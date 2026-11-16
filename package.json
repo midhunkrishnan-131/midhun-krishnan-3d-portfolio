@@ -11,7 +11,8 @@
     "typecheck": "next typegen && tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "npm run lint && npm run typecheck && npm run build"
+    "check": "npm run lint && npm run typecheck && npm run build",
+    "seo:check": "node scripts/seo-check.mjs"
   },
   "dependencies": {
     "@gsap/react": "2.1.2",

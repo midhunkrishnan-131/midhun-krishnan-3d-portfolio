@@ -31,3 +31,4 @@ Copy .env.example to .env.local and set NEXT_PUBLIC_SITE_URL.
 - npm run typecheck — next typegen + tsc --noEmit
 - npm run format / npm run format:check — Prettier
 - npm run check — lint, typecheck and build
+- npm run seo:check — after a production build, assert titles, descriptions, canonicals, a single h1 and JSON-LD

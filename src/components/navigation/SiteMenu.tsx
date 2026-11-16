@@ -111,12 +111,12 @@ export function SiteMenu() {
         )}
       >
         <div className="mx-auto flex min-h-full max-w-[96rem] flex-col justify-between gap-12 px-(--gutter) pt-[calc(var(--header-height)+3rem)] pb-12">
-          <h2
+          <p
             id={titleId}
             className="text-micro font-medium text-paper-faint uppercase"
           >
             Chapters
-          </h2>
+          </p>
           <nav aria-label="Chapters">
             <ol className="grid gap-x-12 gap-y-1 md:grid-cols-2">
               {sections.map((section, index) => (

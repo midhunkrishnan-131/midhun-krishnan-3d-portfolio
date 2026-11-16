@@ -30,7 +30,7 @@ export function ContactSection() {
               best way to reach me is below.
             </p>
             <div className="flex flex-wrap gap-4">
-              <ButtonLink href={github} external>
+              <ButtonLink href={github} external rel="me noopener noreferrer">
                 GitHub profile
               </ButtonLink>
             </div>
@@ -52,7 +52,7 @@ export function ContactSection() {
                 <a
                   href={github}
                   target="_blank"
-                  rel="noopener noreferrer"
+                  rel="me noopener noreferrer"
                   className="text-paper underline decoration-ember underline-offset-4 hover:text-ember-soft"
                 >
                   github.com/midhunkrishnan-131

@@ -34,6 +34,7 @@ export function ButtonLink({
   external = false,
   className,
   children,
+  rel,
   ...props
 }: ButtonLinkProps) {
   if (external) {
@@ -41,7 +42,7 @@ export function ButtonLink({
       <a
         href={href}
         target="_blank"
-        rel="noopener noreferrer"
+        rel={rel ?? "noopener noreferrer"}
         className={buttonClasses(variant, className)}
       >
         {children}

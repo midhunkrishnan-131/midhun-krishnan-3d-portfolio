@@ -14,6 +14,7 @@ export function HeroFallbackArt() {
       viewBox="0 0 1200 800"
       preserveAspectRatio="xMidYMid slice"
       role="presentation"
+      aria-hidden="true"
       focusable="false"
     >
       <defs>
