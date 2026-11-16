@@ -18,7 +18,7 @@ import {
 import { StudioLights } from "@/components/three/core/StudioLights";
 import { useDisposable } from "@/components/three/core/useDisposable";
 import { materials } from "@/components/three/materials/presets";
-import { pointer } from "@/lib/three/pointer";
+import { createScenePointer, readScenePointer } from "@/lib/three/pointer";
 import { palette } from "@/lib/three/presets";
 import { damp } from "@/lib/three/progress";
 import type { SceneProps } from "@/types/three";
@@ -136,6 +136,7 @@ const seeded = (i: number) => {
  *   0.22–0.48 fold · 0.46–0.60 ignition · 0.58–0.95 lift-off. Fully scrubbed and reversible.
  */
 export default function BlackBoxScene({
+  track,
   progress,
   active,
   tier,
@@ -145,6 +146,8 @@ export default function BlackBoxScene({
   const meshRef = useRef<Mesh>(null);
   const sparksRef = useRef<Points>(null);
   const smooth = useRef(-1);
+  const sp = useMemo(() => createScenePointer(), []);
+  const hover = useRef(0);
   const count = tier === "low" ? 90 : SPARKS;
   const sparkSeeds = useMemo(
     () =>
@@ -207,6 +210,16 @@ export default function BlackBoxScene({
     const t = animate ? state.clock.elapsedTime : 0;
     const k = animate ? damp(4, delta) : 1;
 
+    // Mouse: the nose tracks the cursor (within the slot) and the exhaust bends away from it.
+    readScenePointer(track.current, sp);
+    hover.current = MathUtils.lerp(
+      hover.current,
+      sp.inside && animate ? 1 : 0,
+      damp(4, delta),
+    );
+    const px = sp.x * hover.current;
+    const py = sp.y * hover.current;
+
     if (mesh.morphTargetInfluences) mesh.morphTargetInfluences[0] = fold;
 
     // Flat sheet faces the camera; as it folds it stands up and turns, then climbs.
@@ -223,15 +236,11 @@ export default function BlackBoxScene({
       fold * (0.8 + t * 0.25 * fold),
       k,
     );
-    // The nose leans slightly toward the pointer once the rocket exists.
-    rocket.rotation.z = MathUtils.lerp(
-      rocket.rotation.z,
-      -pointer.x * 0.25 * fold,
-      k,
-    );
+    // The nose leans toward the cursor once the rocket exists.
+    rocket.rotation.z = MathUtils.lerp(rocket.rotation.z, -px * 0.45 * fold, k);
     rocket.rotation.x = MathUtils.lerp(
       rocket.rotation.x,
-      (1 - fold) * -0.25 + pointer.y * 0.15 * fold,
+      (1 - fold) * -0.25 + py * 0.3 * fold,
       k,
     );
 
@@ -242,7 +251,7 @@ export default function BlackBoxScene({
         "position",
       ) as Float32BufferAttribute;
       const nozzleY = rocket.position.y + BOTTOM - 0.05;
-      const push = -pointer.x * 0.6;
+      const push = -px * 0.9;
       for (let i = 0; i < count; i++) {
         const [a, b, c] = sparkSeeds[i];
         const life = (t * (0.9 + a * 0.8) + b) % 1;

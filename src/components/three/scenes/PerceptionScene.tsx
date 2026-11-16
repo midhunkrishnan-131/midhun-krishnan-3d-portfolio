@@ -19,7 +19,12 @@ import {
 import { StudioLights } from "@/components/three/core/StudioLights";
 import { useDisposable } from "@/components/three/core/useDisposable";
 import { materials } from "@/components/three/materials/presets";
-import { pointer } from "@/lib/three/pointer";
+import {
+  createScenePointer,
+  pointerOnPlane,
+  readScenePointer,
+  screenDistance,
+} from "@/lib/three/pointer";
 import { palette } from "@/lib/three/presets";
 import { damp } from "@/lib/three/progress";
 import type { SceneProps } from "@/types/three";
@@ -53,6 +58,7 @@ function buildGraph() {
 
 /** Perception SEO: a crawler lens moving through a site graph, indexing pages as it goes. */
 export default function PerceptionScene({
+  track,
   progress,
   active,
   tier,
@@ -79,6 +85,9 @@ export default function PerceptionScene({
   const lit = useMemo(() => new Color(palette.paper), []);
   const smooth = useRef(-1);
   const lensPos = useMemo(() => new Vector3(), []);
+  const sp = useMemo(() => createScenePointer(), []);
+  const world = useMemo(() => new Vector3(), []);
+  const hover = useRef(0);
 
   useFrame((state, delta) => {
     const group = groupRef.current;
@@ -93,6 +102,14 @@ export default function PerceptionScene({
       MathUtils.smoothstep(smooth.current, 0.2, 0.75) * (nodes.length - 1);
     const t = animate ? state.clock.elapsedTime : 0;
     const camera = state.camera;
+    readScenePointer(track.current, sp);
+    hover.current = MathUtils.lerp(
+      hover.current,
+      sp.inside && animate ? 1 : 0,
+      damp(5, delta),
+    );
+    const h = hover.current;
+    group.updateMatrixWorld();
 
     for (let i = 0; i < nodes.length; i++) {
       const indexed = MathUtils.clamp(crawl - i + 1, 0, 1);
@@ -102,7 +119,18 @@ export default function PerceptionScene({
       dummy.scale.setScalar(i === 0 ? 1.6 : 1);
       dummy.updateMatrix();
       mesh.setMatrixAt(i, dummy.matrix);
-      mesh.setColorAt(i, color.copy(dim).lerp(lit, indexed));
+      // Mouse: pages under the lens light up as if crawled, and lean toward the viewer.
+      let seen = 0;
+      if (h > 0.001) {
+        world.copy(nodes[i]).applyMatrix4(group.matrixWorld);
+        seen = h * Math.max(0, 1 - screenDistance(world, camera, sp) / 0.38);
+        if (seen > 0) {
+          dummy.scale.multiplyScalar(1 + seen * 0.45);
+          dummy.updateMatrix();
+          mesh.setMatrixAt(i, dummy.matrix);
+        }
+      }
+      mesh.setColorAt(i, color.copy(dim).lerp(lit, Math.max(indexed, seen)));
     }
     mesh.instanceMatrix.needsUpdate = true;
     if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
@@ -112,20 +140,21 @@ export default function PerceptionScene({
       const a = Math.floor(MathUtils.clamp(crawl, 0, nodes.length - 1));
       const b = Math.min(a + 1, nodes.length - 1);
       lensPos.lerpVectors(nodes[a], nodes[b], crawl - a);
+      if (h > 0.001) {
+        group.localToWorld(world.copy(lensPos));
+        if (pointerOnPlane(sp, camera, world, world))
+          lensPos.lerp(group.worldToLocal(world), h);
+      }
       lens.position.lerp(lensPos, animate ? damp(6, delta) : 1);
       lens.lookAt(camera.position);
     }
     const k = animate ? damp(3, delta) : 1;
     group.rotation.y = MathUtils.lerp(
       group.rotation.y,
-      smooth.current * 1.4 - 0.5 + pointer.x * 0.25,
+      smooth.current * 1.4 - 0.5,
       k,
     );
-    group.rotation.x = MathUtils.lerp(
-      group.rotation.x,
-      0.25 - pointer.y * 0.1,
-      k,
-    );
+    group.rotation.x = MathUtils.lerp(group.rotation.x, 0.25, k);
   });
 
   return (

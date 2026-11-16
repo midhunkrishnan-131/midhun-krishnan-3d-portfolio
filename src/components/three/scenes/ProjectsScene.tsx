@@ -2,7 +2,7 @@
 
 import { PerspectiveCamera } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import {
   BufferGeometry,
   ExtrudeGeometry,
@@ -10,13 +10,18 @@ import {
   Group,
   MathUtils,
   type MeshStandardMaterial,
+  Vector3,
 } from "three";
 import { StudioLights } from "@/components/three/core/StudioLights";
 import { useDisposable } from "@/components/three/core/useDisposable";
 import { materials } from "@/components/three/materials/presets";
 import { projectGlyphs } from "@/components/three/objects/projectGlyphs";
 import { projects } from "@/data/projects";
-import { pointer } from "@/lib/three/pointer";
+import {
+  createScenePointer,
+  readScenePointer,
+  screenDistance,
+} from "@/lib/three/pointer";
 import { palette } from "@/lib/three/presets";
 import { damp } from "@/lib/three/progress";
 import { useFocusStore } from "@/stores/focusStore";
@@ -42,6 +47,7 @@ function orbitRing(radius: number, segments = 128): BufferGeometry {
  * Hovering or focusing a project card (see focusStore) pulls its object forward and lights it.
  */
 export default function ProjectsScene({
+  track,
   progress,
   active,
   tier,
@@ -83,6 +89,9 @@ export default function ProjectsScene({
     };
   }, tier);
   const smooth = useRef(-1);
+  const sp = useMemo(() => createScenePointer(), []);
+  const world = useMemo(() => new Vector3(), []);
+  const hover = useRef(0);
 
   useFrame((state, delta) => {
     const group = groupRef.current;
@@ -95,17 +104,41 @@ export default function ProjectsScene({
     const t = animate ? state.clock.elapsedTime : 0;
     const focus = useFocusStore.getState().project;
     const k = animate ? damp(5, delta) : 1;
+    // Mouse: the whole orbit parallaxes with the cursor; the glyph under it is pulled forward.
+    readScenePointer(track.current, sp);
+    hover.current = MathUtils.lerp(
+      hover.current,
+      sp.inside && animate ? 1 : 0,
+      damp(4, delta),
+    );
+    const h = hover.current;
+    let picked = -1;
+    if (h > 0.5) {
+      let best = 0.32;
+      items.current.forEach((item, i) => {
+        if (!item) return;
+        const d = screenDistance(
+          item.getWorldPosition(world),
+          state.camera,
+          sp,
+        );
+        if (d < best) {
+          best = d;
+          picked = i;
+        }
+      });
+    }
 
     if (hero.current) {
       const on = focus === featured.slug ? 1 : 0;
       hero.current.rotation.y = MathUtils.lerp(
         hero.current.rotation.y,
-        Math.sin(t * 0.4) * 0.35 + pointer.x * 0.3,
+        Math.sin(t * 0.4) * 0.35 + sp.x * h * 0.3,
         k,
       );
       hero.current.rotation.x = MathUtils.lerp(
         hero.current.rotation.x,
-        -pointer.y * 0.2,
+        -sp.y * h * 0.2,
         k,
       );
       const sc = MathUtils.lerp(hero.current.scale.x, 1.45 + on * 0.12, k);
@@ -115,11 +148,13 @@ export default function ProjectsScene({
     items.current.forEach((item, i) => {
       if (!item) return;
       const a = spin + (i / orbiting.length) * Math.PI * 2;
-      const on = focus === orbiting[i].slug ? 1 : 0;
+      const on = focus === orbiting[i].slug || picked === i ? 1 : 0;
+      const pull = MathUtils.lerp(item.userData.pull ?? 0, on, k);
+      item.userData.pull = pull;
       item.position.set(
-        Math.cos(a) * ORBIT,
-        Math.sin(a * 2 + i) * 0.12,
-        Math.sin(a) * ORBIT,
+        Math.cos(a) * ORBIT * (1 - pull * 0.15),
+        Math.sin(a * 2 + i) * 0.12 + pull * 0.15,
+        Math.sin(a) * ORBIT + pull * 1.4,
       );
       item.rotation.y = MathUtils.lerp(
         item.rotation.y,
@@ -138,9 +173,10 @@ export default function ProjectsScene({
     });
     group.rotation.x = MathUtils.lerp(
       group.rotation.x,
-      0.32 - pointer.y * 0.08,
+      0.32 - sp.y * h * 0.12,
       k,
     );
+    group.rotation.y = MathUtils.lerp(group.rotation.y, sp.x * h * 0.25, k);
   });
 
   return (

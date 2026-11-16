@@ -3,11 +3,22 @@
 import { PerspectiveCamera } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
-import { BoxGeometry, Group, InstancedMesh, MathUtils, Object3D } from "three";
+import {
+  BoxGeometry,
+  Group,
+  InstancedMesh,
+  MathUtils,
+  Object3D,
+  Vector3,
+} from "three";
 import { StudioLights } from "@/components/three/core/StudioLights";
 import { useDisposable } from "@/components/three/core/useDisposable";
 import { materials } from "@/components/three/materials/presets";
-import { pointer } from "@/lib/three/pointer";
+import {
+  createScenePointer,
+  pointerOnPlane,
+  readScenePointer,
+} from "@/lib/three/pointer";
 import { damp } from "@/lib/three/progress";
 import type { SceneProps } from "@/types/three";
 
@@ -82,6 +93,7 @@ function buildPixels(): { pixels: Pixel[]; slots: [number, number][] } {
 
 /** The beginning: a first line of code assembling itself from scattered terminal pixels. */
 export default function BeginningScene({
+  track,
   progress,
   active,
   tier,
@@ -102,6 +114,10 @@ export default function BeginningScene({
     tier,
   );
   const smooth = useRef(-1);
+  const sp = useMemo(() => createScenePointer(), []);
+  const hit = useMemo(() => new Vector3(), []);
+  const origin = useMemo(() => new Vector3(), []);
+  const hover = useRef(0);
 
   useFrame((state, delta) => {
     const mesh = meshRef.current;
@@ -116,17 +132,44 @@ export default function BeginningScene({
       MathUtils.smoothstep(smooth.current, 0.15, 0.55) * (totalChars + 1);
     const t = state.clock.elapsedTime;
 
+    // Mouse: glyph cubes near the cursor scatter outward and tumble, then re-form behind it.
+    readScenePointer(track.current, sp);
+    let near = false;
+    if (sp.inside && animate) {
+      group.updateMatrixWorld();
+      near =
+        pointerOnPlane(
+          sp,
+          state.camera,
+          group.getWorldPosition(origin),
+          hit,
+        ) !== null;
+      if (near) group.worldToLocal(hit);
+    }
+    hover.current = MathUtils.lerp(hover.current, near ? 1 : 0, damp(6, delta));
+    const h = hover.current;
+
     for (let i = 0; i < pixels.length; i++) {
       const px = pixels[i];
       const k = MathUtils.clamp(typed - px.order, 0, 1);
       const e = 1 - Math.pow(1 - k, 3);
-      dummy.position.set(
-        MathUtils.lerp(px.sx, px.x, e),
-        MathUtils.lerp(px.sy, px.y, e),
+      let x = MathUtils.lerp(px.sx, px.x, e);
+      let y = MathUtils.lerp(px.sy, px.y, e);
+      let z =
         MathUtils.lerp(px.sz, 0, e) +
-          (animate ? Math.sin(t * 2 + i) * 0.004 : 0),
-      );
-      dummy.rotation.set((1 - e) * 3, (1 - e) * 2, 0);
+        (animate ? Math.sin(t * 2 + i) * 0.004 : 0);
+      let f = 0;
+      if (h > 0.001) {
+        const dx = x - hit.x;
+        const dy = y - hit.y;
+        const d = Math.hypot(dx, dy) + 1e-4;
+        f = h * e * Math.max(0, 1 - d / 0.55) ** 2;
+        x += (dx / d) * f * 0.35;
+        y += (dy / d) * f * 0.35;
+        z += f * 0.5;
+      }
+      dummy.position.set(x, y, z);
+      dummy.rotation.set((1 - e) * 3 + f * 2.4, (1 - e) * 2 + f * 1.6, 0);
       dummy.scale.setScalar(0.25 + e * 0.75);
       dummy.updateMatrix();
       mesh.setMatrixAt(i, dummy.matrix);
@@ -151,14 +194,10 @@ export default function BeginningScene({
     const k = animate ? damp(3, delta) : 1;
     group.rotation.y = MathUtils.lerp(
       group.rotation.y,
-      -0.35 + smooth.current * 0.5 + pointer.x * 0.15,
+      -0.35 + smooth.current * 0.5,
       k,
     );
-    group.rotation.x = MathUtils.lerp(
-      group.rotation.x,
-      0.12 - pointer.y * 0.1,
-      k,
-    );
+    group.rotation.x = MathUtils.lerp(group.rotation.x, 0.12, k);
   });
 
   return (

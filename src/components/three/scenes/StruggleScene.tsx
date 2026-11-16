@@ -2,7 +2,7 @@
 
 import { PerspectiveCamera } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import {
   CatmullRomCurve3,
   Group,
@@ -14,7 +14,11 @@ import {
 import { StudioLights } from "@/components/three/core/StudioLights";
 import { useDisposable } from "@/components/three/core/useDisposable";
 import { materials } from "@/components/three/materials/presets";
-import { pointer } from "@/lib/three/pointer";
+import {
+  createScenePointer,
+  pointerOnPlane,
+  readScenePointer,
+} from "@/lib/three/pointer";
 import { damp } from "@/lib/three/progress";
 import type { SceneProps } from "@/types/three";
 
@@ -71,6 +75,7 @@ function buildThread(i: number, segments: number): TubeGeometry {
 
 /** The struggle: a knot of threads that slowly works itself straight as you scroll. */
 export default function StruggleScene({
+  track,
   progress,
   active,
   tier,
@@ -88,6 +93,10 @@ export default function StruggleScene({
     tier,
   );
   const smooth = useRef(-1);
+  const sp = useMemo(() => createScenePointer(), []);
+  const hit = useMemo(() => new Vector3(), []);
+  const origin = useMemo(() => new Vector3(), []);
+  const hover = useRef(0);
 
   useFrame((state, delta) => {
     const group = groupRef.current;
@@ -98,23 +107,45 @@ export default function StruggleScene({
         ? target
         : MathUtils.lerp(smooth.current, target, damp(4, delta));
     const resolve = MathUtils.smoothstep(smooth.current, 0.3, 0.78);
+
+    // Mouse: threads near the cursor are shoved apart and partly knot up again.
+    readScenePointer(track.current, sp);
+    let near = false;
+    if (sp.inside && animate) {
+      group.updateMatrixWorld();
+      near =
+        pointerOnPlane(
+          sp,
+          state.camera,
+          group.getWorldPosition(origin),
+          hit,
+        ) !== null;
+      if (near) group.worldToLocal(hit);
+    }
+    hover.current = MathUtils.lerp(hover.current, near ? 1 : 0, damp(5, delta));
+    const h = hover.current * resolve;
+    const kk = animate ? damp(6, delta) : 1;
     meshes.current.forEach((mesh, i) => {
       if (!mesh?.morphTargetInfluences) return;
+      const rest = (i - (THREADS - 1) / 2) * 0.22;
+      const f = h * Math.exp(-(((hit.y - rest) / 0.32) ** 2));
       const stagger = MathUtils.clamp(resolve * 1.4 - i * 0.06, 0, 1);
-      mesh.morphTargetInfluences[0] = stagger;
+      mesh.morphTargetInfluences[0] = stagger * (1 - f * 0.55);
+      mesh.position.y = MathUtils.lerp(
+        mesh.position.y,
+        Math.sign(rest - hit.y || 1) * f * 0.28,
+        kk,
+      );
+      mesh.position.z = MathUtils.lerp(mesh.position.z, f * 0.35, kk);
     });
     const t = animate ? state.clock.elapsedTime : 0;
     const k = animate ? damp(3, delta) : 1;
     group.rotation.y = MathUtils.lerp(
       group.rotation.y,
-      (1 - resolve) * (t * 0.15 + 0.6) + pointer.x * 0.2,
+      (1 - resolve) * (t * 0.15 + 0.6),
       k,
     );
-    group.rotation.x = MathUtils.lerp(
-      group.rotation.x,
-      (1 - resolve) * 0.4 - pointer.y * 0.1,
-      k,
-    );
+    group.rotation.x = MathUtils.lerp(group.rotation.x, (1 - resolve) * 0.4, k);
   });
 
   return (

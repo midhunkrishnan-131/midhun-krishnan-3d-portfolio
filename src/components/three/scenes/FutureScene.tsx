@@ -2,7 +2,7 @@
 
 import { PerspectiveCamera } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import {
   AdditiveBlending,
   BufferGeometry,
@@ -10,14 +10,19 @@ import {
   Float32BufferAttribute,
   Group,
   LineSegments,
-  Mesh,
   MathUtils,
+  Mesh,
   PlaneGeometry,
   ShaderMaterial,
+  Vector3,
 } from "three";
 import { useDisposable } from "@/components/three/core/useDisposable";
 import { materials } from "@/components/three/materials/presets";
-import { pointer } from "@/lib/three/pointer";
+import {
+  createScenePointer,
+  pointerOnPlane,
+  readScenePointer,
+} from "@/lib/three/pointer";
 import { palette } from "@/lib/three/presets";
 import { damp } from "@/lib/three/progress";
 import type { SceneProps } from "@/types/three";
@@ -38,16 +43,24 @@ const groundShader = {
     uniform float uDawn;
     uniform vec3 uLine;
     uniform vec3 uGlow;
+    uniform vec3 uPointer;
+    uniform float uRipple;
     varying vec2 vUv;
     varying vec3 vWorld;
     void main() {
-      vec2 g = vec2(vWorld.x, vWorld.z + uTime * 0.6);
+      // Ripple: concentric waves spread out from the cursor's spot on the ground.
+      vec2 toP = vWorld.xz - uPointer.xz;
+      float d = length(toP);
+      float wave = sin(d * 5.0 - uTime * 6.0) * exp(-d * 0.55) * uRipple;
+      vec2 g = vec2(vWorld.x, vWorld.z + uTime * 0.6) + normalize(toP + 1e-4) * wave * 0.22;
       vec2 cell = abs(fract(g * 0.8) - 0.5) / fwidth(g * 0.8);
       float line = 1.0 - min(min(cell.x, cell.y), 1.0);
       float far = smoothstep(2.0, -22.0, vWorld.z);
       float horizon = pow(far, 3.0);
       vec3 col = uLine * line * (1.0 - far) * 0.55 + uGlow * horizon * (0.25 + uDawn * 0.9);
-      float alpha = clamp(line * (1.0 - far) * 0.8 + horizon * (0.4 + uDawn * 0.6), 0.0, 1.0);
+      float ring = max(wave, 0.0) * line * 1.4;
+      col += uGlow * ring;
+      float alpha = clamp(line * (1.0 - far) * (0.8 + ring) + horizon * (0.4 + uDawn * 0.6), 0.0, 1.0);
       gl_FragColor = vec4(col, alpha);
     }
   `,
@@ -81,8 +94,13 @@ function skyline(): BufferGeometry {
   return g;
 }
 
+const UP = new Vector3(0, 1, 0);
+/** World-space point on the ground plane (the group sits at y = -0.6). */
+const GROUND_POINT = new Vector3(0, -0.6, 0);
+
 /** Future vision: an open horizon, with the outlines of what's next being drawn into it. */
 export default function FutureScene({
+  track,
   progress,
   active,
   tier,
@@ -102,6 +120,8 @@ export default function FutureScene({
         uDawn: { value: 0 },
         uLine: { value: new Color(palette.paperDim) },
         uGlow: { value: new Color(palette.ember) },
+        uPointer: { value: new Vector3(0, 0, -100) },
+        uRipple: { value: 0 },
       },
     });
     const sky = skyline();
@@ -121,6 +141,9 @@ export default function FutureScene({
     };
   }, tier);
   const smooth = useRef(-1);
+  const sp = useMemo(() => createScenePointer(), []);
+  const hit = useMemo(() => new Vector3(), []);
+  const hover = useRef(0);
 
   useFrame((state, delta) => {
     const group = groupRef.current;
@@ -135,6 +158,20 @@ export default function FutureScene({
     if (ground) {
       ground.uniforms.uTime.value = animate ? state.clock.elapsedTime : 0;
       ground.uniforms.uDawn.value = MathUtils.smoothstep(p, 0.2, 0.7);
+      readScenePointer(track.current, sp);
+      const onGround =
+        sp.inside &&
+        animate &&
+        pointerOnPlane(sp, state.camera, GROUND_POINT, hit, UP) !== null &&
+        hit.z < 3;
+      if (onGround)
+        (ground.uniforms.uPointer.value as Vector3).lerp(hit, damp(8, delta));
+      hover.current = MathUtils.lerp(
+        hover.current,
+        onGround ? 1 : 0,
+        damp(3, delta),
+      );
+      ground.uniforms.uRipple.value = hover.current;
     }
     const sky = skyRef.current?.geometry;
     if (!sky) return;
@@ -145,12 +182,8 @@ export default function FutureScene({
     );
     const cam = state.camera;
     const k = animate ? damp(3, delta) : 1;
-    cam.position.x = MathUtils.lerp(cam.position.x, pointer.x * 0.4, k);
-    cam.position.y = MathUtils.lerp(
-      cam.position.y,
-      1.1 - p * 0.4 + pointer.y * 0.15,
-      k,
-    );
+    cam.position.x = MathUtils.lerp(cam.position.x, 0, k);
+    cam.position.y = MathUtils.lerp(cam.position.y, 1.1 - p * 0.4, k);
     cam.lookAt(0, 0.4, -12);
   });
 

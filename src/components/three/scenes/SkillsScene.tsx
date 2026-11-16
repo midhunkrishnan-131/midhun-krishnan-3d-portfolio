@@ -9,6 +9,8 @@ import {
   Float32BufferAttribute,
   Group,
   InstancedMesh,
+  type LineBasicMaterial,
+  LineSegments,
   MathUtils,
   Object3D,
   OctahedronGeometry,
@@ -18,7 +20,11 @@ import { StudioLights } from "@/components/three/core/StudioLights";
 import { useDisposable } from "@/components/three/core/useDisposable";
 import { materials } from "@/components/three/materials/presets";
 import { skillGroups } from "@/data/skills";
-import { pointer } from "@/lib/three/pointer";
+import {
+  createScenePointer,
+  pointerOnPlane,
+  readScenePointer,
+} from "@/lib/three/pointer";
 import { palette } from "@/lib/three/presets";
 import { damp } from "@/lib/three/progress";
 import { useFocusStore } from "@/stores/focusStore";
@@ -72,8 +78,11 @@ function buildConstellation() {
   return { stars, lines };
 }
 
+const LINKS = 4;
+
 /** Skills: a constellation of technology nodes, one cluster per skill group. */
 export default function SkillsScene({
+  track,
   progress,
   active,
   tier,
@@ -84,15 +93,28 @@ export default function SkillsScene({
   const dummy = useMemo(() => new Object3D(), []);
   const color = useMemo(() => new Color(), []);
   const { stars, lines } = useMemo(() => buildConstellation(), []);
-  const [geo, mat, lineMat, lineGeo] = useDisposable(
-    () => [
+  const [geo, mat, lineMat, lineGeo, linkGeo, linkMat] = useDisposable(() => {
+    const links = new BufferGeometry();
+    links.setAttribute(
+      "position",
+      new Float32BufferAttribute(new Float32Array(LINKS * 6), 3),
+    );
+    return [
       new OctahedronGeometry(0.075, 0),
       materials.ember(1),
       materials.line(palette.paperDim, 0.3),
       lines,
-    ],
-    tier,
-  );
+      links,
+      materials.line(palette.ember, 0),
+    ];
+  }, tier);
+  const linksRef = useRef<LineSegments>(null);
+  const sp = useMemo(() => createScenePointer(), []);
+  const hit = useMemo(() => new Vector3(), []);
+  const world = useMemo(() => new Vector3(), []);
+  const hover = useRef(0);
+  const nearestRef = useRef<number[]>(new Array<number>(LINKS).fill(-1));
+  const nearestDRef = useRef<number[]>(new Array<number>(LINKS).fill(Infinity));
   const base = useMemo(() => new Color(palette.paperDim), []);
   const hot = useMemo(() => new Color(palette.ember), []);
   const smooth = useRef(-1);
@@ -110,14 +132,52 @@ export default function SkillsScene({
     const t = animate ? state.clock.elapsedTime : 0;
     const focusId = useFocusStore.getState().skillGroup;
     const focus = skillGroups.findIndex((g) => g.id === focusId);
+
+    // Mouse: the cursor becomes a temporary star, linking itself to the nearest nodes.
+    readScenePointer(track.current, sp);
+    let near = false;
+    if (sp.inside && animate && appear > 0.5) {
+      group.updateMatrixWorld();
+      near =
+        pointerOnPlane(sp, state.camera, group.getWorldPosition(world), hit) !==
+        null;
+    }
+    hover.current = MathUtils.lerp(hover.current, near ? 1 : 0, damp(6, delta));
+    const nearest = nearestRef.current;
+    const nearestD = nearestDRef.current;
+    nearest.fill(-1);
+    nearestD.fill(Infinity);
+    if (near) {
+      group.worldToLocal(hit);
+      for (let i = 0; i < stars.length; i++) {
+        const d = world
+          .copy(stars[i].pos)
+          .multiplyScalar(0.6 + appear * 0.4)
+          .distanceTo(hit);
+        if (d > 1.4) continue;
+        for (let j = 0; j < LINKS; j++) {
+          if (d < nearestD[j]) {
+            nearest.splice(j, 0, i);
+            nearestD.splice(j, 0, d);
+            nearest.length = LINKS;
+            nearestD.length = LINKS;
+            break;
+          }
+        }
+      }
+    }
     for (let i = 0; i < stars.length; i++) {
       const s = stars[i];
       const on = focus === s.group ? 1 : 0;
       const twinkle = 0.85 + Math.sin(t * 2 + i * 1.7) * 0.15;
       dummy.position.copy(s.pos).multiplyScalar(0.6 + appear * 0.4);
       dummy.rotation.set(t * 0.4 + i, t * 0.3, 0);
+      const linked = nearest.includes(i) ? hover.current : 0;
       dummy.scale.setScalar(
-        appear * twinkle * (s.confirmed ? 1 : 0.6) * (1 + on * 0.6),
+        appear *
+          twinkle *
+          (s.confirmed ? 1 : 0.6) *
+          (1 + on * 0.6 + linked * 0.5),
       );
       dummy.updateMatrix();
       mesh.setMatrixAt(i, dummy.matrix);
@@ -126,17 +186,34 @@ export default function SkillsScene({
     mesh.instanceMatrix.needsUpdate = true;
     if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
     lineMat.setValues({ opacity: appear * 0.3 });
+    const links = linksRef.current;
+    if (links) {
+      const attr = links.geometry.getAttribute(
+        "position",
+      ) as Float32BufferAttribute;
+      for (let j = 0; j < LINKS; j++) {
+        const i = nearest[j];
+        if (i < 0) {
+          attr.setXYZ(j * 2, 0, 0, 0);
+          attr.setXYZ(j * 2 + 1, 0, 0, 0);
+          continue;
+        }
+        world.copy(stars[i].pos).multiplyScalar(0.6 + appear * 0.4);
+        attr.setXYZ(j * 2, hit.x, hit.y, hit.z);
+        attr.setXYZ(j * 2 + 1, world.x, world.y, world.z);
+      }
+      attr.needsUpdate = true;
+      (links.material as LineBasicMaterial).setValues({
+        opacity: hover.current * 0.75,
+      });
+    }
     const k = animate ? damp(3, delta) : 1;
     group.rotation.y = MathUtils.lerp(
       group.rotation.y,
-      smooth.current * 1.2 + t * 0.03 + pointer.x * 0.25,
+      smooth.current * 1.2 + t * 0.03,
       k,
     );
-    group.rotation.x = MathUtils.lerp(
-      group.rotation.x,
-      0.28 - pointer.y * 0.12,
-      k,
-    );
+    group.rotation.x = MathUtils.lerp(group.rotation.x, 0.28, k);
   });
 
   return (
@@ -145,6 +222,12 @@ export default function SkillsScene({
       <StudioLights />
       <group ref={groupRef}>
         <lineSegments geometry={lineGeo} material={lineMat} />
+        <lineSegments
+          ref={linksRef}
+          geometry={linkGeo}
+          material={linkMat}
+          frustumCulled={false}
+        />
         <instancedMesh
           ref={meshRef}
           args={[geo, mat, stars.length]}

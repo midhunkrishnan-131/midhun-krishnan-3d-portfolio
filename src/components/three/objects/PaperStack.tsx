@@ -19,7 +19,7 @@ import {
   createPageGeometry,
   PAGE_THICKNESS,
 } from "@/components/three/objects/pageGeometry";
-import { pointer } from "@/lib/three/pointer";
+import { pointer, pointerSpeed } from "@/lib/three/pointer";
 import { damp } from "@/lib/three/progress";
 
 interface PaperStackProps {
@@ -60,7 +60,7 @@ export function PaperStack({
   const groupRef = useRef<Group>(null);
   const meshRef = useRef<InstancedMesh>(null);
   const dummy = useMemo(() => new Object3D(), []);
-  const smooth = useRef({ p: -1 });
+  const smooth = useRef({ p: -1, breeze: 0 });
 
   const geometry = useMemo(() => {
     const g = createPageGeometry();
@@ -118,7 +118,10 @@ export function PaperStack({
     const uniforms = paperUniformsOf(mesh.material);
     if (uniforms) {
       uniforms.uTime.value = t;
-      uniforms.uFlutter.value = animate ? 1 : 0;
+      // Mouse: moving the cursor is a breeze — the faster it moves, the more the pages flutter.
+      const gust = animate && pointer.enabled ? pointerSpeed() : 0;
+      s.breeze = lerp(s.breeze, gust, damp(gust > s.breeze ? 6 : 1.5, delta));
+      uniforms.uFlutter.value = animate ? 1 + s.breeze * 3.5 : 0;
     }
 
     const fan = win(p, 0, 0.28);
@@ -195,20 +198,16 @@ export function PaperStack({
     );
     group.position.y = lerp(group.position.y, lerp(baseY, 0.2, dolly), k);
     group.scale.setScalar(wide ? 1.12 : 0.74);
-    group.rotation.x = lerp(
-      group.rotation.x,
-      lerp(-0.3, -0.08, separate) - pointer.y * 0.1,
-      k,
-    );
+    group.rotation.x = lerp(group.rotation.x, lerp(-0.3, -0.08, separate), k);
     group.rotation.y = lerp(
       group.rotation.y,
-      lerp(0.3, 0.85, separate) + p * 0.2 + pointer.x * 0.18,
+      lerp(0.3, 0.85, separate) + p * 0.2 + s.breeze * pointer.x * 0.12,
       k,
     );
     group.rotation.z = lerp(group.rotation.z, lerp(0.12, 0, fan), k);
 
     camera.position.set(
-      lerp(camera.position.x, pointer.x * 0.15, k),
+      lerp(camera.position.x, 0, k),
       lerp(camera.position.y, lerp(0.3, 0.05, dolly), k),
       lerp(camera.position.z, lerp(6.4, 4.1, dolly), k),
     );

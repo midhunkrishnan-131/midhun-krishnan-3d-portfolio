@@ -2,12 +2,23 @@
 
 import { PerspectiveCamera } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { useRef } from "react";
-import { EdgesGeometry, ExtrudeGeometry, Group, MathUtils, Shape } from "three";
+import { useMemo, useRef } from "react";
+import {
+  EdgesGeometry,
+  ExtrudeGeometry,
+  Group,
+  MathUtils,
+  Shape,
+  Vector3,
+} from "three";
 import { StudioLights } from "@/components/three/core/StudioLights";
 import { useDisposable } from "@/components/three/core/useDisposable";
 import { materials } from "@/components/three/materials/presets";
-import { pointer } from "@/lib/three/pointer";
+import {
+  createScenePointer,
+  readScenePointer,
+  screenDistance,
+} from "@/lib/three/pointer";
 import { palette } from "@/lib/three/presets";
 import { damp } from "@/lib/three/progress";
 import type { SceneProps } from "@/types/three";
@@ -30,6 +41,7 @@ function roundedRect(w: number, h: number, r: number): Shape {
 
 /** BCA: structured blocks — scattered slabs that lock into an ordered stack, layer by layer. */
 export default function BcaScene({
+  track,
   progress,
   active,
   tier,
@@ -57,6 +69,9 @@ export default function BcaScene({
     ];
   }, tier);
   const smooth = useRef(-1);
+  const sp = useMemo(() => createScenePointer(), []);
+  const hover = useRef(0);
+  const world = useMemo(() => new Vector3(), []);
 
   useFrame((state, delta) => {
     const group = groupRef.current;
@@ -67,6 +82,12 @@ export default function BcaScene({
         ? target
         : MathUtils.lerp(smooth.current, target, damp(4, delta));
     const t = animate ? state.clock.elapsedTime : 0;
+    readScenePointer(track.current, sp);
+    hover.current = MathUtils.lerp(
+      hover.current,
+      sp.inside && animate ? 1 : 0,
+      damp(5, delta),
+    );
     slabs.current.forEach((slab, i) => {
       if (!slab) return;
       const k = MathUtils.smoothstep(
@@ -82,23 +103,34 @@ export default function BcaScene({
           Math.sin(t + i) * 0.02 * (1 - e),
         MathUtils.lerp(-Math.abs(scatter) * 0.6, 0, e),
       );
+      // Mouse: the slab under the cursor tilts up toward it; its neighbours follow a little.
+      let tx = 0;
+      let ty = 0;
+      if (hover.current > 0.001) {
+        slab.getWorldPosition(world);
+        const near = Math.max(
+          0,
+          1 - screenDistance(world, state.camera, sp) / 0.9,
+        );
+        const f = hover.current * e * near * near;
+        world.project(state.camera);
+        tx = -(sp.y - world.y) * 1.2 * f;
+        ty = (sp.x - world.x) * sp.aspect * 1.2 * f;
+        slab.position.z += f * 0.25;
+      }
       slab.rotation.set(
-        (1 - e) * (i % 2 ? 0.6 : -0.5),
-        (1 - e) * (i - 2) * 0.5,
+        (1 - e) * (i % 2 ? 0.6 : -0.5) + tx,
+        (1 - e) * (i - 2) * 0.5 + ty,
         (1 - e) * 0.3,
       );
     });
     const k = animate ? damp(3, delta) : 1;
     group.rotation.y = MathUtils.lerp(
       group.rotation.y,
-      -0.6 + smooth.current * 0.6 + pointer.x * 0.2,
+      -0.6 + smooth.current * 0.6,
       k,
     );
-    group.rotation.x = MathUtils.lerp(
-      group.rotation.x,
-      0.35 - pointer.y * 0.08,
-      k,
-    );
+    group.rotation.x = MathUtils.lerp(group.rotation.x, 0.35, k);
   });
 
   return (
