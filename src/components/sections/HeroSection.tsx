@@ -4,7 +4,7 @@ import { SectionShell } from "@/components/layout/SectionShell";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Heading } from "@/components/ui/Heading";
 import { ButtonLink } from "@/components/ui/Button";
-import { HeroVisual } from "@/components/three/core/HeroVisual";
+import { SceneSlot } from "@/components/three/core/SceneSlot";
 import { HeroFallbackArt } from "@/components/sections/HeroFallbackArt";
 import { sectionHref } from "@/data/navigation";
 
@@ -21,7 +21,11 @@ export function HeroSection() {
       className="isolate flex min-h-svh items-end overflow-hidden border-t-0 pt-[calc(var(--header-height)+4rem)] pb-16 sm:pb-24"
     >
       <div className="absolute inset-0 -z-10">
-        <HeroVisual fallback={<HeroFallbackArt />} />
+        <SceneSlot
+          scene="hero"
+          fallback={<HeroFallbackArt />}
+          className="absolute inset-0"
+        />
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-ink-950 via-ink-950/70 to-transparent"

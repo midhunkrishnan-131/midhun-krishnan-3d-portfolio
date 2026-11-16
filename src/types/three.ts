@@ -1,0 +1,17 @@
+import type { RefObject } from "react";
+import type { PerfTier } from "@/lib/three/capabilities";
+
+/** Keys of every lazily loaded section scene (see components/three/scenes/registry.ts). */
+export type SceneKey = "hero";
+
+/** Props every section scene receives from the shared engine. */
+export interface SceneProps {
+  /** The DOM slot the scene is drawn into — used for scroll progress. */
+  track: RefObject<HTMLElement | null>;
+  /** Element whose scroll position drives the scene (defaults to the slot itself). */
+  scroll: RefObject<HTMLElement | null>;
+  /** True while the slot intersects the viewport; skip per-frame work when false. */
+  active: RefObject<boolean>;
+  tier: PerfTier;
+  animate: boolean;
+}

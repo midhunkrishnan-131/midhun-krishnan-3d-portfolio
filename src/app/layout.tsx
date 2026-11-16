@@ -4,6 +4,7 @@ import { instrumentSerif, inter } from "@/styles/fonts";
 import { SkipLink } from "@/components/navigation/SkipLink";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
+import { RenderEngine } from "@/components/three/core/RenderEngine";
 import "@/styles/globals.css";
 
 export const metadata: Metadata = {
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SiteHeader />
         {children}
         <SiteFooter />
+        <RenderEngine />
       </body>
     </html>
   );

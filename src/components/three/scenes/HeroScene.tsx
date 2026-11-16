@@ -1,51 +1,34 @@
 "use client";
 
-import { Canvas } from "@react-three/fiber";
+import { PerspectiveCamera } from "@react-three/drei";
 import type { PerfTier } from "@/lib/three/capabilities";
 import { ManuscriptPages } from "@/components/three/objects/ManuscriptPages";
-
-export interface HeroSceneProps {
-  dpr: [number, number];
-  tier: PerfTier;
-  reducedMotion: boolean;
-  active: boolean;
-  onReady: () => void;
-  onContextLost: () => void;
-}
+import type { SceneProps } from "@/types/three";
 
 const PAGE_COUNT: Record<PerfTier, number> = { high: 16, medium: 11, low: 7 };
 
+/** Hero: the unwritten manuscript, drawn into the hero slot of the shared canvas. */
 export default function HeroScene({
-  dpr,
-  tier,
-  reducedMotion,
+  scroll,
   active,
-  onReady,
-  onContextLost,
-}: HeroSceneProps) {
+  tier,
+  animate,
+}: SceneProps) {
   return (
-    <Canvas
-      dpr={dpr}
-      frameloop={reducedMotion ? "demand" : active ? "always" : "never"}
-      camera={{ position: [0, 0.15, 6.2], fov: 35, near: 0.1, far: 30 }}
-      gl={{
-        antialias: tier !== "low",
-        alpha: true,
-        powerPreference: "high-performance",
-      }}
-      onCreated={({ gl }) => {
-        gl.domElement.addEventListener(
-          "webglcontextlost",
-          (event) => {
-            event.preventDefault();
-            onContextLost();
-          },
-          { once: true },
-        );
-        requestAnimationFrame(() => onReady());
-      }}
-    >
-      <ManuscriptPages count={PAGE_COUNT[tier]} animate={!reducedMotion} />
-    </Canvas>
+    <>
+      <PerspectiveCamera
+        makeDefault
+        position={[0, 0.15, 6.2]}
+        fov={35}
+        near={0.1}
+        far={30}
+      />
+      <ManuscriptPages
+        count={PAGE_COUNT[tier]}
+        animate={animate}
+        scroll={scroll}
+        active={active}
+      />
+    </>
   );
 }

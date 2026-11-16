@@ -22,12 +22,14 @@ interface NavigatorHints {
   connection?: { saveData?: boolean };
 }
 
-function hasWebGL(): boolean {
+function hasWebGL(strict: boolean): boolean {
   try {
     const canvas = document.createElement("canvas");
+    const opts: WebGLContextAttributes = {
+      failIfMajorPerformanceCaveat: strict,
+    };
     const gl =
-      canvas.getContext("webgl2", { failIfMajorPerformanceCaveat: true }) ??
-      canvas.getContext("webgl", { failIfMajorPerformanceCaveat: true });
+      canvas.getContext("webgl2", opts) ?? canvas.getContext("webgl", opts);
     if (!gl) return false;
     gl.getExtension("WEBGL_lose_context")?.loseContext();
     return true;
@@ -36,8 +38,18 @@ function hasWebGL(): boolean {
   }
 }
 
+/**
+ * `?gl=force` skips the "major performance caveat" check (software renderers), for testing.
+ * `?gl=off` forces the static fallback.
+ */
+function glOverride(): "force" | "off" | null {
+  const value = new URLSearchParams(window.location.search).get("gl");
+  return value === "force" || value === "off" ? value : null;
+}
+
 export function detectCapabilities(): RenderCapabilities {
-  const webgl = hasWebGL();
+  const override = glOverride();
+  const webgl = override === "off" ? false : hasWebGL(override !== "force");
   const nav = navigator as Navigator & NavigatorHints;
   const cores = nav.hardwareConcurrency ?? 4;
   const memory = nav.deviceMemory ?? 8;

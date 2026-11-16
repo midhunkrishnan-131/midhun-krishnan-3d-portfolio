@@ -5,7 +5,7 @@ import { Container } from "@/components/layout/Container";
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-line py-16">
+    <footer className="relative z-10 border-t border-line py-16">
       <Container size="wide" className="flex flex-col gap-12">
         <nav aria-label="Footer">
           <ol className="grid grid-cols-2 gap-x-8 gap-y-3 sm:grid-cols-3 lg:grid-cols-6">

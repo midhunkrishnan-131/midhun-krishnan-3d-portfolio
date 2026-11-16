@@ -1,7 +1,7 @@
 "use client";
 
 import { useFrame } from "@react-three/fiber";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, type RefObject } from "react";
 import {
   Group,
   InstancedBufferAttribute,
@@ -15,10 +15,14 @@ import {
   PAGE_WIDTH,
 } from "@/components/three/materials/manuscriptMaterial";
 import { createPageGeometry } from "@/components/three/objects/pageGeometry";
+import { pointer } from "@/lib/three/pointer";
+import { exitProgress } from "@/lib/three/progress";
 
 interface ManuscriptPagesProps {
   count: number;
   animate: boolean;
+  scroll: RefObject<HTMLElement | null>;
+  active: RefObject<boolean>;
 }
 
 interface PageSeed {
@@ -40,7 +44,12 @@ function seeded(i: number): number {
  * The "unwritten manuscript": loose pages in a slow spiral, each curling from its spine
  * while lines of handwriting are drawn across it. One instanced draw call.
  */
-export function ManuscriptPages({ count, animate }: ManuscriptPagesProps) {
+export function ManuscriptPages({
+  count,
+  animate,
+  scroll: scrollEl,
+  active,
+}: ManuscriptPagesProps) {
   const groupRef = useRef<Group>(null);
   const meshRef = useRef<InstancedMesh>(null);
   const dummy = useMemo(() => new Object3D(), []);
@@ -78,17 +87,14 @@ export function ManuscriptPages({ count, animate }: ManuscriptPagesProps) {
   useFrame((state, delta) => {
     const mesh = meshRef.current;
     const group = groupRef.current;
-    if (!mesh || !group) return;
+    if (!mesh || !group || !active.current) return;
     const mat = mesh.material as ShaderMaterial;
 
     const t = animate ? state.clock.elapsedTime : 4;
     mat.uniforms.uTime.value = t;
 
     // Scroll through the first viewport parts the pages and lifts the camera away.
-    const scroll =
-      typeof window === "undefined"
-        ? 0
-        : MathUtils.clamp(window.scrollY / window.innerHeight, 0, 1);
+    const scroll = exitProgress(scrollEl.current);
     const spread = 1 + scroll * 0.9;
     mat.uniforms.uCurl.value = 0.35 + scroll * 0.45;
 
@@ -112,7 +118,7 @@ export function ManuscriptPages({ count, animate }: ManuscriptPagesProps) {
     mesh.instanceMatrix.needsUpdate = true;
 
     // Pages sit right of the headline on wide screens and behind it on narrow ones.
-    const aspect = state.size.width / Math.max(state.size.height, 1);
+    const aspect = (state.camera as { aspect?: number }).aspect ?? 1;
     const wide = aspect > 1.1;
     group.position.x = wide ? 2.1 : 0.3;
     group.position.y = wide ? 0.1 : 1.1;
@@ -121,12 +127,12 @@ export function ManuscriptPages({ count, animate }: ManuscriptPagesProps) {
     const damp = animate ? 1 - Math.exp(-delta * 3) : 1;
     group.rotation.x = MathUtils.lerp(
       group.rotation.x,
-      -state.pointer.y * 0.12,
+      -pointer.y * 0.12,
       damp,
     );
     group.rotation.y = MathUtils.lerp(
       group.rotation.y,
-      state.pointer.x * 0.22 + scroll * 0.5,
+      pointer.x * 0.22 + scroll * 0.5,
       damp,
     );
     state.camera.position.z = MathUtils.lerp(

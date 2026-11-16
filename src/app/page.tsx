@@ -4,7 +4,7 @@ import { SectionStub } from "@/components/sections/SectionStub";
 
 export default function Home() {
   return (
-    <main id="main" tabIndex={-1} className="focus:outline-none">
+    <main id="main" tabIndex={-1} className="relative z-10 focus:outline-none">
       <HeroSection />
       {sections
         .filter((section) => section.id !== "hero")
