@@ -50,6 +50,7 @@ export default function SceneCanvas() {
       aria-hidden="true"
       className="!pointer-events-none !fixed !inset-0 !z-0 !h-svh !w-screen"
       dpr={dpr}
+      shadows={tier === "low" ? false : "percentage"}
       frameloop={frameloop}
       gl={{
         antialias: tier !== "low",
