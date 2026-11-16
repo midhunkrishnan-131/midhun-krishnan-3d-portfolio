@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
-import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import { sectionHref, sections } from "@/data/navigation";
 import { cn } from "@/lib/utils/cn";
 
@@ -13,7 +12,7 @@ const FOCUSABLE =
  * Full-screen chapter index. The panel markup is always rendered (so the 11 section
  * links are in the server HTML) and made inert/hidden while closed.
  * - aria-expanded / aria-controls on the toggle
- * - focus moves into the dialog on open, is trapped while open, and returns on close
+ * - focus moves into the dialog on open, is trapped (toggle + links) while open, and returns on close
  * - Escape closes; page scroll is locked while open
  * - motion is CSS-only and disabled under prefers-reduced-motion (motion-safe:)
  */
@@ -34,38 +33,39 @@ export function SiteMenu() {
     const root = document.documentElement;
     const previousOverflow = root.style.overflow;
     root.style.overflow = "hidden";
-    const first = panelRef.current?.querySelector<HTMLElement>(FOCUSABLE);
-    first?.focus();
+    const frame = requestAnimationFrame(() => {
+      panelRef.current?.querySelector<HTMLElement>(FOCUSABLE)?.focus();
+    });
 
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
         close(true);
+        return;
       }
+      if (event.key !== "Tab" || !panelRef.current || !toggleRef.current)
+        return;
+      // Trap focus within the toggle (Close) + the panel's links.
+      const nodes = [
+        toggleRef.current,
+        ...Array.from(
+          panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE),
+        ),
+      ];
+      const index = nodes.indexOf(document.activeElement as HTMLElement);
+      event.preventDefault();
+      const next = event.shiftKey
+        ? (index <= 0 ? nodes.length : index) - 1
+        : (index + 1) % nodes.length;
+      nodes[next].focus();
     };
     document.addEventListener("keydown", onKey);
     return () => {
+      cancelAnimationFrame(frame);
       root.style.overflow = previousOverflow;
       document.removeEventListener("keydown", onKey);
     };
   }, [open, close]);
-
-  const trapFocus = (event: ReactKeyboardEvent<HTMLDivElement>) => {
-    if (event.key !== "Tab" || !panelRef.current) return;
-    const nodes = Array.from(
-      panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE),
-    );
-    if (nodes.length === 0) return;
-    const first = nodes[0];
-    const last = nodes[nodes.length - 1];
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault();
-      last.focus();
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault();
-      first.focus();
-    }
-  };
 
   return (
     <>
@@ -101,11 +101,13 @@ export function SiteMenu() {
         aria-modal="true"
         aria-labelledby={titleId}
         inert={!open}
-        onKeyDown={trapFocus}
         className={cn(
           "fixed inset-0 z-50 overflow-y-auto bg-ink-950/97 backdrop-blur-sm",
-          "motion-safe:transition-[opacity,visibility] motion-safe:duration-(--duration-slow) motion-safe:ease-cinematic",
-          open ? "visible opacity-100" : "invisible opacity-0",
+          "motion-safe:duration-(--duration-slow) motion-safe:ease-cinematic",
+          // Visibility flips instantly on open (so focus can move in) and only after the fade on close.
+          open
+            ? "visible opacity-100 motion-safe:transition-opacity"
+            : "invisible opacity-0 motion-safe:transition-[opacity,visibility]",
         )}
       >
         <div className="mx-auto flex min-h-full max-w-[96rem] flex-col justify-between gap-12 px-(--gutter) pt-[calc(var(--header-height)+3rem)] pb-12">
