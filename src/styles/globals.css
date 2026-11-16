@@ -1,11 +1,126 @@
 @import "tailwindcss";
 
+/*
+ * Design tokens — "ink & paper".
+ * Raw values live on :root so non-Tailwind code (3D, inline styles) can read them;
+ * @theme exposes them as Tailwind utilities (bg-ink-950, text-paper, font-display, ease-cinematic ...).
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-ink-950: #0a0a0b;
+  --color-ink-900: #111113;
+  --color-ink-800: #1a1a1d;
+  --color-ink-700: #26262a;
+  --color-paper: #ede8df;
+  --color-paper-dim: #b4aea4;
+  --color-paper-faint: #8c877f;
+  --color-ember: #ff7a45;
+  --color-ember-soft: #ffb08a;
+  --color-line: rgb(237 232 223 / 0.14);
+  --color-line-strong: rgb(237 232 223 / 0.32);
+
+  --duration-instant: 120ms;
+  --duration-fast: 200ms;
+  --duration-base: 400ms;
+  --duration-slow: 800ms;
+  --duration-cinematic: 1600ms;
+
+  --header-height: 4.5rem;
+  --gutter: clamp(1.25rem, 0.75rem + 2.5vw, 3rem);
+  --section-space: clamp(6rem, 4rem + 10vw, 14rem);
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
+@theme inline {
+  --color-ink-950: var(--color-ink-950);
+  --color-ink-900: var(--color-ink-900);
+  --color-ink-800: var(--color-ink-800);
+  --color-ink-700: var(--color-ink-700);
+  --color-paper: var(--color-paper);
+  --color-paper-dim: var(--color-paper-dim);
+  --color-paper-faint: var(--color-paper-faint);
+  --color-ember: var(--color-ember);
+  --color-ember-soft: var(--color-ember-soft);
+  --color-line: var(--color-line);
+  --color-line-strong: var(--color-line-strong);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-instrument-serif), ui-serif, Georgia, serif;
+  --font-mono:
+    ui-monospace, "SFMono-Regular", "Cascadia Code", Menlo, monospace;
+}
+
+@theme {
+  /* Fluid type scale */
+  --text-micro: 0.6875rem;
+  --text-micro--line-height: 1.4;
+  --text-micro--letter-spacing: 0.18em;
+  --text-body: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --text-body--line-height: 1.65;
+  --text-lead: clamp(1.125rem, 1rem + 0.6vw, 1.5rem);
+  --text-lead--line-height: 1.5;
+  --text-title: clamp(2.25rem, 1.5rem + 3.2vw, 4.5rem);
+  --text-title--line-height: 1.02;
+  --text-title--letter-spacing: -0.02em;
+  --text-display: clamp(3.25rem, 1.75rem + 7.5vw, 10.5rem);
+  --text-display--line-height: 0.92;
+  --text-display--letter-spacing: -0.03em;
+
+  /* Radii */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 10px;
+  --radius-lg: 18px;
+  --radius-pill: 999px;
+
+  /* Motion */
+  --ease-cinematic: cubic-bezier(0.77, 0, 0.18, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    background-color: var(--color-ink-950);
+    scroll-padding-top: var(--header-height);
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  body {
+    min-height: 100svh;
+    background-color: var(--color-ink-950);
+    color: var(--color-paper);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background-color: var(--color-ember);
+    color: var(--color-ink-950);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ember);
+    outline-offset: 3px;
+    border-radius: var(--radius-xs);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }
