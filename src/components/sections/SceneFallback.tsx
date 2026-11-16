@@ -27,9 +27,13 @@ const art: Record<Exclude<SceneKey, "hero">, React.ReactNode> = {
   ),
   blackbox: (
     <g fill="none" stroke="currentColor" opacity="0.6">
-      <path d="M200 70 L320 130 L320 270 L200 330 L80 270 L80 130 Z" />
-      <path d="M80 130 L200 190 L320 130 M200 190 L200 330" />
-      <circle cx="200" cy="190" r="5" fill="var(--color-ember)" stroke="none" />
+      <path d="M200 70 L232 140 L232 260 L168 260 L168 140 Z" />
+      <path d="M168 140 L232 140 M168 230 L140 280 L168 260 M232 230 L260 280 L232 260" />
+      <path
+        d="M188 275 L200 320 L212 275"
+        stroke="var(--color-ember)"
+        strokeWidth="2"
+      />
     </g>
   ),
   bca: (
