@@ -18,7 +18,7 @@ import { projectGlyphs } from "@/components/three/objects/projectGlyphs";
 import { projects } from "@/data/projects";
 import { pointer } from "@/lib/three/pointer";
 import { palette } from "@/lib/three/presets";
-import { damp, passProgress } from "@/lib/three/progress";
+import { damp } from "@/lib/three/progress";
 import { useFocusStore } from "@/stores/focusStore";
 import type { SceneProps } from "@/types/three";
 
@@ -42,7 +42,7 @@ function orbitRing(radius: number, segments = 128): BufferGeometry {
  * Hovering or focusing a project card (see focusStore) pulls its object forward and lights it.
  */
 export default function ProjectsScene({
-  track,
+  progress,
   active,
   tier,
   animate,
@@ -87,7 +87,7 @@ export default function ProjectsScene({
   useFrame((state, delta) => {
     const group = groupRef.current;
     if (!group || !active.current) return;
-    const target = animate ? passProgress(track.current) : 0.5;
+    const target = animate ? progress.current : 0.5;
     smooth.current =
       smooth.current < 0 || !animate
         ? target

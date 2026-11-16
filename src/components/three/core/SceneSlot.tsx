@@ -8,6 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { ScrollTrigger } from "@/lib/animations/gsap";
 import { useRenderStore } from "@/stores/renderStore";
 import { cn } from "@/lib/utils/cn";
 import type { SceneKey } from "@/types/three";
@@ -26,6 +27,10 @@ interface SceneSlotProps {
   preload?: string;
   /** id of the element whose scroll drives the scene (e.g. a pinned section); defaults to the slot. */
   scrollTargetId?: string;
+  /** "pass": 0 entering the bottom → 1 leaving the top. "pin": 0 → 1 across a sticky section. */
+  progressMode?: "pass" | "pin";
+  /** Frame opens (scales up) as the section arrives. */
+  reveal?: boolean;
 }
 
 /**
@@ -40,9 +45,11 @@ export function SceneSlot({
   className,
   preload = "60% 0px",
   scrollTargetId,
+  progressMode = "pass",
+  reveal = false,
 }: SceneSlotProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const scrollRef = useRef<HTMLElement | null>(null);
+  const progress = useRef(0);
   const active = useRef(false);
   const [near, setNear] = useState(false);
   const [ready, setReady] = useState(false);
@@ -54,8 +61,19 @@ export function SceneSlot({
   useEffect(() => {
     const el = ref.current;
     if (!enabled || !el) return;
-    scrollRef.current =
+    const target =
       (scrollTargetId && document.getElementById(scrollTargetId)) || el;
+    const trigger = ScrollTrigger.create({
+      trigger: target,
+      start: progressMode === "pin" ? "top top" : "top bottom",
+      end: progressMode === "pin" ? "bottom bottom" : "bottom top",
+      onUpdate: (self) => {
+        progress.current = self.progress;
+      },
+      onRefresh: (self) => {
+        progress.current = self.progress;
+      },
+    });
     const { adjustMounted, adjustVisible } = useRenderStore.getState();
     let isNear = false;
     const nearObserver = new IntersectionObserver(
@@ -76,13 +94,14 @@ export function SceneSlot({
     nearObserver.observe(el);
     visibleObserver.observe(el);
     return () => {
+      trigger.kill();
       nearObserver.disconnect();
       visibleObserver.disconnect();
       if (isNear) adjustMounted(-1);
       if (active.current) adjustVisible(-1);
       active.current = false;
     };
-  }, [enabled, preload, scrollTargetId]);
+  }, [enabled, preload, scrollTargetId, progressMode]);
 
   const onReady = useCallback(() => setReady(true), []);
   const onError = useCallback(() => setFailed(true), []);
@@ -91,6 +110,7 @@ export function SceneSlot({
   return (
     <div
       ref={ref}
+      data-reveal={reveal ? "frame" : undefined}
       aria-hidden="true"
       className={cn("pointer-events-none relative", className)}
     >
@@ -106,7 +126,7 @@ export function SceneSlot({
         <SceneView
           scene={scene}
           track={ref}
-          scroll={scrollRef}
+          progress={progress}
           active={active}
           onReady={onReady}
           onError={onError}

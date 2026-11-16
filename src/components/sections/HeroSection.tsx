@@ -29,6 +29,7 @@ export function HeroSection() {
           <SceneSlot
             scene="hero"
             scrollTargetId={section.id}
+            progressMode="pin"
             preload="30% 0px"
             fallback={<HeroFallbackArt />}
             className="absolute inset-0"
@@ -39,7 +40,10 @@ export function HeroSection() {
           />
         </div>
         <Container size="wide">
-          <div className="relative flex max-w-4xl flex-col gap-8">
+          <div
+            data-hero-content
+            className="relative flex max-w-4xl flex-col gap-8"
+          >
             <Eyebrow number={section.number}>Prologue</Eyebrow>
             <Heading level={1} variant="display" id={headingId}>
               {site.name}
@@ -56,10 +60,14 @@ export function HeroSection() {
               ))}
             </ul>
             <div className="flex flex-wrap gap-4 pt-2">
-              <ButtonLink href={sectionHref("projects")}>
+              <ButtonLink href={sectionHref("projects")} data-magnetic>
                 Explore the projects
               </ButtonLink>
-              <ButtonLink href={sectionHref("about")} variant="ghost">
+              <ButtonLink
+                href={sectionHref("about")}
+                variant="ghost"
+                data-magnetic
+              >
                 Read the story
               </ButtonLink>
             </div>

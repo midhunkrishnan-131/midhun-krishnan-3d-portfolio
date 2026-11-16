@@ -4,6 +4,7 @@ import { PerformanceMonitor, View } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import { isGlForced } from "@/lib/three/capabilities";
+import { gsap } from "@/lib/animations/gsap";
 import { useRenderStore } from "@/stores/renderStore";
 import { WebGLErrorBoundary } from "@/components/three/core/WebGLErrorBoundary";
 
@@ -35,18 +36,40 @@ function FrameBudgetGuard() {
   return null;
 }
 
-/** In "demand" mode (reduced motion / nothing visible) still re-render when the page scrolls or resizes. */
-function DemandInvalidator() {
-  const invalidate = useThree((s) => s.invalidate);
+/**
+ * Single RAF: the canvas runs with frameloop="never" and is advanced from gsap.ticker — the
+ * same clock that drives Lenis and ScrollTrigger. It only renders while a scene is on screen
+ * (plus one clearing frame after the last one leaves); with reduced motion it renders only
+ * when the page scrolls or resizes.
+ */
+function TickerDriver() {
+  const advance = useThree((s) => s.advance);
   useEffect(() => {
-    const onChange = () => invalidate();
-    window.addEventListener("scroll", onChange, { passive: true });
-    window.addEventListener("resize", onChange);
-    return () => {
-      window.removeEventListener("scroll", onChange);
-      window.removeEventListener("resize", onChange);
+    let dirty = true;
+    const mark = () => {
+      dirty = true;
     };
-  }, [invalidate]);
+    const unsubscribe = useRenderStore.subscribe((s, prev) => {
+      if (s.visible !== prev.visible || s.reducedMotion !== prev.reducedMotion)
+        dirty = true;
+    });
+    window.addEventListener("scroll", mark, { passive: true });
+    window.addEventListener("resize", mark);
+    const tick = (time: number) => {
+      const { visible, reducedMotion } = useRenderStore.getState();
+      const continuous = visible > 0 && !reducedMotion;
+      if (!continuous && !dirty) return;
+      dirty = false;
+      advance(time);
+    };
+    gsap.ticker.add(tick);
+    return () => {
+      gsap.ticker.remove(tick);
+      unsubscribe();
+      window.removeEventListener("scroll", mark);
+      window.removeEventListener("resize", mark);
+    };
+  }, [advance]);
   return null;
 }
 
@@ -58,12 +81,8 @@ function DemandInvalidator() {
 export default function SceneCanvas() {
   const tier = useRenderStore((s) => s.caps?.tier ?? "low");
   const dpr = useRenderStore((s) => s.dpr);
-  const visible = useRenderStore((s) => s.visible);
-  const reducedMotion = useRenderStore((s) => s.reducedMotion);
   const setDpr = useRenderStore((s) => s.setDpr);
   const setFailed = useRenderStore((s) => s.setFailed);
-
-  const frameloop = visible > 0 && !reducedMotion ? "always" : "demand";
 
   return (
     <Canvas
@@ -71,7 +90,7 @@ export default function SceneCanvas() {
       className="!pointer-events-none !fixed !inset-0 !z-0 !h-svh !w-screen"
       dpr={dpr}
       shadows={tier === "low" ? false : "percentage"}
-      frameloop={frameloop}
+      frameloop="never"
       gl={{
         antialias: tier !== "low",
         alpha: true,
@@ -100,7 +119,7 @@ export default function SceneCanvas() {
         />
         <FrameBudgetGuard />
         <FrameClear />
-        <DemandInvalidator />
+        <TickerDriver />
         <View.Port />
       </WebGLErrorBoundary>
     </Canvas>

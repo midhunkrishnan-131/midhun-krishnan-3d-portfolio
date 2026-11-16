@@ -19,7 +19,7 @@ import { useDisposable } from "@/components/three/core/useDisposable";
 import { materials } from "@/components/three/materials/presets";
 import { pointer } from "@/lib/three/pointer";
 import { palette } from "@/lib/three/presets";
-import { damp, passProgress } from "@/lib/three/progress";
+import { damp } from "@/lib/three/progress";
 import type { SceneProps } from "@/types/three";
 
 const groundShader = {
@@ -83,7 +83,7 @@ function skyline(): BufferGeometry {
 
 /** Future vision: an open horizon, with the outlines of what's next being drawn into it. */
 export default function FutureScene({
-  track,
+  progress,
   active,
   tier,
   animate,
@@ -125,7 +125,7 @@ export default function FutureScene({
   useFrame((state, delta) => {
     const group = groupRef.current;
     if (!group || !active.current) return;
-    const target = animate ? passProgress(track.current) : 0.65;
+    const target = animate ? progress.current : 0.65;
     smooth.current =
       smooth.current < 0 || !animate
         ? target

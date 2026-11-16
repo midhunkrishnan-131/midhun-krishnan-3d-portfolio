@@ -15,7 +15,7 @@ const SHADOW_SIZE: Record<PerfTier, number> = {
 
 /** Hero: the unwritten manuscript as real, thick, shadow-casting paper scrubbed by scroll. */
 export default function HeroScene({
-  scroll,
+  progress,
   active,
   tier,
   animate,
@@ -67,7 +67,7 @@ export default function HeroScene({
         count={PAGE_COUNT[tier]}
         tier={tier}
         animate={animate}
-        scroll={scroll}
+        progress={progress}
         active={active}
       />
     </>

@@ -59,7 +59,10 @@ export function ChapterSection({
                 chapter.lead.placeholder && "text-paper-dim",
               )}
             />
-            <div className="flex max-w-prose flex-col gap-4 text-paper-dim">
+            <div
+              data-reveal="fade"
+              className="flex max-w-prose flex-col gap-4 text-paper-dim"
+            >
               {chapter.body.map((copy) => (
                 <CopyText key={copy.text} copy={copy} />
               ))}
@@ -89,9 +92,10 @@ export function ChapterSection({
           {scene ? (
             <SceneSlot
               scene={scene}
+              reveal
               fallback={<SceneFallback scene={scene} />}
               className={cn(
-                "aspect-square w-full sm:aspect-[4/3] lg:col-span-7 lg:aspect-auto lg:h-[78svh]",
+                "aspect-square w-full origin-center sm:aspect-[4/3] lg:col-span-7 lg:aspect-auto lg:h-[78svh]",
                 reverse && "lg:order-1 lg:col-start-1",
               )}
             />

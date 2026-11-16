@@ -117,7 +117,7 @@ export function ProjectsSection() {
           <Heading level={2} id={headingId}>
             {section.title}
           </Heading>
-          <p className="text-lead text-paper-dim">
+          <p data-reveal="fade" className="text-lead text-paper-dim">
             Six projects across AI, Python and frontend development, each marked
             honestly as in progress, a prototype or planned.
           </p>

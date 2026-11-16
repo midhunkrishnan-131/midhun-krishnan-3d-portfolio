@@ -18,7 +18,7 @@ function ReadySignal({ onReady }: { onReady: () => void }) {
 interface SceneViewProps {
   scene: SceneKey;
   track: RefObject<HTMLElement | null>;
-  scroll: RefObject<HTMLElement | null>;
+  progress: RefObject<number>;
   active: RefObject<boolean>;
   onReady: () => void;
   onError: () => void;
@@ -28,7 +28,7 @@ interface SceneViewProps {
 export default function SceneView({
   scene,
   track,
-  scroll,
+  progress,
   active,
   onReady,
   onError,
@@ -42,7 +42,7 @@ export default function SceneView({
         <Suspense fallback={null}>
           <Scene
             track={track}
-            scroll={scroll}
+            progress={progress}
             active={active}
             tier={tier}
             animate={!reducedMotion}

@@ -9,6 +9,8 @@ interface HeadingProps {
   variant?: Variant;
   id?: string;
   className?: string;
+  /** Masked line reveal on scroll (defaults on for h1/h2). */
+  reveal?: boolean;
   children: ReactNode;
 }
 
@@ -24,12 +26,14 @@ export function Heading({
   variant = "title",
   id,
   className,
+  reveal,
   children,
 }: HeadingProps) {
   const Tag = `h${level}` as const;
   return (
     <Tag
       id={id}
+      data-reveal={(reveal ?? level <= 2) ? "lines" : undefined}
       className={cn("text-balance text-paper", variants[variant], className)}
     >
       {children}

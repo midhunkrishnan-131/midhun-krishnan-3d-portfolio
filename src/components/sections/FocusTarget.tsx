@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "motion/react";
 import type { ReactNode } from "react";
 import { useFocusStore } from "@/stores/focusStore";
 import { cn } from "@/lib/utils/cn";
@@ -13,7 +14,8 @@ interface FocusTargetProps {
 
 /**
  * Wraps server-rendered content and tells the section scene what is hovered / focused,
- * so the matching 3D object reacts. Purely an enhancement: content works without it.
+ * so the matching 3D object reacts, and lifts slightly on hover (motion/react).
+ * Purely an enhancement: content works without it.
  */
 export function FocusTarget({
   kind,
@@ -25,14 +27,16 @@ export function FocusTarget({
     kind === "project" ? s.setProject : s.setSkillGroup,
   );
   return (
-    <div
+    <motion.div
       className={cn("group/focus", className)}
+      whileHover={{ y: -4 }}
+      transition={{ type: "spring", stiffness: 260, damping: 24 }}
       onPointerEnter={() => set(id)}
       onPointerLeave={() => set(null)}
       onFocus={() => set(id)}
       onBlur={() => set(null)}
     >
       {children}
-    </div>
+    </motion.div>
   );
 }

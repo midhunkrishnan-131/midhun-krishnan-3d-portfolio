@@ -25,12 +25,15 @@ export function ContactSection() {
             <Heading level={2} variant="display" id={headingId}>
               Let&rsquo;s talk.
             </Heading>
-            <p className="max-w-prose text-lead text-paper-dim">
+            <p
+              data-reveal="fade"
+              className="max-w-prose text-lead text-paper-dim"
+            >
               Have a question, an opportunity or an idea worth building? The
               best way to reach me is below.
             </p>
             <div className="flex flex-wrap gap-4">
-              <ButtonLink href={github} external>
+              <ButtonLink href={github} external data-magnetic>
                 GitHub profile
               </ButtonLink>
             </div>

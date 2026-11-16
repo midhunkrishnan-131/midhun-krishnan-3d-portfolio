@@ -20,13 +20,13 @@ import {
   PAGE_THICKNESS,
 } from "@/components/three/objects/pageGeometry";
 import { pointer } from "@/lib/three/pointer";
-import { damp, pinProgress } from "@/lib/three/progress";
+import { damp } from "@/lib/three/progress";
 
 interface PaperStackProps {
   count: number;
   tier: PerfTier;
   animate: boolean;
-  scroll: RefObject<HTMLElement | null>;
+  progress: RefObject<number>;
   active: RefObject<boolean>;
 }
 
@@ -54,7 +54,7 @@ export function PaperStack({
   count,
   tier,
   animate,
-  scroll,
+  progress,
   active,
 }: PaperStackProps) {
   const groupRef = useRef<Group>(null);
@@ -110,7 +110,7 @@ export function PaperStack({
     const camera = state.camera as PerspectiveCamera;
 
     // Damped scroll progress gives a scrubbed, inertial feel and stays fully reversible.
-    const target = animate ? pinProgress(scroll.current) : STILL_PROGRESS;
+    const target = animate ? progress.current : STILL_PROGRESS;
     const s = smooth.current;
     s.p = s.p < 0 || !animate ? target : lerp(s.p, target, damp(5, delta));
     const p = s.p;

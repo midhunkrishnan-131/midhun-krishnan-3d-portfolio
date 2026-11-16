@@ -20,7 +20,7 @@ import { materials } from "@/components/three/materials/presets";
 import { skillGroups } from "@/data/skills";
 import { pointer } from "@/lib/three/pointer";
 import { palette } from "@/lib/three/presets";
-import { damp, passProgress } from "@/lib/three/progress";
+import { damp } from "@/lib/three/progress";
 import { useFocusStore } from "@/stores/focusStore";
 import type { SceneProps } from "@/types/three";
 
@@ -74,7 +74,7 @@ function buildConstellation() {
 
 /** Skills: a constellation of technology nodes, one cluster per skill group. */
 export default function SkillsScene({
-  track,
+  progress,
   active,
   tier,
   animate,
@@ -101,7 +101,7 @@ export default function SkillsScene({
     const group = groupRef.current;
     const mesh = meshRef.current;
     if (!group || !mesh || !active.current) return;
-    const target = animate ? passProgress(track.current) : 0.5;
+    const target = animate ? progress.current : 0.5;
     smooth.current =
       smooth.current < 0 || !animate
         ? target

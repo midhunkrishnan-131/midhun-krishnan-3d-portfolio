@@ -5,6 +5,9 @@ import { SkipLink } from "@/components/navigation/SkipLink";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { RenderEngine } from "@/components/three/core/RenderEngine";
+import { SmoothScroll } from "@/components/animations/SmoothScroll";
+import { ScrollAnimations } from "@/components/animations/ScrollAnimations";
+import { MotionProvider } from "@/components/animations/MotionProvider";
 import "@/styles/globals.css";
 
 export const metadata: Metadata = {
@@ -22,11 +25,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${inter.variable} ${instrumentSerif.variable}`}>
       <body>
-        <SkipLink targetId="main" />
-        <SiteHeader />
-        {children}
-        <SiteFooter />
+        <MotionProvider>
+          <SkipLink targetId="main" />
+          <SiteHeader />
+          {children}
+          <SiteFooter />
+        </MotionProvider>
         <RenderEngine />
+        <SmoothScroll />
+        <ScrollAnimations />
       </body>
     </html>
   );

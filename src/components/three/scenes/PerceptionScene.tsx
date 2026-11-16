@@ -21,7 +21,7 @@ import { useDisposable } from "@/components/three/core/useDisposable";
 import { materials } from "@/components/three/materials/presets";
 import { pointer } from "@/lib/three/pointer";
 import { palette } from "@/lib/three/presets";
-import { damp, passProgress } from "@/lib/three/progress";
+import { damp } from "@/lib/three/progress";
 import type { SceneProps } from "@/types/three";
 
 /** A small site graph: home → sections → pages, crawled in breadth-first order. */
@@ -53,7 +53,7 @@ function buildGraph() {
 
 /** Perception SEO: a crawler lens moving through a site graph, indexing pages as it goes. */
 export default function PerceptionScene({
-  track,
+  progress,
   active,
   tier,
   animate,
@@ -84,7 +84,7 @@ export default function PerceptionScene({
     const group = groupRef.current;
     const mesh = nodesRef.current;
     if (!group || !mesh || !active.current) return;
-    const target = animate ? passProgress(track.current) : 0.7;
+    const target = animate ? progress.current : 0.7;
     smooth.current =
       smooth.current < 0 || !animate
         ? target

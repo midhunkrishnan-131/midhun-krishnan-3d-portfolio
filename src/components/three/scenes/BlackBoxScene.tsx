@@ -20,7 +20,7 @@ import { useDisposable } from "@/components/three/core/useDisposable";
 import { materials } from "@/components/three/materials/presets";
 import { pointer } from "@/lib/three/pointer";
 import { palette } from "@/lib/three/presets";
-import { damp, passProgress } from "@/lib/three/progress";
+import { damp } from "@/lib/three/progress";
 import type { SceneProps } from "@/types/three";
 
 type V = [number, number, number];
@@ -136,7 +136,7 @@ const seeded = (i: number) => {
  *   0.22–0.48 fold · 0.46–0.60 ignition · 0.58–0.95 lift-off. Fully scrubbed and reversible.
  */
 export default function BlackBoxScene({
-  track,
+  progress,
   active,
   tier,
   animate,
@@ -195,7 +195,7 @@ export default function BlackBoxScene({
     const rocket = rocketRef.current;
     const mesh = meshRef.current;
     if (!rocket || !mesh || !active.current) return;
-    const target = animate ? passProgress(track.current) : 0.5;
+    const target = animate ? progress.current : 0.5;
     smooth.current =
       smooth.current < 0 || !animate
         ? target

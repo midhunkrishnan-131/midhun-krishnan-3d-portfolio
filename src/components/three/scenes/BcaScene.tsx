@@ -9,7 +9,7 @@ import { useDisposable } from "@/components/three/core/useDisposable";
 import { materials } from "@/components/three/materials/presets";
 import { pointer } from "@/lib/three/pointer";
 import { palette } from "@/lib/three/presets";
-import { damp, passProgress } from "@/lib/three/progress";
+import { damp } from "@/lib/three/progress";
 import type { SceneProps } from "@/types/three";
 
 const SLABS = 6;
@@ -29,7 +29,12 @@ function roundedRect(w: number, h: number, r: number): Shape {
 }
 
 /** BCA: structured blocks — scattered slabs that lock into an ordered stack, layer by layer. */
-export default function BcaScene({ track, active, tier, animate }: SceneProps) {
+export default function BcaScene({
+  progress,
+  active,
+  tier,
+  animate,
+}: SceneProps) {
   const groupRef = useRef<Group>(null);
   const slabs = useRef<(Group | null)[]>([]);
   const [slabGeo, edgeGeo, ink, ember, line] = useDisposable(() => {
@@ -56,7 +61,7 @@ export default function BcaScene({ track, active, tier, animate }: SceneProps) {
   useFrame((state, delta) => {
     const group = groupRef.current;
     if (!group || !active.current) return;
-    const target = animate ? passProgress(track.current) : 0.6;
+    const target = animate ? progress.current : 0.6;
     smooth.current =
       smooth.current < 0 || !animate
         ? target
