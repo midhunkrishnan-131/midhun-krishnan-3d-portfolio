@@ -34,7 +34,7 @@ export const projects: Project[] = [
       "Python",
       "Gemini API",
     ],
-    technologiesToConfirm: ["Groq", "FastAPI", "PostgreSQL"],
+    technologiesToConfirm: [],
     status: "in-progress",
     statusNote:
       "In active development. The repository's own status file marks parts as completed and others (database migrations, live scanners) as scaffolded.",
@@ -46,7 +46,6 @@ export const projects: Project[] = [
     githubUrl: "https://github.com/midhunkrishnan-131/myx-ai-windows",
     demoUrl: null,
     needsVerification: [
-      "Groq is not referenced in the repository's package.json; confirm whether it is still used.",
       "Confirm whether the FastAPI + PostgreSQL backend in backend/ is part of the current architecture or an earlier iteration.",
       "Engineering challenges to feature on the detail page.",
       "A real preview image or screenshot.",

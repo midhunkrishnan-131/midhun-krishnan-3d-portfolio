@@ -7,4 +7,12 @@ export const sceneRegistry: Record<
   LazyExoticComponent<ComponentType<SceneProps>>
 > = {
   hero: lazy(() => import("@/components/three/scenes/HeroScene")),
+  beginning: lazy(() => import("@/components/three/scenes/BeginningScene")),
+  struggle: lazy(() => import("@/components/three/scenes/StruggleScene")),
+  blackbox: lazy(() => import("@/components/three/scenes/BlackBoxScene")),
+  bca: lazy(() => import("@/components/three/scenes/BcaScene")),
+  perception: lazy(() => import("@/components/three/scenes/PerceptionScene")),
+  projects: lazy(() => import("@/components/three/scenes/ProjectsScene")),
+  skills: lazy(() => import("@/components/three/scenes/SkillsScene")),
+  future: lazy(() => import("@/components/three/scenes/FutureScene")),
 };

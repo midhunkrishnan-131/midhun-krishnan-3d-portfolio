@@ -9,6 +9,9 @@ import {
 import type { PerfTier } from "@/lib/three/capabilities";
 import { palette } from "@/lib/three/presets";
 
+/** Lacquer base, a touch lighter than the page so forms read against it. */
+const INK_SURFACE = "#3a3a41";
+
 /** Shared material presets. Callers own the returned material and must dispose it. */
 export const materials = {
   /** Satin dark lacquer — the base surface of most objects. */
@@ -20,8 +23,8 @@ export const materials = {
           metalness: 0.2,
         })
       : new MeshPhysicalMaterial({
-          color: palette.ink700,
-          roughness: 0.42,
+          color: INK_SURFACE,
+          roughness: 0.38,
           metalness: 0.25,
           clearcoat: 0.6,
           clearcoatRoughness: 0.35,

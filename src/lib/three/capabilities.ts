@@ -31,8 +31,15 @@ function hasWebGL(strict: boolean): boolean {
     const gl =
       canvas.getContext("webgl2", opts) ?? canvas.getContext("webgl", opts);
     if (!gl) return false;
+    // Software rasterisers (SwiftShader, llvmpipe…) can't hold a frame budget: treat as no WebGL.
+    const info = gl.getExtension("WEBGL_debug_renderer_info");
+    const renderer = info
+      ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL))
+      : "";
     gl.getExtension("WEBGL_lose_context")?.loseContext();
-    return true;
+    return !(
+      strict && /swiftshader|llvmpipe|softpipe|software/i.test(renderer)
+    );
   } catch {
     return false;
   }
@@ -46,6 +53,9 @@ function glOverride(): "force" | "off" | null {
   const value = new URLSearchParams(window.location.search).get("gl");
   return value === "force" || value === "off" ? value : null;
 }
+
+/** True when testing with `?gl=force`: runtime performance fallbacks are disabled. */
+export const isGlForced = (): boolean => glOverride() === "force";
 
 export function detectCapabilities(): RenderCapabilities {
   const override = glOverride();

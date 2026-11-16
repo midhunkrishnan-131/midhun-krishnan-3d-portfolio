@@ -2,7 +2,8 @@
 
 import { PerformanceMonitor, View } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { isGlForced } from "@/lib/three/capabilities";
 import { useRenderStore } from "@/stores/renderStore";
 import { WebGLErrorBoundary } from "@/components/three/core/WebGLErrorBoundary";
 
@@ -12,6 +13,28 @@ function FrameClear() {
     gl.setScissorTest(false);
     gl.clear(true, true, true);
   }, 0);
+  return null;
+}
+
+/**
+ * Last-resort guard: if the first rendered frames are far over budget (e.g. an undetected
+ * software renderer), give up on 3D and let every slot show its static fallback.
+ */
+function FrameBudgetGuard() {
+  const setFailed = useRenderStore((s) => s.setFailed);
+  const samples = useRef<number[]>([]);
+  const forced =
+    typeof window !== "undefined" &&
+    window.location.search.includes("gl=force");
+  useFrame(() => {
+    const list = samples.current;
+    if (list.length > 40 || isGlForced()) return;
+    list.push(performance.now());
+    if (list.length === 40) {
+      const avg = (list[39] - list[10]) / 29;
+      if (avg > 120) setFailed();
+    }
+  });
   return null;
 }
 
@@ -74,7 +97,11 @@ export default function SceneCanvas() {
           onDecline={() => setDpr(useRenderStore.getState().dpr - 0.25)}
           onIncline={() => setDpr(useRenderStore.getState().dpr + 0.25)}
           flipflops={3}
+          onFallback={() => {
+            if (!isGlForced()) setFailed();
+          }}
         />
+        <FrameBudgetGuard />
         <FrameClear />
         <DemandInvalidator />
         <View.Port />

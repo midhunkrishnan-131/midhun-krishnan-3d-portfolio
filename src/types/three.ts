@@ -2,7 +2,16 @@ import type { RefObject } from "react";
 import type { PerfTier } from "@/lib/three/capabilities";
 
 /** Keys of every lazily loaded section scene (see components/three/scenes/registry.ts). */
-export type SceneKey = "hero";
+export type SceneKey =
+  | "hero"
+  | "beginning"
+  | "struggle"
+  | "blackbox"
+  | "bca"
+  | "perception"
+  | "projects"
+  | "skills"
+  | "future";
 
 /** Props every section scene receives from the shared engine. */
 export interface SceneProps {
