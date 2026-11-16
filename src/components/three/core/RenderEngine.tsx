@@ -57,5 +57,14 @@ export function RenderEngine() {
     return () => window.clearTimeout(id);
   }, [webgl, wanted, idle]);
 
+  const reducedMotion = useRenderStore((s) => s.reducedMotion);
+  const live = webgl && !failed && !reducedMotion;
+  useEffect(() => {
+    const root = document.documentElement;
+    if (live) root.dataset.gl = "on";
+    else delete root.dataset.gl;
+    window.dispatchEvent(new Event("gl-layout-change"));
+  }, [live]);
+
   return webgl && idle && !failed ? <SceneCanvas /> : null;
 }

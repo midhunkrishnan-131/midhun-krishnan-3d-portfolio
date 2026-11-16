@@ -16,12 +16,13 @@ export function HeroSection() {
   const section = getSection("hero");
   const headingId = `${section.id}-heading`;
   return (
-    // Pinned: the section is taller than the viewport and its content sticks, so scrolling
-    // scrubs the paper animation before About arrives. Reduced motion: a normal-height hero.
+    // Normal height by default (no-JS, no-WebGL, reduced motion). Only when the 3D view is
+    // live does <html data-gl="on"> make it tall so its sticky content pins and scroll
+    // scrubs the paper animation (see .hero-pin in globals.css).
     <section
       id={section.id}
       aria-labelledby={headingId}
-      className="relative isolate h-[200svh] motion-reduce:h-auto lg:h-[230svh]"
+      className="hero-pin relative isolate"
     >
       <div className="sticky top-0 flex h-svh min-h-[36rem] items-end overflow-hidden pt-[calc(var(--header-height)+4rem)] pb-16 motion-reduce:relative sm:pb-24">
         <div className="absolute inset-0 -z-10">

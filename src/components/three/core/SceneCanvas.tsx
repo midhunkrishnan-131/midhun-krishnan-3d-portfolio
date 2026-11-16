@@ -23,9 +23,6 @@ function FrameClear() {
 function FrameBudgetGuard() {
   const setFailed = useRenderStore((s) => s.setFailed);
   const samples = useRef<number[]>([]);
-  const forced =
-    typeof window !== "undefined" &&
-    window.location.search.includes("gl=force");
   useFrame(() => {
     const list = samples.current;
     if (list.length > 40 || isGlForced()) return;

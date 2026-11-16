@@ -77,6 +77,16 @@
   --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
+/* Hero pin: only while the shared 3D view is active (set by RenderEngine). */
+html[data-gl="on"] .hero-pin {
+  height: 200svh;
+}
+@media (min-width: 64rem) {
+  html[data-gl="on"] .hero-pin {
+    height: 230svh;
+  }
+}
+
 @layer base {
   html {
     color-scheme: dark;

@@ -36,12 +36,24 @@ interface Pixel {
   sz: number;
 }
 
-function buildPixels(): { pixels: Pixel[]; cursor: [number, number] } {
+/** Cell centre of a character position (line, column). */
+const slotAt = (
+  line: number,
+  col: number,
+  totalCols: number,
+): [number, number] => [
+  (col * 6 + 2 - totalCols / 2) * CELL,
+  (-(line * 9 + 3) + 7) * CELL,
+];
+
+function buildPixels(): { pixels: Pixel[]; slots: [number, number][] } {
   const pixels: Pixel[] = [];
+  const slots: [number, number][] = [];
   let charIndex = 0;
   const totalCols = Math.max(...LINES.map((l) => l.length)) * 6;
   LINES.forEach((line, li) => {
     [...line].forEach((ch, ci) => {
+      slots.push(slotAt(li, ci, totalCols));
       const glyph = GLYPHS[ch] ?? GLYPHS[" "];
       glyph.forEach((row, ry) =>
         [...row].forEach((bit, rx) => {
@@ -61,11 +73,11 @@ function buildPixels(): { pixels: Pixel[]; cursor: [number, number] } {
       charIndex++;
     });
   });
-  const last = LINES[LINES.length - 1];
-  return {
-    pixels,
-    cursor: [(last.length * 6 - totalCols / 2) * CELL, (-(9 + 6) + 7) * CELL],
-  };
+  // One extra slot after the final character: where the cursor rests once typing is done.
+  slots.push(
+    slotAt(LINES.length - 1, LINES[LINES.length - 1].length, totalCols),
+  );
+  return { pixels, slots };
 }
 
 /** The beginning: a first line of code assembling itself from scattered terminal pixels. */
@@ -79,7 +91,7 @@ export default function BeginningScene({
   const meshRef = useRef<InstancedMesh>(null);
   const cursorRef = useRef<InstancedMesh>(null);
   const dummy = useMemo(() => new Object3D(), []);
-  const { pixels, cursor } = useMemo(() => buildPixels(), []);
+  const { pixels, slots } = useMemo(() => buildPixels(), []);
   const totalChars = LINES.join("").length;
   const [geometry, ink, ember] = useDisposable(
     () => [
@@ -123,8 +135,12 @@ export default function BeginningScene({
 
     const c = cursorRef.current;
     if (c) {
-      const blink = !animate || Math.sin(t * 6) > 0 ? 1 : 0.001;
-      dummy.position.set(cursor[0], cursor[1] + CELL * 3, 0);
+      // The cursor sits in the slot *after* the character being typed, never on top of it,
+      // and only blinks once the line is finished.
+      const done = typed >= totalChars;
+      const slot = slots[Math.min(Math.floor(typed) + 1, slots.length - 1)];
+      const blink = !animate || !done || Math.sin(t * 6) > 0 ? 1 : 0.001;
+      dummy.position.set(slot[0], slot[1], 0);
       dummy.rotation.set(0, 0, 0);
       dummy.scale.set(5 * blink, 7 * blink, 1.2 * blink);
       dummy.updateMatrix();
