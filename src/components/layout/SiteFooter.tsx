@@ -2,10 +2,11 @@ import Link from "next/link";
 import { sectionHref, sections } from "@/data/navigation";
 import { site } from "@/data/site";
 import { Container } from "@/components/layout/Container";
+import { FooterPortrait } from "@/components/layout/FooterPortrait";
 
 export function SiteFooter() {
   return (
-    <footer className="relative z-10 border-t border-line py-16">
+    <footer className="relative z-10 border-t border-line pt-16 pb-24">
       <Container size="wide" className="flex flex-col gap-12">
         <nav aria-label="Footer">
           <ol className="grid grid-cols-2 gap-x-8 gap-y-3 sm:grid-cols-3 lg:grid-cols-6">
@@ -24,9 +25,12 @@ export function SiteFooter() {
             ))}
           </ol>
         </nav>
-        <div className="flex flex-col justify-between gap-4 font-mono text-micro text-paper-faint uppercase sm:flex-row">
-          <p>© {site.name}</p>
-          <p>{site.title}</p>
+        <div className="flex flex-col items-center justify-between gap-8 sm:flex-row sm:items-end">
+          <FooterPortrait />
+          <div className="flex flex-col gap-2 font-mono text-micro text-paper-faint uppercase sm:items-end">
+            <p>© {site.name}</p>
+            <p>{site.title}</p>
+          </div>
         </div>
       </Container>
     </footer>

@@ -370,19 +370,23 @@ function createArrangement(
     trigger: root,
     start: pin
       ? () => `top top+=${Math.round(headerHeight() + 16)}`
-      : "top 82%",
+      : "top 70%",
+    // Original unpinned end was "bottom 60%". Keep that for short blocks (projects).
+    // On a tall skills column that range left cards mid-turn; finish within one viewport
+    // so the original ghost-cursor choreography still plays, then cards land cleanly.
     end: pin
       ? () =>
           `+=${Math.max(Math.round(window.innerHeight * 0.85), items.length * 420)}`
-      : "top 28%",
+      : () =>
+          root.offsetHeight > window.innerHeight * 1.15
+            ? `+=${Math.round(window.innerHeight * 0.95)}`
+            : "bottom 60%",
     pin: pin,
     pinSpacing: true,
     scrub: 0.6,
     invalidateOnRefresh: true,
     anticipatePin: pin ? 1 : 0,
     refreshPriority: id.includes("project") ? 0 : 1,
-    // Once the section has been scrolled through, cards must sit in their
-    // CSS slots — never left rotated mid-list on a tall skills column.
     onLeave: (self) => {
       if (self.direction === 1) self.animation?.progress(1);
     },
@@ -438,8 +442,11 @@ export function CardArranger({
           stagger: 0.16,
           scrollTrigger: {
             trigger: root,
-            start: "top 85%",
-            end: "top 35%",
+            start: "top 80%",
+            end: () =>
+              root.offsetHeight > window.innerHeight * 1.15
+                ? `+=${Math.round(window.innerHeight * 0.9)}`
+                : "bottom 60%",
             scrub: 0.6,
             invalidateOnRefresh: true,
             onLeave: (self) => {

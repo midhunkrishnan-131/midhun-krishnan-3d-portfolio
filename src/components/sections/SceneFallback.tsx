@@ -7,10 +7,13 @@ import type { SceneKey } from "@/types/three";
 const art: Record<Exclude<SceneKey, "hero">, React.ReactNode> = {
   beginning: (
     <g fontFamily="monospace" fill="currentColor">
-      <text x="60" y="220" fontSize="44" opacity="0.8">
-        {"> hello, world"}
+      <text x="60" y="190" fontSize="44" opacity="0.8">
+        {"> hello,"}
       </text>
-      <rect x="400" y="188" width="16" height="36" fill="var(--color-ember)" />
+      <text x="60" y="250" fontSize="44" opacity="0.8">
+        {"  world"}
+      </text>
+      <rect x="248" y="218" width="16" height="36" fill="var(--color-ember)" />
     </g>
   ),
   struggle: (
@@ -97,11 +100,19 @@ const art: Record<Exclude<SceneKey, "hero">, React.ReactNode> = {
     </g>
   ),
   experience: (
-    <g fill="none" stroke="currentColor" opacity="0.6">
-      {[0, 1, 2, 3, 4].map((i) => (
-        <rect key={i} x="70" y={80 + i * 48} width="260" height="32" rx="4" />
-      ))}
-      <circle cx="96" cy="96" r="6" fill="var(--color-ember)" stroke="none" />
+    <g fill="none" stroke="currentColor" opacity="0.65">
+      <rect x="70" y="230" width="260" height="16" />
+      <rect x="145" y="90" width="110" height="80" rx="4" />
+      <rect
+        x="155"
+        y="100"
+        width="90"
+        height="60"
+        stroke="var(--color-ember)"
+      />
+      <circle cx="200" cy="270" r="22" />
+      <path d="M178 290 L178 340 L222 340 L222 290" />
+      <path d="M178 310 L150 330 M222 310 L250 330" />
     </g>
   ),
   myx: (

@@ -17,6 +17,11 @@ import {
 import { useDisposable } from "@/components/three/core/useDisposable";
 import { materials } from "@/components/three/materials/presets";
 import {
+  createPageGeometry,
+  PAGE_HEIGHT,
+  PAGE_WIDTH,
+} from "@/components/three/objects/pageGeometry";
+import {
   createScenePointer,
   pointerOnPlane,
   readScenePointer,
@@ -26,14 +31,15 @@ import { damp } from "@/lib/three/progress";
 import type { SceneProps } from "@/types/three";
 
 const TRAIL = 22;
-const PAGE_HALF = { x: 1.05, y: 1.32 };
+const PAGE_HALF = { x: PAGE_WIDTH / 2, y: PAGE_HEIGHT / 2 };
 const PLANE_POINT = new Vector3();
 const PLANE_NORMAL = new Vector3();
 const INK_HIT = new Vector3();
 
 /**
- * A ruled notebook leaf with Midhun's first Python programme painted on a
- * canvas texture so the type stays sharp as the page turns.
+ * Midhun's first Python programme, painted on a manuscript leaf so the type
+ * stays sharp while the page turns around its spine — the same paper language
+ * as the hero stack.
  */
 function paintNotebook(): CanvasTexture {
   const width = 1024;
@@ -43,25 +49,21 @@ function paintNotebook(): CanvasTexture {
   canvas.height = height;
   const ctx = canvas.getContext("2d");
   if (!ctx) {
-    const tex = new CanvasTexture(canvas);
-    return tex;
+    return new CanvasTexture(canvas);
   }
 
   ctx.fillStyle = "#e9e7e2";
   ctx.fillRect(0, 0, width, height);
-  // Fibre
   for (let i = 0; i < 1800; i++) {
     ctx.fillStyle = `rgba(0,0,0,${0.015 + Math.random() * 0.03})`;
     ctx.fillRect(Math.random() * width, Math.random() * height, 1.2, 1.2);
   }
-  // Red margin
   ctx.strokeStyle = "rgba(180, 40, 40, 0.28)";
   ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.moveTo(128, 0);
   ctx.lineTo(128, height);
   ctx.stroke();
-  // Ruled lines
   ctx.strokeStyle = "rgba(40, 70, 140, 0.16)";
   ctx.lineWidth = 1;
   for (let y = 160; y < height - 80; y += 36) {
@@ -72,30 +74,30 @@ function paintNotebook(): CanvasTexture {
   }
 
   ctx.fillStyle = "#1a1a1a";
-  ctx.font = "italic 54px 'Instrument Serif', Georgia, serif";
-  ctx.fillText("My First Python Program", 160, 110);
+  ctx.font = "italic 48px 'Instrument Serif', Georgia, serif";
+  ctx.fillText("My Programming Journey", 160, 110);
 
   ctx.font = "italic 22px Georgia, serif";
   ctx.fillStyle = "rgba(40,40,40,0.55)";
   ctx.fillText("— the first page I was proud to write", 160, 148);
 
-  const lines: { text: string; color: string }[] = [
-    { text: "# My First Python Program", color: "#5a6b4a" },
-    { text: "", color: "#1a1a1a" },
-    { text: "def introduce():", color: "#1a1a1a" },
-    { text: '    name = "Midhun Krishnan"', color: "#1a1a1a" },
-    { text: '    role = "Python & Generative AI Developer"', color: "#1a1a1a" },
-    { text: "", color: "#1a1a1a" },
-    { text: '    print(f"Hello, I\'m {name}")', color: "#1a1a1a" },
-    { text: '    print(f"Exploring the world of {role}")', color: "#1a1a1a" },
-    { text: "", color: "#1a1a1a" },
-    { text: "introduce()", color: "#1a1a1a" },
+  const lines = [
+    "# My Programming Journey",
+    "",
+    "def introduce():",
+    '    name = "Midhun Krishnan"',
+    '    interest = "Python and Generative AI"',
+    "",
+    '    print(f"Hello, I\'m {name}")',
+    '    print(f"Learning {interest}")',
+    "",
+    "introduce()",
   ];
 
   ctx.font = "26px ui-monospace, SFMono-Regular, Menlo, monospace";
   let y = 220;
   for (const line of lines) {
-    drawHighlighted(ctx, line.text, 160, y);
+    drawHighlighted(ctx, line, 160, y);
     y += 36;
   }
 
@@ -126,7 +128,6 @@ function drawHighlighted(
   y: number,
 ) {
   if (!text) return;
-  // Very small highlighter: comments, strings, keywords.
   const parts = text.split(
     /(#.*$|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\b(?:def|print|return|if|else)\b)/,
   );
@@ -146,7 +147,7 @@ function drawHighlighted(
 
 export function NotebookPage({ track, progress, active, animate }: SceneProps) {
   const group = useRef<Group>(null);
-  const mesh = useRef<Mesh>(null);
+  const leaf = useRef<Mesh>(null);
   const texture = useMemo(() => paintNotebook(), []);
   useEffect(() => () => texture.dispose(), [texture]);
   const turn = useRef(0);
@@ -159,6 +160,10 @@ export function NotebookPage({ track, progress, active, animate }: SceneProps) {
   const strength = useRef(0);
   const positions = useRef(new Float32Array(TRAIL * 3));
   const lineRef = useRef<Line | null>(null);
+  const [pageGeo, underGeo, paperMat] = useDisposable(
+    () => [createPageGeometry(), createPageGeometry(), materials.paper()],
+    "notebook-paper",
+  );
   const trail = useDisposable(() => {
     const geo = new BufferGeometry();
     geo.setAttribute(
@@ -180,32 +185,38 @@ export function NotebookPage({ track, progress, active, animate }: SceneProps) {
 
   useFrame((state, delta) => {
     if (!group.current || !active.current) return;
+    // Open early in the section so the programme stays readable for most of the scroll.
     const target = animate
-      ? MathUtils.smoothstep(progress.current, 0.08, 0.7)
-      : 0.65;
+      ? MathUtils.smoothstep(progress.current, 0.06, 0.48)
+      : 0.85;
     turn.current = MathUtils.lerp(turn.current, target, damp(4, delta));
-    // Page turns toward the reader, then settles open and readable.
     const open = turn.current;
-    group.current.rotation.y = MathUtils.lerp(0.22, -0.16, open);
+    // Sit to the left of the original hello-world typography so both can be full size.
+    group.current.position.set(-2.2, 0.1, -0.15);
+    group.current.scale.setScalar(0.95);
     group.current.rotation.x = MathUtils.lerp(0.08, 0.02, open);
-    group.current.position.set(-0.55, 0.28, -0.15);
-    if (mesh.current) {
-      mesh.current.rotation.z = Math.sin(open * Math.PI) * 0.04;
+    group.current.rotation.y = 0.16;
+    if (leaf.current) {
+      // Spine-left page turn: starts nearly closed, settles open and readable.
+      const mid = Math.sin(open * Math.PI);
+      leaf.current.rotation.y = MathUtils.lerp(0.7, -0.1, open);
+      leaf.current.rotation.z = mid * 0.06;
+      leaf.current.position.y = mid * 0.04;
     }
 
-    // The Decision: a single ink stroke follows the pointer across the open leaf.
     readScenePointer(track.current, sp);
     let onPage = false;
-    if (animate && sp.inside && open > 0.35 && mesh.current) {
-      mesh.current.updateWorldMatrix(true, false);
-      mesh.current.getWorldPosition(PLANE_POINT);
-      mesh.current.getWorldDirection(PLANE_NORMAL);
+    if (animate && sp.inside && open > 0.45 && leaf.current) {
+      leaf.current.updateWorldMatrix(true, false);
+      leaf.current.getWorldPosition(PLANE_POINT);
+      leaf.current.getWorldDirection(PLANE_NORMAL);
       if (
         pointerOnPlane(sp, state.camera, PLANE_POINT, INK_HIT, PLANE_NORMAL)
       ) {
-        mesh.current.worldToLocal(INK_HIT);
+        leaf.current.worldToLocal(INK_HIT);
         if (
-          Math.abs(INK_HIT.x) <= PAGE_HALF.x &&
+          INK_HIT.x >= 0 &&
+          INK_HIT.x <= PAGE_WIDTH &&
           Math.abs(INK_HIT.y) <= PAGE_HALF.y
         ) {
           onPage = true;
@@ -240,8 +251,22 @@ export function NotebookPage({ track, progress, active, animate }: SceneProps) {
 
   return (
     <group ref={group}>
-      <mesh ref={mesh} castShadow receiveShadow>
-        <planeGeometry args={[2.2, 2.75]} />
+      {/* Under-leaf: the rest of the notebook, slightly open for depth and shadow. */}
+      <mesh
+        geometry={underGeo}
+        material={paperMat}
+        rotation={[0, 0.04, 0]}
+        position={[0, 0, -0.02]}
+        castShadow
+        receiveShadow
+      />
+      <mesh
+        ref={leaf}
+        geometry={pageGeo}
+        rotation={[0, 0.72, 0]}
+        castShadow
+        receiveShadow
+      >
         <meshStandardMaterial
           map={texture}
           roughness={0.85}

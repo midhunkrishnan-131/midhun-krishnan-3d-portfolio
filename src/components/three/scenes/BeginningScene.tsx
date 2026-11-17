@@ -36,7 +36,7 @@ const GLYPHS: Record<string, string[]> = {
   d: ["00001", "00001", "01101", "10011", "10001", "10001", "01111"],
   " ": ["00000", "00000", "00000", "00000", "00000", "00000", "00000"],
 };
-const LINES = ["> hello, world"];
+const LINES = ["> hello,", "  world"];
 const CELL = 0.06;
 
 interface Pixel {
@@ -125,7 +125,8 @@ export default function BeginningScene({
     const group = groupRef.current;
     if (!mesh || !group || !active.current) return;
     const target = animate ? progress.current : 0.6;
-    // Restart cleanly when the section is re-entered (hash links, reverse scroll).
+    // Restart the typewriter when the section is re-entered (refresh, hash, reverse scroll)
+    // so the original typography never gets stuck mid-line or doubles up.
     if (animate && target < 0.06) {
       smooth.current = target;
     } else {
@@ -138,8 +139,7 @@ export default function BeginningScene({
       MathUtils.smoothstep(smooth.current, 0.15, 0.55) * (totalChars + 1);
     const t = state.clock.elapsedTime;
 
-    // The Decision's mouse idea lives on the notebook (an ink stroke). Glyphs stay almost still
-    // so the line can be read; a breath of clearance only, not a scatter.
+    // Mouse: glyph cubes near the cursor scatter outward and tumble, then re-form behind it.
     readScenePointer(track.current, sp);
     let near = false;
     if (sp.inside && animate) {
@@ -170,13 +170,13 @@ export default function BeginningScene({
         const dx = x - hit.x;
         const dy = y - hit.y;
         const d = Math.hypot(dx, dy) + 1e-4;
-        f = h * e * Math.max(0, 1 - d / 0.4) ** 2;
-        x += (dx / d) * f * 0.06;
-        y += (dy / d) * f * 0.06;
-        z += f * 0.08;
+        f = h * e * Math.max(0, 1 - d / 0.55) ** 2;
+        x += (dx / d) * f * 0.35;
+        y += (dy / d) * f * 0.35;
+        z += f * 0.5;
       }
       dummy.position.set(x, y, z);
-      dummy.rotation.set((1 - e) * 3 + f * 0.4, (1 - e) * 2 + f * 0.3, 0);
+      dummy.rotation.set((1 - e) * 3 + f * 2.4, (1 - e) * 2 + f * 1.6, 0);
       dummy.scale.setScalar(0.25 + e * 0.75);
       dummy.updateMatrix();
       mesh.setMatrixAt(i, dummy.matrix);
@@ -187,8 +187,9 @@ export default function BeginningScene({
     if (c) {
       // The cursor sits in the slot *after* the character being typed, never on top of it,
       // and only blinks once the line is finished.
+      const done = typed >= totalChars;
       const slot = slots[Math.min(Math.floor(typed) + 1, slots.length - 1)];
-      const blink = !animate || Math.sin(t * 6) > 0 ? 1 : 0.08;
+      const blink = !animate || !done || Math.sin(t * 6) > 0 ? 1 : 0.001;
       dummy.position.set(slot[0], slot[1], 0);
       dummy.rotation.set(0, 0, 0);
       dummy.scale.set(5 * blink, 7 * blink, 1.2 * blink);
@@ -200,10 +201,10 @@ export default function BeginningScene({
     const k = animate ? damp(3, delta) : 1;
     group.rotation.y = MathUtils.lerp(
       group.rotation.y,
-      -0.08 + smooth.current * 0.16,
+      -0.35 + smooth.current * 0.5,
       k,
     );
-    group.rotation.x = MathUtils.lerp(group.rotation.x, 0.04, k);
+    group.rotation.x = MathUtils.lerp(group.rotation.x, 0.12, k);
   });
 
   return (
@@ -217,7 +218,7 @@ export default function BeginningScene({
         tier={tier}
         animate={animate}
       />
-      <group ref={groupRef} position={[-0.15, -1.0, 0.7]} scale={0.36}>
+      <group ref={groupRef} position={[0.55, 0.02, 0.3]}>
         <instancedMesh
           ref={meshRef}
           args={[geometry, ink, pixels.length]}
