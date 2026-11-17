@@ -7,13 +7,10 @@ import type { SceneKey } from "@/types/three";
 const art: Record<Exclude<SceneKey, "hero">, React.ReactNode> = {
   beginning: (
     <g fontFamily="monospace" fill="currentColor">
-      <text x="60" y="190" fontSize="44" opacity="0.8">
-        {"> hello,"}
+      <text x="60" y="220" fontSize="44" opacity="0.8">
+        {"> hello, world"}
       </text>
-      <text x="60" y="250" fontSize="44" opacity="0.8">
-        {"  world"}
-      </text>
-      <rect x="262" y="214" width="22" height="38" fill="var(--color-ember)" />
+      <rect x="400" y="188" width="16" height="36" fill="var(--color-ember)" />
     </g>
   ),
   struggle: (
@@ -97,6 +94,53 @@ const art: Record<Exclude<SceneKey, "hero">, React.ReactNode> = {
         <path key={i} d={`M0 ${240 + i * i * 6} L400 ${240 + i * i * 6}`} />
       ))}
       <path d="M0 230 L400 230" stroke="var(--color-ember)" strokeWidth="2" />
+    </g>
+  ),
+  experience: (
+    <g fill="none" stroke="currentColor" opacity="0.6">
+      {[0, 1, 2, 3, 4].map((i) => (
+        <rect key={i} x="70" y={80 + i * 48} width="260" height="32" rx="4" />
+      ))}
+      <circle cx="96" cy="96" r="6" fill="var(--color-ember)" stroke="none" />
+    </g>
+  ),
+  myx: (
+    <g fill="none" stroke="currentColor" opacity="0.65">
+      <path d="M200 70 L270 110 L255 250 L200 310 L145 250 L130 110 Z" />
+      <path
+        d="M200 110 L230 130 L222 230 L200 268 L178 230 L170 130 Z"
+        stroke="var(--color-ember)"
+      />
+    </g>
+  ),
+  catalogue: (
+    <g fill="none" stroke="currentColor" opacity="0.6">
+      {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+        <rect
+          key={i}
+          x={60 + (i % 4) * 80}
+          y={100 + Math.floor(i / 4) * 110}
+          width="60"
+          height="80"
+          rx="4"
+        />
+      ))}
+    </g>
+  ),
+  projectDetail: (
+    <g fill="none" stroke="currentColor" opacity="0.65">
+      <rect x="110" y="80" width="180" height="240" rx="8" />
+      <path
+        d="M140 140 L260 140 M140 200 L230 200 M140 260 L200 260"
+        stroke="var(--color-ember)"
+      />
+    </g>
+  ),
+  lost: (
+    <g fontFamily="serif" fill="currentColor" opacity="0.7">
+      <text x="70" y="230" fontSize="120">
+        404
+      </text>
     </g>
   ),
 };

@@ -31,6 +31,8 @@ interface SceneSlotProps {
   progressMode?: "pass" | "pin";
   /** Frame opens (scales up) as the section arrives. */
   reveal?: boolean;
+  /** Bound project slug, used by the project-detail scene. */
+  slug?: string;
 }
 
 /**
@@ -47,6 +49,7 @@ export function SceneSlot({
   scrollTargetId,
   progressMode = "pass",
   reveal = false,
+  slug,
 }: SceneSlotProps) {
   const ref = useRef<HTMLDivElement>(null);
   const progress = useRef(0);
@@ -126,6 +129,7 @@ export function SceneSlot({
       {show ? (
         <SceneView
           scene={scene}
+          slug={slug}
           track={ref}
           progress={progress}
           active={active}

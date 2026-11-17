@@ -22,6 +22,7 @@ interface SceneViewProps {
   active: RefObject<boolean>;
   onReady: () => void;
   onError: () => void;
+  slug?: string;
 }
 
 /** DOM-side half of a slot: a tracked <View> whose children are tunnelled into the shared canvas. */
@@ -32,6 +33,7 @@ export default function SceneView({
   active,
   onReady,
   onError,
+  slug,
 }: SceneViewProps) {
   const tier = useRenderStore((s) => s.caps?.tier ?? "low");
   const reducedMotion = useRenderStore((s) => s.reducedMotion);
@@ -46,6 +48,7 @@ export default function SceneView({
             active={active}
             tier={tier}
             animate={!reducedMotion}
+            slug={slug}
           />
           <ReadySignal onReady={onReady} />
         </Suspense>

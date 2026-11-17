@@ -36,6 +36,9 @@ export function ContactSection() {
               Have a question, an opportunity or an idea worth building? The
               best way to reach me is below.
             </p>
+            <p data-reveal="fade" className="font-display text-paper">
+              A story still being written.
+            </p>
             <div className="flex flex-wrap gap-4">
               {email ? (
                 <ButtonLink href={`mailto:${email}`} data-magnetic>

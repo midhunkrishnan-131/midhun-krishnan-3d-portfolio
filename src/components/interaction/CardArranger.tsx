@@ -370,17 +370,25 @@ function createArrangement(
     trigger: root,
     start: pin
       ? () => `top top+=${Math.round(headerHeight() + 16)}`
-      : "top 70%",
+      : "top 82%",
     end: pin
       ? () =>
           `+=${Math.max(Math.round(window.innerHeight * 0.85), items.length * 420)}`
-      : "bottom 60%",
+      : "top 28%",
     pin: pin,
     pinSpacing: true,
     scrub: 0.6,
     invalidateOnRefresh: true,
     anticipatePin: pin ? 1 : 0,
     refreshPriority: id.includes("project") ? 0 : 1,
+    // Once the section has been scrolled through, cards must sit in their
+    // CSS slots — never left rotated mid-list on a tall skills column.
+    onLeave: (self) => {
+      if (self.direction === 1) self.animation?.progress(1);
+    },
+    onLeaveBack: (self) => {
+      self.animation?.progress(0);
+    },
   });
 }
 
@@ -430,10 +438,13 @@ export function CardArranger({
           stagger: 0.16,
           scrollTrigger: {
             trigger: root,
-            start: "top 80%",
-            end: "bottom 60%",
+            start: "top 85%",
+            end: "top 35%",
             scrub: 0.6,
             invalidateOnRefresh: true,
+            onLeave: (self) => {
+              if (self.direction === 1) self.animation?.progress(1);
+            },
           },
         });
       });

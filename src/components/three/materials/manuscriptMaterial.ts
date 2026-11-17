@@ -203,6 +203,9 @@ export function createPaperMaterials(tier: PerfTier): PaperMaterials {
       .replace("#include <roughnessmap_fragment>", roughnessChunk)
       .replace("#include <emissivemap_fragment>", emissiveChunk);
   };
+  material.polygonOffset = true;
+  material.polygonOffsetFactor = 1;
+  material.polygonOffsetUnits = 1;
   material.customProgramCacheKey = () => `paper-${tier}`;
   material.userData.paper = uniforms;
 

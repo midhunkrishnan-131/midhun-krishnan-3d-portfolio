@@ -7,6 +7,7 @@ export type SectionId =
   | "blackbox-learning"
   | "bca"
   | "perception"
+  | "myx"
   | "projects"
   | "skills"
   | "future"

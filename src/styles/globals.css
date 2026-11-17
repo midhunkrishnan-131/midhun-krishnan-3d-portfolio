@@ -319,12 +319,33 @@ html[data-gl="on"] .hero-pin {
 }
 
 @media (pointer: fine) {
+  /* Native pointer stays visible and fully usable (click, select, I-beam).
+     The ember dot and ring are a trailing accent only. */
   html.has-custom-cursor,
   html.has-custom-cursor * {
-    cursor: none;
+    cursor: auto;
+  }
+
+  html.has-custom-cursor :is(a, button, [role="button"], [data-cursor]) {
+    cursor: pointer;
   }
 
   html.has-custom-cursor :is(input, textarea, select, [contenteditable]) {
     cursor: text;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .avatar-float {
+    animation: avatar-float 6s cubic-bezier(0.77, 0, 0.18, 1) infinite;
+  }
+}
+@keyframes avatar-float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -7px;
   }
 }

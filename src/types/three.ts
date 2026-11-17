@@ -9,9 +9,14 @@ export type SceneKey =
   | "blackbox"
   | "bca"
   | "perception"
+  | "experience"
+  | "myx"
   | "projects"
+  | "catalogue"
+  | "projectDetail"
   | "skills"
-  | "future";
+  | "future"
+  | "lost";
 
 /** Props every section scene receives from the shared engine. */
 export interface SceneProps {
@@ -23,4 +28,6 @@ export interface SceneProps {
   active: RefObject<boolean>;
   tier: PerfTier;
   animate: boolean;
+  /** Project slug for the catalogue detail scene, if the slot is bound to one. */
+  slug?: string;
 }

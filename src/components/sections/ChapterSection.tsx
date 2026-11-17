@@ -16,6 +16,8 @@ interface ChapterSectionProps {
   /** Put the scene on the left on wide screens. */
   reverse?: boolean;
   children?: ReactNode;
+  /** Non-3D media (e.g. the About avatar). Never used as a WebGL scene. */
+  aside?: ReactNode;
 }
 
 /**
@@ -27,6 +29,7 @@ export function ChapterSection({
   scene,
   reverse = false,
   children,
+  aside,
 }: ChapterSectionProps) {
   const section = getSection(chapter.id);
   const headingId = `${section.id}-heading`;
@@ -75,10 +78,15 @@ export function ChapterSection({
                   chapter.facts.length > 1 && "sm:grid-cols-2",
                 )}
               >
-                {chapter.facts.map((fact) => (
+                {chapter.facts.map((fact, index) => (
                   <div
                     key={fact.label}
-                    className="flex flex-col gap-1 bg-ink-950 p-5"
+                    className={cn(
+                      "flex flex-col gap-1 bg-ink-950 p-5",
+                      chapter.facts!.length % 2 === 1 &&
+                        index === chapter.facts!.length - 1 &&
+                        "sm:col-span-2",
+                    )}
                   >
                     <dt className="font-mono text-micro text-paper-faint uppercase">
                       {fact.label}
@@ -100,6 +108,15 @@ export function ChapterSection({
                 reverse && "lg:order-1 lg:col-start-1",
               )}
             />
+          ) : aside ? (
+            <div
+              className={cn(
+                "flex items-center justify-center lg:col-span-7",
+                reverse && "lg:order-1 lg:col-start-1",
+              )}
+            >
+              {aside}
+            </div>
           ) : null}
         </div>
       </Container>

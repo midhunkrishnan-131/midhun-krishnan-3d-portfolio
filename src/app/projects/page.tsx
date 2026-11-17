@@ -8,6 +8,7 @@ import { Breadcrumb } from "@/components/navigation/Breadcrumb";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Heading } from "@/components/ui/Heading";
 import { ProjectSummary } from "@/components/projects/ProjectSummary";
+import { PageSceneFrame } from "@/components/sections/PageSceneFrame";
 
 export const metadata = buildProjectsIndexMetadata();
 
@@ -23,20 +24,26 @@ export default function ProjectsIndexPage() {
           <Breadcrumb
             items={[{ label: "Home", href: "/" }, { label: "Projects" }]}
           />
-          <div className="mt-10 flex max-w-3xl flex-col gap-6">
-            <Eyebrow>Catalogue</Eyebrow>
-            <Heading level={1} variant="display">
-              Projects
-            </Heading>
-            <p className="text-lead text-paper-dim">
-              Software Midhun can show today, listed from the flagship work
-              outward. Status, technologies and links appear only when they have
-              been confirmed. The catalogue is edited from{" "}
-              <code className="font-mono text-[0.9em] text-paper">
-                src/data/projects.ts
-              </code>
-              .
-            </p>
+          <div className="mt-10 grid items-center gap-10 lg:grid-cols-12">
+            <div className="flex max-w-3xl flex-col gap-6 lg:col-span-5">
+              <Eyebrow>Catalogue</Eyebrow>
+              <Heading level={1} variant="display">
+                Projects
+              </Heading>
+              <p className="text-lead text-paper-dim">
+                Software Midhun can show today, listed from the flagship work
+                outward. Status, technologies and links appear only when they
+                have been confirmed. The catalogue is edited from{" "}
+                <code className="font-mono text-[0.9em] text-paper">
+                  src/data/projects.ts
+                </code>
+                .
+              </p>
+            </div>
+            <PageSceneFrame
+              scene="catalogue"
+              className="lg:col-span-7 lg:aspect-auto lg:h-[52svh]"
+            />
           </div>
         </Container>
       </section>

@@ -21,6 +21,7 @@ import {
 } from "@/lib/three/pointer";
 import { damp } from "@/lib/three/progress";
 import type { SceneProps } from "@/types/three";
+import { NotebookPage } from "@/components/three/objects/NotebookPage";
 
 /** 5×7 bitmap glyphs (rows top→bottom). */
 const GLYPHS: Record<string, string[]> = {
@@ -35,7 +36,7 @@ const GLYPHS: Record<string, string[]> = {
   d: ["00001", "00001", "01101", "10011", "10001", "10001", "01111"],
   " ": ["00000", "00000", "00000", "00000", "00000", "00000", "00000"],
 };
-const LINES = ["> hello,", "  world"];
+const LINES = ["> hello, world"];
 const CELL = 0.06;
 
 interface Pixel {
@@ -124,10 +125,15 @@ export default function BeginningScene({
     const group = groupRef.current;
     if (!mesh || !group || !active.current) return;
     const target = animate ? progress.current : 0.6;
-    smooth.current =
-      smooth.current < 0 || !animate
-        ? target
-        : MathUtils.lerp(smooth.current, target, damp(5, delta));
+    // Restart cleanly when the section is re-entered (hash links, reverse scroll).
+    if (animate && target < 0.06) {
+      smooth.current = target;
+    } else {
+      smooth.current =
+        smooth.current < 0 || !animate
+          ? target
+          : MathUtils.lerp(smooth.current, target, damp(5, delta));
+    }
     const typed =
       MathUtils.smoothstep(smooth.current, 0.15, 0.55) * (totalChars + 1);
     const t = state.clock.elapsedTime;
@@ -180,9 +186,8 @@ export default function BeginningScene({
     if (c) {
       // The cursor sits in the slot *after* the character being typed, never on top of it,
       // and only blinks once the line is finished.
-      const done = typed >= totalChars;
       const slot = slots[Math.min(Math.floor(typed) + 1, slots.length - 1)];
-      const blink = !animate || !done || Math.sin(t * 6) > 0 ? 1 : 0.001;
+      const blink = !animate || Math.sin(t * 6) > 0 ? 1 : 0.08;
       dummy.position.set(slot[0], slot[1], 0);
       dummy.rotation.set(0, 0, 0);
       dummy.scale.set(5 * blink, 7 * blink, 1.2 * blink);
@@ -204,7 +209,14 @@ export default function BeginningScene({
     <>
       <PerspectiveCamera makeDefault position={[0, 0.1, 6]} fov={35} />
       <StudioLights />
-      <group ref={groupRef}>
+      <NotebookPage
+        track={track}
+        progress={progress}
+        active={active}
+        tier={tier}
+        animate={animate}
+      />
+      <group ref={groupRef} position={[0.15, 0.35, 0.55]} scale={0.92}>
         <instancedMesh
           ref={meshRef}
           args={[geometry, ink, pixels.length]}

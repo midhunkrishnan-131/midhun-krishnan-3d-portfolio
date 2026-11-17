@@ -75,6 +75,7 @@ export const skillGroups: SkillGroup[] = [
       { name: "GitHub", confirmed: true },
       { name: "VS Code", confirmed: true },
       { name: "Jupyter Notebook", confirmed: true },
+      { name: "Postman", confirmed: true },
     ],
   },
   {
@@ -95,5 +96,14 @@ export const skillGroups: SkillGroup[] = [
     title: "Search engine optimisation",
     source: "Brief (SEO Intern at Perception)",
     items: [{ name: "SEO", confirmed: true }],
+  },
+  {
+    id: "security",
+    title: "Cybersecurity",
+    source: "Brief; MYX AI repository",
+    items: [
+      { name: "Threat intelligence", confirmed: true },
+      { name: "Security analysis", confirmed: true },
+    ],
   },
 ];

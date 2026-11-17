@@ -8,11 +8,14 @@ import type { Chapter } from "@/types/content";
 export const chapters = {
   about: {
     id: "about",
-    kicker: "Who I am",
+    kicker: "Before technology",
     lead: {
-      text: "I'm Midhun Krishnan — a BCA Computer Science student in Thiruvananthapuram, with IT and technical support experience and practical project work in Python, REST APIs and Generative AI applications.",
+      text: "I did not begin as a computer science student or an experienced software developer. Technology was a field I decided to enter and understand.",
     },
     body: [
+      {
+        text: "I'm Midhun Krishnan — a BCA Computer Science student in Thiruvananthapuram, with IT and technical support experience and practical project work in Python, REST APIs and Generative AI applications.",
+      },
       {
         text: "I've built an AI-assisted code diagnosis platform, a command-line LLM client and a reusable API client, and I also work across frontend development and independent software projects alongside my studies.",
       },
@@ -44,29 +47,28 @@ export const chapters = {
   },
   beginning: {
     id: "beginning",
-    kicker: "Where it started",
+    kicker: "The decision",
     lead: {
-      text: "Every story starts with a first line of code.",
-      placeholder: true,
+      text: "I decided to enter technology and start learning from the first line of code.",
     },
     body: [
       {
-        text: "How my journey into programming began will be told here, in my own words.",
-        placeholder: true,
+        text: "That decision is the beginning of this story. The first programme I was proud of still sits on the page beside these words: a short Python introduction, written, then typed, then run.",
       },
     ],
   },
   struggle: {
     id: "struggle",
-    kicker: "What was hard",
+    kicker: "The struggle",
     lead: {
-      text: "Learning to build software means meeting problems that don't untangle on the first try.",
-      placeholder: true,
+      text: "Becoming a developer required persistence and practice.",
     },
     body: [
       {
-        text: "The real coding struggles, the experiments that didn't work and what they taught me will be written here.",
-        placeholder: true,
+        text: "I learned Python from the beginning. I worked through programming logic, debugged errors, learned how APIs work, and started to understand databases and backend development.",
+      },
+      {
+        text: "I built projects, and I faced coding challenges that did not untangle on the first try. This chapter is that work — fragments, mistakes, and the line that finally holds.",
       },
     ],
   },
@@ -108,11 +110,13 @@ export const chapters = {
         text: "That direction runs through my own work: MYX AI uses the Gemini API, CodeDoctor AI uses the Groq API with a Gemini fallback, and DevAssist is a command-line LLM client.",
       },
       {
-        text: "What the training covers and what I'm learning there will be added here.",
-        placeholder: true,
+        text: "The programme covers Python, generative AI, AI application development, retrieval-augmented generation, FastAPI, backend systems, APIs, and practical project work. Those are the tools I am still learning to use with care.",
       },
     ],
-    facts: [{ label: "Role", value: "Generative AI Developer (training)" }],
+    facts: [
+      { label: "Role", value: "Generative AI Developer (training)" },
+      { label: "Focus", value: "Python, Gen AI, RAG, FastAPI, APIs" },
+    ],
   },
   bca: {
     id: "bca",
@@ -125,8 +129,7 @@ export const chapters = {
         text: "It's an online programme, with expected graduation in 2028.",
       },
       {
-        text: "The subjects that have shaped how I think about software will be added here.",
-        placeholder: true,
+        text: "The degree is a formal path through computer science, taken alongside the work I am already doing with Python and generative AI.",
       },
     ],
     facts: [
@@ -146,24 +149,31 @@ export const chapters = {
       {
         text: "It's also why this site treats search as part of the engineering: every chapter lives in real, semantic HTML, so the story stays readable to people and crawlers even without 3D.",
       },
-      {
-        text: "What I work on during the internship and what I'm learning will be added here.",
-        placeholder: true,
-      },
     ],
     facts: [{ label: "Role", value: "SEO Intern" }],
   },
-  future: {
-    id: "future",
-    kicker: "What's next",
-    lead: { text: "The story is still being written." },
+  myx: {
+    id: "myx",
+    kicker: "Flagship project",
+    lead: {
+      text: "An autonomous cyber defense and threat intelligence platform for Windows, still being built in public.",
+    },
     body: [
       {
-        text: "I'm seeking Python Developer or Generative AI internship opportunities.",
+        text: "MYX AI is the project I am developing most carefully. What follows is only what the repository already contains, labelled honestly as implemented, in development, or planned.",
+      },
+    ],
+  },
+  future: {
+    id: "future",
+    kicker: "The future",
+    lead: { text: "The story is not finished. I'm still building." },
+    body: [
+      {
+        text: "I want to build useful software using artificial intelligence, programming and cybersecurity — work that is careful, and that lasts.",
       },
       {
-        text: "Where I want to go next — the problems I want to work on and the developer I want to become — will be shared here in my own words.",
-        placeholder: true,
+        text: "I'm seeking Python Developer or Generative AI internship opportunities, and I will keep writing this story as the work continues.",
       },
     ],
   },

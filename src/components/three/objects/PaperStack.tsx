@@ -131,7 +131,7 @@ export function PaperStack({
       "aCurl",
     ) as InstancedBufferAttribute;
     const occ = mesh.geometry.getAttribute("aOcc") as InstancedBufferAttribute;
-    const gap = PAGE_THICKNESS * 1.6;
+    const gap = PAGE_THICKNESS * 2.6;
 
     for (let i = 0; i < pages.length; i++) {
       const pg = pages[i];
@@ -154,7 +154,7 @@ export function PaperStack({
       dummy.position.set(
         lerp(0, pg.flyX, fly * fly),
         lerp(breathe * 0.03 + (pg.k - 0.5) * 0.12 * fan, pg.flyY, fly * fly),
-        z + fly * fly * 1.6,
+        z + fly * fly * 1.15,
       );
       dummy.rotation.set(
         pg.lean + fly * pg.spin,
@@ -191,12 +191,18 @@ export function PaperStack({
     const k = animate ? damp(3, delta) : 1;
     const baseX = wide ? 1.35 : -0.25;
     const baseY = wide ? -0.05 : 0.95;
+    // The stack eases away from the pointer — blank paper that resists a probe, not a toy that chases it.
+    const resist = animate && pointer.enabled ? 1 : 0;
     group.position.x = lerp(
       group.position.x,
-      lerp(baseX, wide ? 0.9 : -0.4, dolly),
+      lerp(baseX, wide ? 0.9 : -0.4, dolly) - resist * pointer.x * 0.22,
       k,
     );
-    group.position.y = lerp(group.position.y, lerp(baseY, 0.2, dolly), k);
+    group.position.y = lerp(
+      group.position.y,
+      lerp(baseY, 0.2, dolly) - resist * pointer.y * 0.14,
+      k,
+    );
     group.scale.setScalar(wide ? 1.12 : 0.74);
     group.rotation.x = lerp(group.rotation.x, lerp(-0.3, -0.08, separate), k);
     group.rotation.y = lerp(
