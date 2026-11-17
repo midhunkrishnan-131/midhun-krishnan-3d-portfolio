@@ -349,3 +349,17 @@ html[data-gl="on"] .hero-pin {
     translate: 0 -7px;
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .avatar-fade {
+    animation: avatar-fade 0.6s ease both;
+  }
+}
+@keyframes avatar-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
