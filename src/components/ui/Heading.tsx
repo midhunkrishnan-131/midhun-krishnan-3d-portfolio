@@ -1,10 +1,10 @@
-import type { ReactNode } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
 
 type Level = 1 | 2 | 3;
 type Variant = "display" | "title" | "subtitle";
 
-interface HeadingProps {
+interface HeadingProps extends HTMLAttributes<HTMLHeadingElement> {
   level: Level;
   variant?: Variant;
   id?: string;
@@ -28,6 +28,7 @@ export function Heading({
   className,
   reveal,
   children,
+  ...rest
 }: HeadingProps) {
   const Tag = `h${level}` as const;
   return (
@@ -35,6 +36,7 @@ export function Heading({
       id={id}
       data-reveal={(reveal ?? level <= 2) ? "lines" : undefined}
       className={cn("text-balance text-paper", variants[variant], className)}
+      {...rest}
     >
       {children}
     </Tag>

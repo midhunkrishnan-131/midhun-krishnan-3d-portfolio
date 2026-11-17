@@ -16,11 +16,15 @@ export function ContactSection() {
     <section
       id={section.id}
       aria-labelledby={headingId}
+      data-section={section.id}
       className="relative border-t border-line py-(--section-space)"
     >
       <Container size="wide">
         <div className="grid gap-12 lg:grid-cols-12">
-          <header className="flex flex-col gap-6 lg:col-span-6">
+          <header
+            data-parallax="copy"
+            className="flex flex-col gap-6 lg:col-span-6"
+          >
             <Eyebrow number={section.number}>Get in touch</Eyebrow>
             <Heading level={2} variant="display" id={headingId}>
               Let&rsquo;s talk.
@@ -38,7 +42,10 @@ export function ContactSection() {
               </ButtonLink>
             </div>
           </header>
-          <dl className="self-end border-t border-line lg:col-span-5 lg:col-start-8">
+          <dl
+            data-reveal="stagger"
+            className="self-end border-t border-line lg:col-span-5 lg:col-start-8"
+          >
             <div className={row}>
               <dt className="text-micro text-paper-faint uppercase">Email</dt>
               <dd className={email ? "text-paper" : "text-paper-faint italic"}>

@@ -102,6 +102,30 @@ html[data-gl="on"] .hero-pin {
     }
   }
 
+  /* Lenis owns wheel smoothing; CSS smooth-scroll would fight it and hitch anchor jumps. */
+  html[data-lenis="on"] {
+    scroll-behavior: auto;
+  }
+
+  /*
+   * Section enter: a stronger rule draws across the existing faint border.
+   * --section-rule stays 1 without JS / with reduced motion so the line is always visible.
+   */
+  :root {
+    --section-rule: 1;
+  }
+  [data-section]:not(#hero)::before {
+    content: "";
+    position: absolute;
+    inset-inline: var(--gutter);
+    top: 0;
+    height: 1px;
+    background: var(--color-line-strong);
+    transform: scaleX(var(--section-rule));
+    transform-origin: left center;
+    pointer-events: none;
+  }
+
   body {
     min-height: 100svh;
     background-color: var(--color-ink-950);

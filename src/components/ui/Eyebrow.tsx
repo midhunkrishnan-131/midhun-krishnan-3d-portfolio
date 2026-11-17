@@ -1,20 +1,27 @@
-import type { ReactNode } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
 
-interface EyebrowProps {
+interface EyebrowProps extends HTMLAttributes<HTMLParagraphElement> {
   children: ReactNode;
   number?: string;
   className?: string;
 }
 
-/** Small uppercase label with an optional chapter number. */
-export function Eyebrow({ children, number, className }: EyebrowProps) {
+/** Small uppercase monospace label with an optional chapter number. */
+export function Eyebrow({
+  children,
+  number,
+  className,
+  ...rest
+}: EyebrowProps) {
   return (
     <p
+      data-reveal="eyebrow"
       className={cn(
-        "flex items-center gap-3 text-micro font-medium text-paper-faint uppercase",
+        "flex items-center gap-3 font-mono text-micro font-medium text-paper-faint uppercase",
         className,
       )}
+      {...rest}
     >
       {number ? (
         <span className="text-ember tabular-nums" aria-hidden="true">

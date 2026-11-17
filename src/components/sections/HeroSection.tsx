@@ -22,6 +22,7 @@ export function HeroSection() {
     <section
       id={section.id}
       aria-labelledby={headingId}
+      data-section={section.id}
       className="hero-pin relative isolate"
     >
       <div className="sticky top-0 flex h-svh min-h-[36rem] items-end overflow-hidden pt-[calc(var(--header-height)+4rem)] pb-16 motion-reduce:relative sm:pb-24">
@@ -44,14 +45,25 @@ export function HeroSection() {
             data-hero-content
             className="relative flex max-w-4xl flex-col gap-8"
           >
-            <Eyebrow number={section.number}>Prologue</Eyebrow>
-            <Heading level={1} variant="display" id={headingId}>
+            <Eyebrow number={section.number} data-hero-stage="eyebrow">
+              Prologue
+            </Eyebrow>
+            <Heading
+              level={1}
+              variant="display"
+              id={headingId}
+              data-hero-stage="title"
+            >
               {site.name}
             </Heading>
-            <p className="font-display text-title text-paper-dim italic">
+            <p
+              data-hero-stage="kicker"
+              className="font-display text-title text-paper-dim italic"
+            >
               {site.title}
             </p>
             <ul
+              data-hero-stage="roles"
               className="flex flex-col gap-1 text-sm text-paper-dim sm:text-base"
               aria-label="Currently"
             >
@@ -59,7 +71,10 @@ export function HeroSection() {
                 <li key={role}>{role}</li>
               ))}
             </ul>
-            <div className="flex flex-wrap gap-4 pt-2">
+            <div
+              data-hero-stage="actions"
+              className="flex flex-wrap gap-4 pt-2"
+            >
               <ButtonLink href={sectionHref("projects")} data-magnetic>
                 Explore the projects
               </ButtonLink>

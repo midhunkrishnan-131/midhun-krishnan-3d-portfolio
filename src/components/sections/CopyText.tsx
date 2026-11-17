@@ -5,14 +5,17 @@ import { cn } from "@/lib/utils/cn";
 export function CopyText({
   copy,
   className,
+  reveal,
 }: {
   copy: Copy;
   className?: string;
+  reveal?: "words" | "fade";
 }) {
   return (
     <p
       className={cn(copy.placeholder && "text-paper-faint italic", className)}
       data-placeholder={copy.placeholder ? "true" : undefined}
+      data-reveal={reveal}
     >
       {copy.text}
     </p>

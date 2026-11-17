@@ -33,12 +33,14 @@ export function ChapterSection({
   return (
     <section
       id={section.id}
+      data-section={section.id}
       aria-labelledby={headingId}
       className="relative border-t border-line py-(--section-space)"
     >
       <Container size="wide">
         <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-8">
           <div
+            data-parallax="copy"
             className={cn(
               "flex flex-col gap-8 lg:col-span-5",
               scene
@@ -54,21 +56,20 @@ export function ChapterSection({
             </Heading>
             <CopyText
               copy={chapter.lead}
+              reveal="words"
               className={cn(
                 "font-display text-lead text-paper sm:text-[1.75rem] sm:leading-snug",
                 chapter.lead.placeholder && "text-paper-dim",
               )}
             />
-            <div
-              data-reveal="fade"
-              className="flex max-w-prose flex-col gap-4 text-paper-dim"
-            >
+            <div className="flex max-w-prose flex-col gap-4 text-paper-dim">
               {chapter.body.map((copy) => (
-                <CopyText key={copy.text} copy={copy} />
+                <CopyText key={copy.text} copy={copy} reveal="fade" />
               ))}
             </div>
             {chapter.facts?.length ? (
               <dl
+                data-reveal="stagger"
                 className={cn(
                   "grid gap-px overflow-hidden rounded-lg border border-line bg-line",
                   chapter.facts.length > 1 && "sm:grid-cols-2",

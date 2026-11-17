@@ -16,6 +16,7 @@ export function SkillsSection() {
     <section
       id={section.id}
       aria-labelledby={headingId}
+      data-section={section.id}
       className="relative border-t border-line py-(--section-space)"
     >
       <Container size="wide">
@@ -25,13 +26,16 @@ export function SkillsSection() {
             fallback={<SceneFallback scene="skills" />}
             className="aspect-square w-full lg:order-2 lg:col-span-6 lg:col-start-7 lg:aspect-auto lg:h-[80svh]"
           />
-          <div className="flex flex-col gap-10 lg:order-1 lg:col-span-6">
+          <div
+            data-parallax="copy"
+            className="flex flex-col gap-10 lg:order-1 lg:col-span-6"
+          >
             <header className="flex flex-col gap-6">
               <Eyebrow number={section.number}>Toolkit</Eyebrow>
               <Heading level={2} id={headingId}>
                 {section.title}
               </Heading>
-              <p className="text-paper-dim">
+              <p data-reveal="fade" className="text-paper-dim">
                 Grouped by what my work and studies actually involve. Items
                 marked “to confirm” are mentioned in my project notes but not
                 yet confirmed.
@@ -39,7 +43,11 @@ export function SkillsSection() {
             </header>
             <ul className="flex flex-col border-t border-line">
               {skillGroups.map((group) => (
-                <li key={group.id} className="border-b border-line">
+                <li
+                  key={group.id}
+                  data-reveal="card"
+                  className="border-b border-line"
+                >
                   <FocusTarget kind="skillGroup" id={group.id} className="py-6">
                     <h3 className="mb-4 text-lead font-medium text-paper transition-colors group-hover/focus:text-ember-soft">
                       {group.title}

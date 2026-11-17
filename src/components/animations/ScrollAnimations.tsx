@@ -6,19 +6,102 @@ import {
   gsap,
   ScrollTrigger,
   SplitText,
+  SCRUB,
   STORY_EASE,
 } from "@/lib/animations/gsap";
 
 /**
  * Declarative scroll animations driven by data attributes on server-rendered markup:
- *   data-reveal="lines"  split into masked lines that rise in (headings)
- *   data-reveal="fade"   soft rise + fade (paragraphs, cards)
- *   data-reveal="frame"  scene frames grow into place as the section arrives (scrubbed)
- *   data-hero-content    hero copy drifts up and dims as the pinned hero is scrubbed
- *   data-magnetic        element leans toward a nearby pointer (fine pointers only)
- * Text is fully visible in the HTML; the from-states are applied only here, in JS, and only
+ *   data-reveal="lines"    split into masked lines that rise in (headings)
+ *   data-reveal="words"    word-by-word rise + fade (lead paragraphs)
+ *   data-reveal="fade"     soft rise + fade (paragraphs)
+ *   data-reveal="eyebrow"  short label slide
+ *   data-reveal="card"     card / row entrance
+ *   data-reveal="stagger"  children of the element stagger in
+ *   data-reveal="frame"    scene frames grow into place as the section arrives
+ *   data-parallax="copy"   slow vertical parallax on a column
+ *   data-hero-content      staged intro, then a pin-scrubbed exit
+ *   data-hero-stage        named hero children used by the staged timelines
+ *   data-section           section enter: the top rule draws on
+ *   data-magnetic          element leans toward a nearby pointer (fine pointers only)
+ *
+ * Entrance typography is scrubbed across the first part of a section so it finishes
+ * and stays readable while the section is in view, then reverses only on the way back.
+ * Text is fully visible in the HTML; from-states are applied only here, in JS, and only
  * when motion is allowed, so crawlers / no-JS / reduced-motion visitors always see it.
  */
+const isHeroChild = (el: Element) => Boolean(el.closest("[data-hero-content]"));
+
+const willMotion = (el: HTMLElement, on: boolean) => {
+  el.style.willChange = on ? "transform" : "";
+};
+
+function setupHero(splits: SplitText[]) {
+  const root = document.querySelector<HTMLElement>("[data-hero-content]");
+  const section = root?.closest("section");
+  if (!root || !section) return;
+
+  const eyebrow = root.querySelector<HTMLElement>(
+    "[data-hero-stage='eyebrow']",
+  );
+  const title = root.querySelector<HTMLElement>("[data-hero-stage='title']");
+  const kicker = root.querySelector<HTMLElement>("[data-hero-stage='kicker']");
+  const roles = root.querySelector<HTMLElement>("[data-hero-stage='roles']");
+  const actions = root.querySelector<HTMLElement>(
+    "[data-hero-stage='actions']",
+  );
+  const introTargets = [eyebrow, kicker, roles, actions].filter(
+    (el): el is HTMLElement => Boolean(el),
+  );
+
+  const intro = gsap.timeline({
+    defaults: { ease: STORY_EASE, duration: 1 },
+  });
+  if (eyebrow) {
+    intro.from(eyebrow, { y: 18, autoAlpha: 0, duration: 0.8 }, 0);
+  }
+  if (title) {
+    splits.push(
+      SplitText.create(title, {
+        type: "lines,words",
+        mask: "lines",
+        autoSplit: true,
+        onSplit: (self) =>
+          gsap.from(self.lines, {
+            yPercent: 110,
+            duration: 1.25,
+            stagger: 0.08,
+            ease: STORY_EASE,
+            delay: 0.12,
+            force3D: false,
+          }),
+      }),
+    );
+  }
+  if (kicker) intro.from(kicker, { y: 24, autoAlpha: 0 }, 0.28);
+  if (roles) intro.from(roles, { y: 24, autoAlpha: 0 }, 0.4);
+  if (actions) intro.from(actions, { y: 20, autoAlpha: 0 }, 0.52);
+
+  const exit = gsap.timeline({
+    defaults: { ease: "none" },
+    scrollTrigger: {
+      trigger: section,
+      start: "top top",
+      end: "bottom bottom",
+      scrub: SCRUB,
+      onToggle: (self) => willMotion(root, self.isActive),
+    },
+  });
+  if (actions) exit.to(actions, { yPercent: -30, autoAlpha: 0 }, 0.12);
+  if (roles) exit.to(roles, { yPercent: -28, autoAlpha: 0 }, 0.22);
+  if (kicker) exit.to(kicker, { yPercent: -22, autoAlpha: 0 }, 0.32);
+  if (title) exit.to(title, { yPercent: -16, autoAlpha: 0 }, 0.42);
+  if (eyebrow) exit.to(eyebrow, { yPercent: -12, autoAlpha: 0 }, 0.52);
+  if (!introTargets.length && !title) {
+    exit.to(root, { yPercent: -18, autoAlpha: 0 }, 0);
+  }
+}
+
 export function ScrollAnimations() {
   const pathname = usePathname();
 
@@ -27,8 +110,13 @@ export function ScrollAnimations() {
     const splits: SplitText[] = [];
 
     mm.add("(prefers-reduced-motion: no-preference)", () => {
+      const cleanups: (() => void)[] = [];
+
+      setupHero(splits);
+
       gsap.utils.toArray<HTMLElement>("[data-reveal='lines']").forEach((el) => {
-        const above = el.getBoundingClientRect().top < window.innerHeight;
+        if (isHeroChild(el)) return;
+        const above = el.getBoundingClientRect().top < window.innerHeight * 0.7;
         splits.push(
           SplitText.create(el, {
             type: "lines",
@@ -37,64 +125,173 @@ export function ScrollAnimations() {
             onSplit: (self) =>
               gsap.from(self.lines, {
                 yPercent: 110,
+                ease: above ? STORY_EASE : "none",
                 duration: 1.2,
                 stagger: 0.09,
-                ease: STORY_EASE,
-                delay: above ? 0.15 : 0,
+                delay: above ? 0.12 : 0,
+                force3D: false,
                 scrollTrigger: above
                   ? undefined
-                  : { trigger: el, start: "top 88%", once: true },
+                  : {
+                      trigger: el,
+                      start: "top 88%",
+                      end: "top 58%",
+                      scrub: SCRUB,
+                    },
               }),
           }),
         );
       });
 
+      gsap.utils.toArray<HTMLElement>("[data-reveal='words']").forEach((el) => {
+        if (isHeroChild(el)) return;
+        splits.push(
+          SplitText.create(el, {
+            type: "words",
+            autoSplit: true,
+            onSplit: (self) =>
+              gsap.from(self.words, {
+                yPercent: 36,
+                autoAlpha: 0,
+                ease: "none",
+                stagger: 0.03,
+                force3D: false,
+                scrollTrigger: {
+                  trigger: el,
+                  start: "top 90%",
+                  end: "top 60%",
+                  scrub: SCRUB,
+                },
+              }),
+          }),
+        );
+      });
+
+      gsap.utils
+        .toArray<HTMLElement>("[data-reveal='eyebrow']")
+        .forEach((el) => {
+          if (isHeroChild(el)) return;
+          gsap.from(el, {
+            y: 16,
+            autoAlpha: 0,
+            ease: "none",
+            scrollTrigger: {
+              trigger: el,
+              start: "top 92%",
+              end: "top 74%",
+              scrub: SCRUB,
+            },
+          });
+        });
+
       gsap.utils.toArray<HTMLElement>("[data-reveal='fade']").forEach((el) => {
+        if (isHeroChild(el)) return;
         gsap.from(el, {
           y: 28,
           autoAlpha: 0,
-          duration: 1,
-          scrollTrigger: { trigger: el, start: "top 90%", once: true },
+          ease: "none",
+          scrollTrigger: {
+            trigger: el,
+            start: "top 92%",
+            end: "top 68%",
+            scrub: SCRUB,
+          },
         });
       });
+
+      gsap.utils.toArray<HTMLElement>("[data-reveal='card']").forEach((el) => {
+        gsap.from(el, {
+          y: 36,
+          autoAlpha: 0,
+          ease: "none",
+          scrollTrigger: {
+            trigger: el,
+            start: "top 94%",
+            end: "top 70%",
+            scrub: SCRUB,
+            onToggle: (self) => willMotion(el, self.isActive),
+          },
+        });
+      });
+
+      gsap.utils
+        .toArray<HTMLElement>("[data-reveal='stagger']")
+        .forEach((el) => {
+          const items = Array.from(el.children);
+          if (!items.length) return;
+          gsap.from(items, {
+            y: 24,
+            autoAlpha: 0,
+            ease: "none",
+            stagger: 0.1,
+            scrollTrigger: {
+              trigger: el,
+              start: "top 90%",
+              end: "top 60%",
+              scrub: SCRUB,
+            },
+          });
+        });
 
       gsap.utils.toArray<HTMLElement>("[data-reveal='frame']").forEach((el) => {
         // Scale (not clip-path): the shared canvas draws each view at the slot's transformed rect.
         gsap.fromTo(
           el,
-          { scale: 0.84 },
+          { scale: 0.84, y: 36 },
           {
             scale: 1,
+            y: 0,
             ease: "none",
             scrollTrigger: {
               trigger: el,
               start: "top bottom",
               end: "top 35%",
-              scrub: true,
+              scrub: SCRUB,
+              onToggle: (self) => willMotion(el, self.isActive),
             },
           },
         );
       });
 
-      const hero = document.querySelector<HTMLElement>("[data-hero-content]");
-      const heroSection = hero?.closest("section");
-      if (hero && heroSection) {
-        gsap.to(hero, {
-          yPercent: -18,
-          autoAlpha: 0,
-          ease: "none",
-          scrollTrigger: {
-            trigger: heroSection,
-            start: "top top",
-            end: "bottom bottom",
-            scrub: true,
+      gsap.utils.toArray<HTMLElement>("[data-parallax]").forEach((el) => {
+        const kind = el.dataset.parallax;
+        const amount = kind === "scene" ? 56 : 40;
+        gsap.fromTo(
+          el,
+          { y: amount },
+          {
+            y: -amount * 0.55,
+            ease: "none",
+            scrollTrigger: {
+              trigger: el.closest("section") ?? el,
+              start: "top bottom",
+              end: "bottom top",
+              scrub: 0.8,
+              onToggle: (self) => willMotion(el, self.isActive),
+            },
           },
-        });
-      }
+        );
+      });
 
-      // Magnetic elements.
+      gsap.utils.toArray<HTMLElement>("[data-section]").forEach((el) => {
+        if (el.id === "hero") return;
+        gsap.fromTo(
+          el,
+          { ["--section-rule" as string]: 0 },
+          {
+            ["--section-rule" as string]: 1,
+            ease: "none",
+            scrollTrigger: {
+              trigger: el,
+              start: "top 92%",
+              end: "top 55%",
+              scrub: SCRUB,
+            },
+          },
+        );
+      });
+
       const fine = window.matchMedia("(pointer: fine)").matches;
-      const cleanups: (() => void)[] = [];
       if (fine) {
         gsap.utils.toArray<HTMLElement>("[data-magnetic]").forEach((el) => {
           const xTo = gsap.quickTo(el, "x", {
@@ -122,10 +319,13 @@ export function ScrollAnimations() {
           });
         });
       }
+
       return () => cleanups.forEach((fn) => fn());
     });
 
-    const id = requestAnimationFrame(() => ScrollTrigger.refresh());
+    const id = requestAnimationFrame(() =>
+      requestAnimationFrame(() => ScrollTrigger.refresh()),
+    );
     return () => {
       cancelAnimationFrame(id);
       splits.forEach((s) => s.revert());

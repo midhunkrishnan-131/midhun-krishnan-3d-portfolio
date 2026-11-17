@@ -27,6 +27,7 @@ export function SectionShell({
   return (
     <section
       id={section.id}
+      data-section={section.id}
       aria-labelledby={headingId}
       className={cn(
         "relative border-t border-line py-(--section-space)",

@@ -22,6 +22,7 @@ function ProjectCard({
   return (
     <FocusTarget kind="project" id={project.slug}>
       <article
+        data-reveal="card"
         aria-labelledby={headingId}
         className={cn(
           "relative flex flex-col gap-5 rounded-lg border border-line bg-ink-950/70 p-6 backdrop-blur-sm transition-colors duration-(--duration-base) group-hover/focus:border-line-strong sm:p-8",
@@ -109,10 +110,11 @@ export function ProjectsSection() {
     <section
       id={section.id}
       aria-labelledby={headingId}
+      data-section={section.id}
       className="relative border-t border-line py-(--section-space)"
     >
       <Container size="wide">
-        <header className="flex max-w-3xl flex-col gap-6">
+        <header data-parallax="copy" className="flex max-w-3xl flex-col gap-6">
           <Eyebrow number={section.number}>Selected work</Eyebrow>
           <Heading level={2} id={headingId}>
             {section.title}
