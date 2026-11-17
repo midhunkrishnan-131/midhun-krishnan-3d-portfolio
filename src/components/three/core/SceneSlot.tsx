@@ -118,6 +118,10 @@ export function SceneSlot({
   const onError = useCallback(() => setFailed(true), []);
   const show = enabled && near;
 
+  useEffect(() => {
+    if (show) active.current = true;
+  }, [show]);
+
   // If onReady is late, hide the fallback anyway once the view has had time to paint
   // so static artwork cannot show through the transparent canvas.
   useEffect(() => {

@@ -1,5 +1,8 @@
 import type { SceneKey } from "@/types/three";
 import { StruggleFallbackArt } from "@/components/sections/StruggleFallbackArt";
+import { ExperienceFallbackArt } from "@/components/sections/ExperienceFallbackArt";
+import { BeginningFallbackArt } from "@/components/sections/BeginningFallbackArt";
+import { MyxFallbackArt } from "@/components/sections/MyxFallbackArt";
 
 /**
  * Static, server-rendered stand-ins for each section scene: shown before the 3D view is ready,
@@ -180,11 +183,15 @@ const art: Record<Exclude<SceneKey, "hero">, React.ReactNode> = {
 
 export function SceneFallback({ scene }: { scene: Exclude<SceneKey, "hero"> }) {
   if (scene === "struggle") return <StruggleFallbackArt />;
+  if (scene === "experience") return <ExperienceFallbackArt />;
+  if (scene === "beginning") return <BeginningFallbackArt />;
+  if (scene === "myx") return <MyxFallbackArt />;
   return (
     <svg
+      data-allow-motion
       viewBox="0 0 400 400"
       preserveAspectRatio="xMidYMid meet"
-      className="h-full w-full text-paper-faint"
+      className="flat-idle h-full w-full text-paper-faint"
       aria-hidden="true"
       focusable="false"
     >

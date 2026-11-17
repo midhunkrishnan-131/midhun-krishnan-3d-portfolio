@@ -61,8 +61,7 @@ export function RenderEngine() {
     return () => window.clearTimeout(id);
   }, [webgl, displayMode, wanted, idle]);
 
-  const reducedMotion = useRenderStore((s) => s.reducedMotion);
-  const live = webgl && !failed && !reducedMotion && displayMode === "3d";
+  const live = webgl && !failed && displayMode === "3d";
   useEffect(() => {
     const root = document.documentElement;
     if (live) root.dataset.gl = "on";

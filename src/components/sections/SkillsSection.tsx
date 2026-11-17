@@ -25,7 +25,7 @@ export function SkillsSection() {
           <SceneSlot
             scene="skills"
             fallback={<SceneFallback scene="skills" />}
-            className="aspect-square w-full lg:order-2 lg:col-span-6 lg:col-start-7 lg:aspect-auto lg:h-[80svh]"
+            className="aspect-[5/4] w-full max-h-[min(62svh,26rem)] lg:order-2 lg:col-span-6 lg:col-start-7 lg:aspect-auto lg:h-[min(70svh,42rem)] lg:max-h-none"
           />
           <div
             data-parallax="copy"

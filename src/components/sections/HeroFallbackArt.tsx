@@ -10,7 +10,8 @@ export function HeroFallbackArt() {
   ];
   return (
     <svg
-      className="absolute inset-0 h-full w-full"
+      data-allow-motion
+      className="hero-flat absolute inset-0 h-full w-full"
       viewBox="0 0 1200 800"
       preserveAspectRatio="xMidYMid slice"
       role="presentation"
@@ -27,6 +28,7 @@ export function HeroFallbackArt() {
       {pages.map((p, i) => (
         <g
           key={i}
+          className={`hero-flat__page hero-flat__page--${i}`}
           transform={`translate(${p.x} ${p.y}) rotate(${p.r})`}
           opacity={p.o}
         >
@@ -46,13 +48,14 @@ export function HeroFallbackArt() {
           {i === pages.length - 1 ? (
             <>
               <path
+                className="hero-flat__write"
                 d="M40 50 q 20 -8 40 0 t 40 0 t 40 0 t 30 0"
                 fill="none"
                 stroke="#1a1a1d"
                 strokeWidth="3"
                 strokeLinecap="round"
               />
-              <circle cx="190" cy="50" r="4" fill="#ff7a45" />
+              <circle className="hero-flat__ember" cx="190" cy="50" r="4" fill="#ff7a45" />
             </>
           ) : null}
         </g>

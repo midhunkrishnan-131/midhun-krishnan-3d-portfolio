@@ -66,11 +66,14 @@ export default function ExperienceScene({
   const aim = useMemo(() => [0.08, 0.02, 0.18] as [number, number, number], []);
 
   useFrame((state, delta) => {
-    if (!root.current || !active.current) return;
+    if (!root.current) return;
+    // The View only mounts when the slot is near the viewport, so keep the
+    // idle cycle running even if the visibility observer is late.
     const p = animate ? progress.current : 0.65;
     const open = MathUtils.smoothstep(p, 0.04, 0.48);
     const t = state.clock.elapsedTime;
-    cycle.current = animate ? (t % 8) / 8 : 0.15;
+    const rate = animate ? 1 : 0.45;
+    cycle.current = (t * rate % 6) / 6;
 
     root.current.position.y = MathUtils.lerp(-0.16, 0.02, open);
     root.current.rotation.y = 0.18 + Math.sin(t * 0.08) * 0.02;
@@ -86,37 +89,35 @@ export default function ExperienceScene({
     const trouble =
       MathUtils.smoothstep(c, 0.56, 0.68) *
       (1 - MathUtils.smoothstep(c, 0.78, 0.9));
-    const tap =
-      animate && type > 0.4 ? (Math.sin(t * 14) * 0.5 + 0.5) * 0.28 : 0;
-    const tapL =
-      animate && type > 0.4 ? (Math.sin(t * 14 + 1.3) * 0.5 + 0.5) * 0.24 : 0;
+    const tap = type > 0.4 ? (Math.sin(t * 16) * 0.5 + 0.5) * 0.42 : 0;
+    const tapL = type > 0.4 ? (Math.sin(t * 16 + 1.3) * 0.5 + 0.5) * 0.38 : 0;
 
     if (spine.current) {
-      spine.current.rotation.z = -0.04 - trouble * 0.16;
-      spine.current.rotation.x = 0.04 + trouble * 0.06;
-      spine.current.position.x = trouble * 0.07;
+      spine.current.rotation.z = -0.04 - trouble * 0.28;
+      spine.current.rotation.x = 0.04 + trouble * 0.1;
+      spine.current.position.x = trouble * 0.12;
     }
     if (head.current) {
-      // Look toward the monitor (local +X), with a small glance and a nod on click.
-      head.current.rotation.y = 0.35 + reach * 0.12 + Math.sin(t * 0.7) * 0.05;
-      head.current.rotation.x = -0.08 + trouble * -0.1 + reach * 0.04;
-      head.current.rotation.z = -0.04 - trouble * 0.06;
+      head.current.rotation.y = 0.35 + reach * 0.22 + Math.sin(t * 0.7) * 0.08;
+      head.current.rotation.x = -0.08 + trouble * -0.18 + reach * 0.08;
+      head.current.rotation.z = -0.04 - trouble * 0.1;
     }
-    if (lArm.current) lArm.current.rotation.x = 1.05 + tapL * 0.25 - trouble * 0.45;
-    if (lFore.current) lFore.current.rotation.x = 0.35 + tapL * 0.55;
+    if (lArm.current) lArm.current.rotation.x = 1.05 + tapL * 0.45 - trouble * 0.55;
+    if (lFore.current) lFore.current.rotation.x = 0.35 + tapL * 0.7;
     if (lHand.current) {
-      lHand.current.rotation.x = tapL * 0.5;
-      lHand.current.position.y = -0.28 - tapL * 0.03;
+      lHand.current.rotation.x = tapL * 0.7;
+      lHand.current.position.y = -0.28 - tapL * 0.06;
     }
     if (rArm.current)
-      rArm.current.rotation.x = 1.05 + tap * (1 - reach) * 0.25 + reach * 0.15;
+      rArm.current.rotation.x = 1.05 + tap * (1 - reach) * 0.45 + reach * 0.35;
     if (rFore.current)
-      rFore.current.rotation.x = 0.32 + tap * 0.5 - reach * 0.35;
+      rFore.current.rotation.x = 0.32 + tap * 0.7 - reach * 0.55;
     if (rHand.current) {
-      rHand.current.rotation.x = tap * 0.45;
-      rHand.current.position.x = reach * 0.28;
-      rHand.current.position.z = 0.02 + reach * 0.1;
-      rHand.current.position.y = -0.28 - (animate && reach > 0.6 ? Math.sin(t * 8) * 0.02 : 0);
+      rHand.current.rotation.x = tap * 0.65;
+      rHand.current.position.x = reach * 0.48;
+      rHand.current.position.z = 0.02 + reach * 0.18;
+      rHand.current.position.y =
+        -0.28 - (reach > 0.55 ? Math.sin(t * 10) * 0.045 : tap * 0.04);
     }
     if (glow.current) {
       glow.current.emissiveIntensity =
@@ -129,7 +130,7 @@ export default function ExperienceScene({
     );
     if (bar.current) bar.current.scale.x = Math.max(0.08, fill.current);
 
-    readScenePointer(track.current, sp);
+    if (active.current) readScenePointer(track.current, sp);
     const activeRow = Math.floor(
       (c * 5 + (sp.inside ? (sp.y + 1) * 1.5 : 0)) % ROWS,
     );

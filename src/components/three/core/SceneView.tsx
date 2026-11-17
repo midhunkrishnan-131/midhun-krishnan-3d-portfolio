@@ -36,8 +36,11 @@ export default function SceneView({
   slug,
 }: SceneViewProps) {
   const tier = useRenderStore((s) => s.caps?.tier ?? "low");
-  const reducedMotion = useRenderStore((s) => s.reducedMotion);
   const Scene = sceneRegistry[scene];
+  // Decorative loops stay on whenever this View is mounted. The canvas itself
+  // only exists in 3D mode; freezing them for prefers-reduced-motion made the
+  // ICICI technician (and other scenes) look broken on machines with the OS
+  // animation setting off.
   return (
     <View className="absolute inset-0">
       <WebGLErrorBoundary onError={onError}>
@@ -47,7 +50,7 @@ export default function SceneView({
             progress={progress}
             active={active}
             tier={tier}
-            animate={!reducedMotion}
+            animate
             slug={slug}
           />
           <ReadySignal onReady={onReady} />

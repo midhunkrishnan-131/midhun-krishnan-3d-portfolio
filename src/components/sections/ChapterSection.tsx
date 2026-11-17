@@ -106,7 +106,7 @@ export function ChapterSection({
               reveal
               fallback={<SceneFallback scene={scene} />}
               className={cn(
-                "aspect-square w-full origin-center sm:aspect-[4/3] lg:col-span-7 lg:aspect-auto lg:h-[78svh]",
+                "aspect-[5/4] w-full max-h-[min(62svh,26rem)] origin-center sm:aspect-[4/3] sm:max-h-[min(68svh,34rem)] lg:col-span-7 lg:aspect-auto lg:h-[min(70svh,42rem)] lg:max-h-none",
                 reverse && "lg:order-1 lg:col-start-1",
               )}
             />

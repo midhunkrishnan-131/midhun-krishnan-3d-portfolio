@@ -25,7 +25,7 @@ export function HeroSection() {
       data-section={section.id}
       className="hero-pin relative isolate"
     >
-      <div className="sticky top-0 flex h-svh min-h-[36rem] items-end overflow-hidden pt-[calc(var(--header-height)+4rem)] pb-16 motion-reduce:relative sm:pb-24">
+      <div className="sticky top-0 flex h-svh min-h-[32rem] items-end overflow-x-clip overflow-y-auto pt-[calc(var(--header-height)+3rem)] pb-16 motion-reduce:relative sm:min-h-[36rem] sm:pt-[calc(var(--header-height)+4rem)] sm:pb-24">
         <div className="absolute inset-0 -z-10">
           <SceneSlot
             scene="hero"

@@ -75,14 +75,20 @@ function TickerDriver() {
       dirty = true;
     };
     const unsubscribe = useRenderStore.subscribe((s, prev) => {
-      if (s.visible !== prev.visible || s.reducedMotion !== prev.reducedMotion)
+      if (
+        s.visible !== prev.visible ||
+        s.mounted !== prev.mounted ||
+        s.displayMode !== prev.displayMode
+      )
         dirty = true;
     });
     window.addEventListener("scroll", mark, { passive: true });
     window.addEventListener("resize", mark);
     const tick = (time: number) => {
-      const { visible, reducedMotion } = useRenderStore.getState();
-      const continuous = visible > 0 && !reducedMotion;
+      const { visible, mounted, displayMode } = useRenderStore.getState();
+      // Tick whenever a 3D view is mounted, even if IntersectionObserver is
+      // late or prefers-reduced-motion is on — otherwise idle cycles freeze.
+      const continuous = displayMode === "3d" && (visible > 0 || mounted > 0);
       if (!continuous && !dirty) return;
       dirty = false;
       advance(time);
