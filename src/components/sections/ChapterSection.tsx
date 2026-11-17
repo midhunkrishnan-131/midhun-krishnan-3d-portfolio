@@ -41,7 +41,7 @@ export function ChapterSection({
       className="relative border-t border-line py-(--section-space)"
     >
       <Container size="wide">
-        <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-8">
+        <div className="grid items-start gap-12 lg:grid-cols-12 lg:gap-8">
           <div
             data-parallax="copy"
             className={cn(
@@ -50,7 +50,9 @@ export function ChapterSection({
                 ? reverse
                   ? "lg:order-2 lg:col-start-8"
                   : ""
-                : "lg:col-span-8",
+                : aside
+                  ? ""
+                  : "lg:col-span-8",
             )}
           >
             <Eyebrow number={section.number}>{chapter.kicker}</Eyebrow>
@@ -111,7 +113,7 @@ export function ChapterSection({
           ) : aside ? (
             <div
               className={cn(
-                "flex items-center justify-center lg:col-span-7",
+                "flex items-center justify-center lg:sticky lg:top-28 lg:col-span-7",
                 reverse && "lg:order-1 lg:col-start-1",
               )}
             >

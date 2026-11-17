@@ -200,10 +200,10 @@ export default function BeginningScene({
     const k = animate ? damp(3, delta) : 1;
     group.rotation.y = MathUtils.lerp(
       group.rotation.y,
-      -0.35 + smooth.current * 0.5,
+      -0.08 + smooth.current * 0.16,
       k,
     );
-    group.rotation.x = MathUtils.lerp(group.rotation.x, 0.12, k);
+    group.rotation.x = MathUtils.lerp(group.rotation.x, 0.04, k);
   });
 
   return (
@@ -217,7 +217,7 @@ export default function BeginningScene({
         tier={tier}
         animate={animate}
       />
-      <group ref={groupRef} position={[0.15, 0.35, 0.55]} scale={0.92}>
+      <group ref={groupRef} position={[-0.15, -1.0, 0.7]} scale={0.36}>
         <instancedMesh
           ref={meshRef}
           args={[geometry, ink, pixels.length]}

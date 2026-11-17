@@ -186,9 +186,9 @@ export function NotebookPage({ track, progress, active, animate }: SceneProps) {
     turn.current = MathUtils.lerp(turn.current, target, damp(4, delta));
     // Page turns toward the reader, then settles open and readable.
     const open = turn.current;
-    group.current.rotation.y = MathUtils.lerp(0.85, -0.18, open);
+    group.current.rotation.y = MathUtils.lerp(0.22, -0.16, open);
     group.current.rotation.x = MathUtils.lerp(0.08, 0.02, open);
-    group.current.position.set(-0.15, 0.05, -0.35);
+    group.current.position.set(-0.55, 0.28, -0.15);
     if (mesh.current) {
       mesh.current.rotation.z = Math.sin(open * Math.PI) * 0.04;
     }

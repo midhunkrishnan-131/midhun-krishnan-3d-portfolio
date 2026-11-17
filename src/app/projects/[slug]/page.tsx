@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { projects } from "@/data/projects";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -63,7 +64,15 @@ function DetailList({
   );
 }
 
-export default async function ProjectDetailPage({ params }: ProjectPageProps) {
+export default function ProjectDetailPage(props: ProjectPageProps) {
+  return (
+    <Suspense fallback={<main id="main" tabIndex={-1} className="min-h-svh" />}>
+      <ProjectDetail {...props} />
+    </Suspense>
+  );
+}
+
+async function ProjectDetail({ params }: ProjectPageProps) {
   const { slug } = await params;
   const project = getProject(slug);
   if (!project) notFound();
