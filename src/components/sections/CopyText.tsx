@@ -11,13 +11,23 @@ export function CopyText({
   className?: string;
   reveal?: "words" | "fade";
 }) {
+  const visualReveal = reveal === "words" ? undefined : reveal;
   return (
     <p
       className={cn(copy.placeholder && "text-paper-faint italic", className)}
       data-placeholder={copy.placeholder ? "true" : undefined}
-      data-reveal={reveal}
+      data-reveal={visualReveal}
     >
-      {copy.text}
+      {reveal === "words" ? (
+        <>
+          <span className="sr-only">{copy.text}</span>
+          <span aria-hidden="true" data-reveal="words">
+            {copy.text}
+          </span>
+        </>
+      ) : (
+        copy.text
+      )}
     </p>
   );
 }

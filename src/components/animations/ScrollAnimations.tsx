@@ -148,6 +148,7 @@ export function ScrollAnimations() {
         splits.push(
           SplitText.create(el, {
             type: "words",
+            aria: "hidden",
             autoSplit: true,
             onSplit: (self) =>
               gsap.from(self.words, {
