@@ -3,6 +3,7 @@ export type SectionId =
   | "about"
   | "beginning"
   | "struggle"
+  | "icici-prudential"
   | "blackbox-learning"
   | "bca"
   | "perception"

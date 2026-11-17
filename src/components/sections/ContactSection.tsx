@@ -9,7 +9,7 @@ import { ButtonLink } from "@/components/ui/Button";
 export function ContactSection() {
   const section = getSection("contact");
   const headingId = `${section.id}-heading`;
-  const { email, github, linkedin } = site.contact;
+  const { email, phone, github, linkedin } = site.contact;
   const row =
     "flex flex-col gap-1 border-b border-line py-6 sm:flex-row sm:items-baseline sm:justify-between";
   return (
@@ -37,15 +37,37 @@ export function ContactSection() {
               best way to reach me is below.
             </p>
             <div className="flex flex-wrap gap-4">
+              {email ? (
+                <ButtonLink href={`mailto:${email}`} data-magnetic>
+                  Email me
+                </ButtonLink>
+              ) : null}
               <ButtonLink href={github} external data-magnetic>
                 GitHub profile
               </ButtonLink>
+              {linkedin ? (
+                <ButtonLink href={linkedin} external data-magnetic>
+                  LinkedIn
+                </ButtonLink>
+              ) : null}
             </div>
           </header>
           <dl
             data-reveal="stagger"
             className="self-end border-t border-line lg:col-span-5 lg:col-start-8"
           >
+            <div className={row}>
+              <dt className="text-micro text-paper-faint uppercase">
+                Location
+              </dt>
+              <dd className="text-paper">{site.location}</dd>
+            </div>
+            <div className={row}>
+              <dt className="text-micro text-paper-faint uppercase">Phone</dt>
+              <dd className="text-paper">
+                <a href={`tel:${phone.replace(/\s+/g, "")}`}>{phone}</a>
+              </dd>
+            </div>
             <div className={row}>
               <dt className="text-micro text-paper-faint uppercase">Email</dt>
               <dd className={email ? "text-paper" : "text-paper-faint italic"}>

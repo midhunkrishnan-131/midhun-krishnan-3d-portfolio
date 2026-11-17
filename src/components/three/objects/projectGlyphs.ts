@@ -116,11 +116,57 @@ const brackets = () => {
   return [chevron(1), chevron(-1), slash];
 };
 
+const medCross = () => {
+  const bar = (x: number, y: number, w: number, h: number) => {
+    const s = new Shape();
+    s.moveTo(x, y);
+    s.lineTo(x + w, y);
+    s.lineTo(x + w, y + h);
+    s.lineTo(x, y + h);
+    s.closePath();
+    return s;
+  };
+  return [bar(-0.16, -0.48, 0.32, 0.96), bar(-0.48, -0.16, 0.96, 0.32)];
+};
+
+const prompt = () => {
+  const s = new Shape();
+  s.moveTo(-0.28, 0.42);
+  s.lineTo(0.32, 0);
+  s.lineTo(-0.28, -0.42);
+  s.lineTo(-0.42, -0.28);
+  s.lineTo(0.04, 0);
+  s.lineTo(-0.42, 0.28);
+  s.closePath();
+  return [s];
+};
+
+const apiNodes = () => {
+  const disc = (cx: number, cy: number, r: number) => {
+    const s = new Shape();
+    s.absarc(cx, cy, r, 0, Math.PI * 2, false);
+    return s;
+  };
+  const link = new Shape();
+  link.moveTo(-0.22, -0.06);
+  link.lineTo(0.22, -0.06);
+  link.lineTo(0.22, 0.06);
+  link.lineTo(-0.22, 0.06);
+  link.closePath();
+  return [link, disc(-0.38, 0, 0.22), disc(0.38, 0, 0.22)];
+};
+
 export const projectGlyphs: Record<string, () => Shape[]> = {
   "myx-ai": shield,
+  "codedoctor-ai": medCross,
+  devassist: prompt,
+  "production-grade-api-client": apiNodes,
   "docuscan-ocr": docFrame,
   "python-data-cleaning": dataGrid,
   "weather-application": cloud,
   "ai-assistant": bubble,
   "frontend-development-collection": brackets,
 };
+
+/** Fallback glyph so a new project without a custom outline still renders. */
+export const defaultProjectGlyph = brackets;

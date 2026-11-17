@@ -1,10 +1,12 @@
 import type { Project } from "@/types/project";
 
 /**
- * Central, editable project content. Source: Midhun's own descriptions (16 Nov 2026).
- * MYX AI architecture additionally checked against its public GitHub repository on 16 Nov 2026.
- * Rules: no invented features, metrics or results; URLs only when verified; unconfirmed
- * technologies live in technologiesToConfirm.
+ * Central, editable project content. Source: Midhun's own descriptions (16 Nov 2026)
+ * and his CV (17 Nov 2026). MYX AI architecture, CodeDoctor AI, DevAssist, the API
+ * Client, Weather CLI and Data Cleaning were also checked against their public
+ * GitHub repositories. Rules: no invented features, metrics or results; URLs only
+ * when verified; unconfirmed technologies live in technologiesToConfirm.
+ * MYX AI remains the flagship project.
  */
 export const projects: Project[] = [
   {
@@ -51,6 +53,104 @@ export const projects: Project[] = [
       "A real preview image or screenshot.",
     ],
   },
+
+  {
+    slug: "codedoctor-ai",
+    title: "CodeDoctor AI",
+    tagline: "Intelligent code debugging and logic diagnosis.",
+    summary:
+      "An AI-assisted Python coding and debugging platform with complete-answer and Socratic logic-hint modes.",
+    objectives: [
+      "Complete-answer and Socratic logic-hint diagnosis modes.",
+      "Isolated Python execution with timeouts, loop protection, memory limits and standard-input support.",
+      "Code-health checks, anomaly detection, SQLite diagnosis history, session restore and Groq/Gemini fallback.",
+    ],
+    architecture: [
+      "React and TypeScript frontend with the Monaco Editor.",
+      "A FastAPI Python backend.",
+      "Groq API integration, with a Gemini fallback.",
+    ],
+    challenges: [],
+    technologies: [
+      "React",
+      "TypeScript",
+      "Monaco Editor",
+      "FastAPI",
+      "Python",
+      "Groq API",
+    ],
+    technologiesToConfirm: [],
+    status: "in-progress",
+    statusNote:
+      "Public repository verified on 17 Nov 2026. No live demo URL has been verified, and the project is not marked as complete.",
+    featured: false,
+    image: {
+      src: "/images/projects/codedoctor-ai.webp",
+      alt: "CodeDoctor AI project preview",
+    },
+    githubUrl: "https://github.com/midhunkrishnan-131/CodeDoctor--AI",
+    demoUrl: null,
+    needsVerification: [
+      "A real preview image or screenshot.",
+      "A live demo URL, if one exists.",
+    ],
+  },
+  {
+    slug: "devassist",
+    title: "DevAssist",
+    tagline: "An engineering-focused command-line LLM client.",
+    summary:
+      "A CLI LLM client with multi-turn conversations, stateless request demonstrations and streamed responses.",
+    objectives: [
+      "Multi-turn conversations, stateless request demonstrations and streamed responses.",
+      "Token-usage reporting, cost estimates, stop-reason handling, context trimming, 429/5xx retries, JSON-schema invoice extraction and validated calculator tool calling.",
+    ],
+    architecture: [
+      "A Python command-line client using an LLM API, with validation via Pydantic.",
+    ],
+    challenges: [],
+    technologies: ["Python", "LLM API", "Pydantic"],
+    technologiesToConfirm: [],
+    status: "prototype",
+    statusNote:
+      "Public repository verified on 17 Nov 2026. Treated as a prototype; no live demo is claimed.",
+    featured: false,
+    image: {
+      src: "/images/projects/devassist.webp",
+      alt: "DevAssist project preview",
+    },
+    githubUrl: "https://github.com/midhunkrishnan-131/LLM-cli-client",
+    demoUrl: null,
+    needsVerification: ["A real preview image or screenshot."],
+  },
+  {
+    slug: "production-grade-api-client",
+    title: "Production-Grade API Client",
+    tagline: "A reusable REST client with retries and pagination.",
+    summary:
+      "A reusable REST client with session reuse, retries for 429/5xx, exponential backoff with jitter and Retry-After support.",
+    objectives: [
+      "Session reuse, retries for 429/5xx, exponential backoff with jitter and Retry-After support.",
+      "Fail-fast handling for other 4xx responses, structured logging, environment validation and generator-based pagination.",
+    ],
+    architecture: [
+      "A Python client built with Requests, with configuration loaded through python-dotenv.",
+    ],
+    challenges: [],
+    technologies: ["Python", "Requests", "python-dotenv"],
+    technologiesToConfirm: [],
+    status: "prototype",
+    statusNote:
+      "Public repository verified on 17 Nov 2026. Treated as a prototype; no live demo is claimed.",
+    featured: false,
+    image: {
+      src: "/images/projects/production-grade-api-client.webp",
+      alt: "Production-Grade API Client project preview",
+    },
+    githubUrl: "https://github.com/midhunkrishnan-131/api-client-project",
+    demoUrl: null,
+    needsVerification: ["A real preview image or screenshot."],
+  },
   {
     slug: "docuscan-ocr",
     title: "DocuScan OCR",
@@ -87,61 +187,57 @@ export const projects: Project[] = [
     title: "Python Data Cleaning",
     tagline: "Preparing messy datasets for analysis.",
     summary:
-      "Python projects focused on cleaning datasets, handling missing values, transforming data and preparing datasets for analysis.",
+      "A Python project focused on cleaning datasets, handling missing values, transforming data and preparing datasets for analysis.",
     objectives: [
       "Clean datasets",
       "Handle missing values",
       "Transform data",
       "Prepare datasets for analysis",
     ],
-    architecture: [],
+    architecture: [
+      "A Python script that uses Pandas and NumPy, verified against the public repository on 17 Nov 2026.",
+    ],
     challenges: [],
-    technologies: [],
-    technologiesToConfirm: ["Python", "Pandas", "NumPy", "Matplotlib"],
-    status: "in-progress",
-    statusNote: "Status and technologies to be confirmed.",
+    technologies: ["Python", "Pandas", "NumPy"],
+    technologiesToConfirm: [],
+    status: "prototype",
+    statusNote:
+      "Public repository verified on 17 Nov 2026 as a Python data-cleaning project. Matplotlib is not present in that repository. No live demo is claimed.",
     featured: false,
     image: {
       src: "/images/projects/python-data-cleaning.webp",
       alt: "Python Data Cleaning project preview",
     },
-    githubUrl: null,
+    githubUrl: "https://github.com/midhunkrishnan-131/Data-cleaning-",
     demoUrl: null,
-    needsVerification: [
-      "Confirm technologies used.",
-      "Confirm completion status.",
-      "GitHub and demo links.",
-    ],
+    needsVerification: ["A real preview image or screenshot."],
   },
   {
     slug: "weather-application",
-    title: "Weather Application",
-    tagline: "Weather information through API integration.",
+    title: "Weather CLI",
+    tagline: "Current weather from the command line.",
     summary:
-      "A weather application using API integration to retrieve and display weather information.",
-    objectives: ["Retrieve weather information from an API and display it."],
-    architecture: [],
-    challenges: [],
-    technologies: ["Python", "Weather API integration"],
-    technologiesToConfirm: [
-      "Frontend technology",
-      "Specific weather API provider",
+      "A Python command-line tool that retrieves and displays current weather information from the OpenWeatherMap API.",
+    objectives: [
+      "Retrieve current weather information from an API and display it in the terminal.",
     ],
+    architecture: [
+      "A Python CLI using Requests and python-dotenv, calling the OpenWeatherMap current-weather endpoint. Verified against the public repository on 17 Nov 2026.",
+    ],
+    challenges: [],
+    technologies: ["Python", "Requests", "python-dotenv", "OpenWeatherMap API"],
+    technologiesToConfirm: [],
     status: "prototype",
     statusNote:
-      "Exact frontend and API technologies to be confirmed before publishing.",
+      "Confirmed as a Python CLI (not a web app) against the public repository on 17 Nov 2026. No live demo is claimed.",
     featured: false,
     image: {
       src: "/images/projects/weather-application.webp",
-      alt: "Weather Application project preview",
+      alt: "Weather CLI project preview",
     },
-    githubUrl: null,
+    githubUrl: "https://github.com/midhunkrishnan-131/weather-cli",
     demoUrl: null,
-    needsVerification: [
-      "Exact frontend technology.",
-      "Which weather API is used.",
-      "Completion status, GitHub and demo links.",
-    ],
+    needsVerification: ["A real preview image or screenshot."],
   },
   {
     slug: "ai-assistant",

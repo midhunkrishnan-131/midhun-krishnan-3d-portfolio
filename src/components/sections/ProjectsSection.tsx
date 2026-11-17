@@ -120,8 +120,9 @@ export function ProjectsSection() {
             {section.title}
           </Heading>
           <p data-reveal="fade" className="text-lead text-paper-dim">
-            Six projects across AI, Python and frontend development, each marked
-            honestly as in progress, a prototype or planned.
+            {projects.length} projects across AI, Python and frontend
+            development, each marked honestly as in progress, a prototype or
+            planned.
           </p>
         </header>
         <div className="mt-16 grid gap-10 lg:grid-cols-12 lg:gap-8">

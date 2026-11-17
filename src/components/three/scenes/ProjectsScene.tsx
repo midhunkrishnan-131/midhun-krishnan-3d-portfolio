@@ -15,7 +15,10 @@ import {
 import { StudioLights } from "@/components/three/core/StudioLights";
 import { useDisposable } from "@/components/three/core/useDisposable";
 import { materials } from "@/components/three/materials/presets";
-import { projectGlyphs } from "@/components/three/objects/projectGlyphs";
+import {
+  defaultProjectGlyph,
+  projectGlyphs,
+} from "@/components/three/objects/projectGlyphs";
 import { projects } from "@/data/projects";
 import {
   createScenePointer,
@@ -58,14 +61,17 @@ export default function ProjectsScene({
   const hero = useRef<Group>(null);
   const resources = useDisposable(() => {
     const extrude = (slug: string, depth: number) => {
-      const g = new ExtrudeGeometry(projectGlyphs[slug](), {
-        depth,
-        bevelEnabled: true,
-        bevelThickness: 0.03,
-        bevelSize: 0.025,
-        bevelSegments: tier === "low" ? 1 : 3,
-        curveSegments: tier === "low" ? 8 : 18,
-      });
+      const g = new ExtrudeGeometry(
+        (projectGlyphs[slug] ?? defaultProjectGlyph)(),
+        {
+          depth,
+          bevelEnabled: true,
+          bevelThickness: 0.03,
+          bevelSize: 0.025,
+          bevelSegments: tier === "low" ? 1 : 3,
+          curveSegments: tier === "low" ? 8 : 18,
+        },
+      );
       g.center();
       return g;
     };

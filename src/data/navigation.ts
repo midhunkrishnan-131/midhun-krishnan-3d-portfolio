@@ -1,6 +1,6 @@
 import type { NavLink, SectionNavItem } from "@/types/navigation";
 
-/** The eleven homepage chapters, in page order. Single source for nav, footer and section ids. */
+/** The twelve homepage chapters, in page order. Single source for nav, footer and section ids. */
 export const sections = [
   {
     id: "hero",
@@ -22,37 +22,43 @@ export const sections = [
     title: "The struggle",
   },
   {
-    id: "blackbox-learning",
+    id: "icici-prudential",
     number: "05",
+    label: "ICICI Prudential",
+    title: "IT support at ICICI Prudential",
+  },
+  {
+    id: "blackbox-learning",
+    number: "06",
     label: "BlackBox Learning",
     title: "BlackBox Learning",
   },
   {
     id: "bca",
-    number: "06",
+    number: "07",
     label: "BCA Computer Science",
     title: "BCA Computer Science",
   },
   {
     id: "perception",
-    number: "07",
+    number: "08",
     label: "SEO at Perception",
     title: "SEO internship at Perception",
   },
   {
     id: "projects",
-    number: "08",
+    number: "09",
     label: "Project universe",
     title: "Interactive project universe",
   },
-  { id: "skills", number: "09", label: "Skills", title: "Skills" },
+  { id: "skills", number: "10", label: "Skills", title: "Skills" },
   {
     id: "future",
-    number: "10",
+    number: "11",
     label: "Future vision",
     title: "Future vision",
   },
-  { id: "contact", number: "11", label: "Contact", title: "Contact" },
+  { id: "contact", number: "12", label: "Contact", title: "Contact" },
 ] as const satisfies readonly SectionNavItem[];
 
 export const sectionHref = (id: SectionNavItem["id"]): string => `/#${id}`;
