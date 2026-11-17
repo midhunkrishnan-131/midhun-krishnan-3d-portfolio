@@ -31,6 +31,7 @@ export function ProjectSummary({
         level={featured ? 2 : 3}
         variant={featured ? "title" : "subtitle"}
         id={headingId}
+        reveal={false}
       >
         <Link
           href={href}

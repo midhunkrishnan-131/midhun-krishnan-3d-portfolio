@@ -44,6 +44,7 @@ function ProjectCard({
             level={3}
             variant={featured ? "title" : "subtitle"}
             id={headingId}
+            reveal={false}
           >
             <Link
               href={`/projects/${project.slug}`}

@@ -9,7 +9,9 @@ interface HeadingProps extends HTMLAttributes<HTMLHeadingElement> {
   variant?: Variant;
   id?: string;
   className?: string;
-  /** Masked line reveal on scroll (defaults on for h1/h2). */
+  /** Masked line reveal on scroll (defaults on for h1/h2).
+   *  Leave false when the heading wraps a link: data-reveal="lines" plus an
+   *  anchor child causes a production hydration mismatch (React #418). */
   reveal?: boolean;
   children: ReactNode;
 }
