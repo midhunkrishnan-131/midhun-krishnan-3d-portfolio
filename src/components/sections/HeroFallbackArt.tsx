@@ -20,7 +20,7 @@ export function HeroFallbackArt() {
       <defs>
         <radialGradient id="hero-glow" cx="68%" cy="42%" r="55%">
           <stop offset="0%" stopColor="#ff7a45" stopOpacity="0.14" />
-          <stop offset="60%" stopColor="#0a0a0b" stopOpacity="0" />
+          <stop offset="60%" stopColor="#000000" stopOpacity="0" />
         </radialGradient>
       </defs>
       <rect width="1200" height="800" fill="url(#hero-glow)" />
@@ -30,7 +30,7 @@ export function HeroFallbackArt() {
           transform={`translate(${p.x} ${p.y}) rotate(${p.r})`}
           opacity={p.o}
         >
-          <rect width="300" height="400" fill="#ede8df" />
+          <rect width="300" height="400" fill="#e9e7e2" />
           {Array.from({ length: 14 }, (_, row) => (
             <line
               key={row}

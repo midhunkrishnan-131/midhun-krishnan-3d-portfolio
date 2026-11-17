@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { RenderEngine } from "@/components/three/core/RenderEngine";
 import { SmoothScroll } from "@/components/animations/SmoothScroll";
 import { CustomCursor } from "@/components/interaction/CustomCursor";
+import { DisplayModeToggle } from "@/components/navigation/DisplayModeToggle";
 import { ScrollAnimations } from "@/components/animations/ScrollAnimations";
 import { MotionProvider } from "@/components/animations/MotionProvider";
 import "@/styles/globals.css";
@@ -20,9 +21,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body>
         <MotionProvider>
           <SkipLink targetId="main" />
+          <div className="page-frame" aria-hidden="true" />
           <SiteHeader />
           {children}
           <SiteFooter />
+          <DisplayModeToggle />
         </MotionProvider>
         <RenderEngine />
         <SmoothScroll />

@@ -15,12 +15,15 @@ interface RenderState {
   mounted: number;
   /** Slots actually intersecting the viewport (drive the frameloop). */
   visible: number;
+  /** User-facing 3D / flat preference. Flat forces the static fallback. */
+  displayMode: "3d" | "flat";
   setCaps: (caps: RenderCapabilities) => void;
   setReducedMotion: (value: boolean) => void;
   setFailed: () => void;
   setDpr: (dpr: number) => void;
   adjustMounted: (delta: 1 | -1) => void;
   adjustVisible: (delta: 1 | -1) => void;
+  setDisplayMode: (displayMode: "3d" | "flat") => void;
 }
 
 export const useRenderStore = create<RenderState>()((set, get) => ({
@@ -30,6 +33,7 @@ export const useRenderStore = create<RenderState>()((set, get) => ({
   dpr: 1,
   mounted: 0,
   visible: 0,
+  displayMode: "3d",
   setCaps: (caps) =>
     set({
       caps,
@@ -49,6 +53,7 @@ export const useRenderStore = create<RenderState>()((set, get) => ({
     set((s) => ({ mounted: Math.max(0, s.mounted + delta) })),
   adjustVisible: (delta) =>
     set((s) => ({ visible: Math.max(0, s.visible + delta) })),
+  setDisplayMode: (displayMode) => set({ displayMode }),
 }));
 
 export const selectTier = (s: RenderState): PerfTier => s.caps?.tier ?? "low";

@@ -6,17 +6,17 @@
  * @theme exposes them as Tailwind utilities (bg-ink-950, text-paper, font-display, ease-cinematic ...).
  */
 :root {
-  --color-ink-950: #0a0a0b;
-  --color-ink-900: #111113;
-  --color-ink-800: #1a1a1d;
-  --color-ink-700: #26262a;
-  --color-paper: #ede8df;
-  --color-paper-dim: #b4aea4;
-  --color-paper-faint: #8c877f;
+  --color-ink-950: #000000;
+  --color-ink-900: #0c0c0c;
+  --color-ink-800: #161616;
+  --color-ink-700: #242424;
+  --color-paper: #e9e7e2;
+  --color-paper-dim: #b3b0a8;
+  --color-paper-faint: #8a8780;
   --color-ember: #ff7a45;
   --color-ember-soft: #ffb08a;
-  --color-line: rgb(237 232 223 / 0.14);
-  --color-line-strong: rgb(237 232 223 / 0.32);
+  --color-line: rgb(233 231 226 / 0.16);
+  --color-line-strong: rgb(233 231 226 / 0.36);
 
   --duration-instant: 120ms;
   --duration-fast: 200ms;
@@ -123,6 +123,15 @@ html[data-gl="on"] .hero-pin {
     background: var(--color-line-strong);
     transform: scaleX(var(--section-rule));
     transform-origin: left center;
+    pointer-events: none;
+  }
+
+  /* Editorial inset frame, inspired by the reference site's ruled pages. */
+  .page-frame {
+    position: fixed;
+    inset: clamp(0.4rem, 1vw, 0.75rem);
+    z-index: 40;
+    border: 1px solid var(--color-line);
     pointer-events: none;
   }
 

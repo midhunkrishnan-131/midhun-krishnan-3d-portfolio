@@ -57,19 +57,23 @@ export function ContactSection() {
             className="self-end border-t border-line lg:col-span-5 lg:col-start-8"
           >
             <div className={row}>
-              <dt className="text-micro text-paper-faint uppercase">
+              <dt className="font-mono text-micro text-paper-faint uppercase">
                 Location
               </dt>
               <dd className="text-paper">{site.location}</dd>
             </div>
             <div className={row}>
-              <dt className="text-micro text-paper-faint uppercase">Phone</dt>
+              <dt className="font-mono text-micro text-paper-faint uppercase">
+                Phone
+              </dt>
               <dd className="text-paper">
                 <a href={`tel:${phone.replace(/\s+/g, "")}`}>{phone}</a>
               </dd>
             </div>
             <div className={row}>
-              <dt className="text-micro text-paper-faint uppercase">Email</dt>
+              <dt className="font-mono text-micro text-paper-faint uppercase">
+                Email
+              </dt>
               <dd className={email ? "text-paper" : "text-paper-faint italic"}>
                 {email ? (
                   <a href={`mailto:${email}`}>{email}</a>
@@ -79,7 +83,9 @@ export function ContactSection() {
               </dd>
             </div>
             <div className={row}>
-              <dt className="text-micro text-paper-faint uppercase">GitHub</dt>
+              <dt className="font-mono text-micro text-paper-faint uppercase">
+                GitHub
+              </dt>
               <dd>
                 <a
                   href={github}
@@ -93,7 +99,7 @@ export function ContactSection() {
               </dd>
             </div>
             <div className={row}>
-              <dt className="text-micro text-paper-faint uppercase">
+              <dt className="font-mono text-micro text-paper-faint uppercase">
                 LinkedIn
               </dt>
               <dd

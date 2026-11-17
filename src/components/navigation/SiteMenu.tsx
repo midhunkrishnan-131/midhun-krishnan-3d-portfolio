@@ -75,7 +75,7 @@ export function SiteMenu() {
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((v) => !v)}
-        className="relative z-[60] inline-flex items-center gap-3 rounded-pill border border-line-strong px-4 py-2 text-micro font-medium uppercase transition-colors duration-(--duration-base) hover:border-paper"
+        className="relative z-[60] inline-flex items-center gap-3 rounded-pill border border-line-strong px-4 py-2 font-mono text-micro font-medium uppercase transition-colors duration-(--duration-base) ease-cinematic hover:border-paper"
       >
         <span>{open ? "Close" : "Index"}</span>
         <span aria-hidden="true" className="relative block h-2.5 w-4">
@@ -113,7 +113,7 @@ export function SiteMenu() {
         <div className="mx-auto flex min-h-full max-w-[96rem] flex-col justify-between gap-12 px-(--gutter) pt-[calc(var(--header-height)+3rem)] pb-12">
           <p
             id={titleId}
-            className="text-micro font-medium text-paper-faint uppercase"
+            className="font-mono text-micro font-medium text-paper-faint uppercase"
           >
             Chapters
           </p>
@@ -137,7 +137,7 @@ export function SiteMenu() {
                     onClick={() => close(false)}
                     className="group flex items-baseline gap-5 border-b border-line py-4"
                   >
-                    <span className="text-micro text-ember tabular-nums">
+                    <span className="font-mono text-micro text-ember tabular-nums">
                       {section.number}
                     </span>
                     <span className="font-display text-[clamp(1.75rem,1.2rem+2vw,3.25rem)] leading-none text-paper transition-colors duration-(--duration-base) group-hover:text-ember-soft">
@@ -148,7 +148,7 @@ export function SiteMenu() {
               ))}
             </ol>
           </nav>
-          <p className="text-micro text-paper-faint uppercase">
+          <p className="font-mono text-micro text-paper-faint uppercase">
             Midhun Krishnan — A Story Still Being Written
           </p>
         </div>

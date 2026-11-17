@@ -10,10 +10,10 @@ export const TITLE_TEMPLATE = `%s — ${site.name}`;
 
 /** Ink & paper tokens, shared by icons and Open Graph images. */
 export const palette = {
-  ink: "#0a0a0b",
-  paper: "#ede8df",
-  paperDim: "#b4aea4",
-  paperFaint: "#8c877f",
+  ink: "#000000",
+  paper: "#E9E7E2",
+  paperDim: "#B3B0A8",
+  paperFaint: "#8A8780",
   ember: "#ff7a45",
 } as const;
 

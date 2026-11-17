@@ -15,7 +15,7 @@ export function SiteFooter() {
                   href={sectionHref(section.id)}
                   className="text-sm text-paper-dim transition-colors duration-(--duration-fast) hover:text-paper"
                 >
-                  <span className="mr-2 text-paper-faint tabular-nums">
+                  <span className="mr-2 font-mono text-paper-faint tabular-nums">
                     {section.number}
                   </span>
                   {section.label}
@@ -24,7 +24,7 @@ export function SiteFooter() {
             ))}
           </ol>
         </nav>
-        <div className="flex flex-col justify-between gap-4 text-micro text-paper-faint uppercase sm:flex-row">
+        <div className="flex flex-col justify-between gap-4 font-mono text-micro text-paper-faint uppercase sm:flex-row">
           <p>© {site.name}</p>
           <p>{site.title}</p>
         </div>

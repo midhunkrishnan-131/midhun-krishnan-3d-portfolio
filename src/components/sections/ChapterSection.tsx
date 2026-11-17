@@ -80,7 +80,7 @@ export function ChapterSection({
                     key={fact.label}
                     className="flex flex-col gap-1 bg-ink-950 p-5"
                   >
-                    <dt className="text-micro text-paper-faint uppercase">
+                    <dt className="font-mono text-micro text-paper-faint uppercase">
                       {fact.label}
                     </dt>
                     <dd className="text-paper">{fact.value}</dd>

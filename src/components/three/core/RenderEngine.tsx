@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { detectCapabilities } from "@/lib/three/capabilities";
+import { readDisplayMode } from "@/lib/three/displayMode";
 import { attachPointer } from "@/lib/three/pointer";
 import { useRenderStore } from "@/stores/renderStore";
 
@@ -27,11 +28,14 @@ type IdleWindow = Window & {
 export function RenderEngine() {
   const webgl = useRenderStore((s) => s.caps?.webgl === true);
   const failed = useRenderStore((s) => s.failed);
+  const displayMode = useRenderStore((s) => s.displayMode);
   const wanted = useRenderStore((s) => s.mounted > 0);
   const [idle, setIdle] = useState(false);
 
   useEffect(() => {
-    const { setCaps, setReducedMotion } = useRenderStore.getState();
+    const { setCaps, setReducedMotion, setDisplayMode } =
+      useRenderStore.getState();
+    setDisplayMode(readDisplayMode());
     setCaps(detectCapabilities());
     const query = window.matchMedia("(prefers-reduced-motion: reduce)");
     setReducedMotion(query.matches);
@@ -45,7 +49,7 @@ export function RenderEngine() {
   }, []);
 
   useEffect(() => {
-    if (!webgl || !wanted || idle) return;
+    if (!webgl || displayMode !== "3d" || !wanted || idle) return;
     const win = window as IdleWindow;
     if (win.requestIdleCallback) {
       const id = win.requestIdleCallback(() => setIdle(true), {
@@ -55,10 +59,10 @@ export function RenderEngine() {
     }
     const id = window.setTimeout(() => setIdle(true), 300);
     return () => window.clearTimeout(id);
-  }, [webgl, wanted, idle]);
+  }, [webgl, displayMode, wanted, idle]);
 
   const reducedMotion = useRenderStore((s) => s.reducedMotion);
-  const live = webgl && !failed && !reducedMotion;
+  const live = webgl && !failed && !reducedMotion && displayMode === "3d";
   useEffect(() => {
     const root = document.documentElement;
     if (live) root.dataset.gl = "on";
@@ -66,5 +70,7 @@ export function RenderEngine() {
     window.dispatchEvent(new Event("gl-layout-change"));
   }, [live]);
 
-  return webgl && idle && !failed ? <SceneCanvas /> : null;
+  return webgl && displayMode === "3d" && idle && !failed ? (
+    <SceneCanvas />
+  ) : null;
 }

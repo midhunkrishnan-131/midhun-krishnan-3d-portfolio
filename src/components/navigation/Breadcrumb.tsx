@@ -7,7 +7,10 @@ export interface BreadcrumbItem {
 
 export function Breadcrumb({ items }: { items: readonly BreadcrumbItem[] }) {
   return (
-    <nav aria-label="Breadcrumb" className="text-sm text-paper-faint">
+    <nav
+      aria-label="Breadcrumb"
+      className="font-mono text-micro text-paper-faint uppercase"
+    >
       <ol className="flex flex-wrap items-center gap-2">
         {items.map((item, index) => {
           const last = index === items.length - 1;

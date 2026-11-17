@@ -56,7 +56,8 @@ export function SceneSlot({
   const [failed, setFailed] = useState(false);
   const webgl = useRenderStore((s) => s.caps?.webgl === true);
   const engineFailed = useRenderStore((s) => s.failed);
-  const enabled = webgl && !failed && !engineFailed;
+  const displayMode = useRenderStore((s) => s.displayMode);
+  const enabled = webgl && !failed && !engineFailed && displayMode === "3d";
 
   useEffect(() => {
     const el = ref.current;

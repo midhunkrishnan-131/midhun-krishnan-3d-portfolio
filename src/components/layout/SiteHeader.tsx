@@ -18,7 +18,7 @@ export function SiteHeader() {
           <span className="font-display text-2xl leading-none">
             {site.name}
           </span>
-          <span className="hidden text-micro text-paper-faint uppercase sm:inline">
+          <span className="hidden font-mono text-micro text-paper-faint uppercase sm:inline">
             Portfolio
           </span>
         </Link>
@@ -29,7 +29,7 @@ export function SiteHeader() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-micro font-medium text-paper-dim uppercase transition-colors duration-(--duration-fast) hover:text-paper"
+                    className="font-mono text-micro font-medium text-paper-dim uppercase transition-colors duration-(--duration-fast) ease-cinematic hover:text-paper"
                   >
                     {link.label}
                   </Link>

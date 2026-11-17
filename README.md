@@ -107,6 +107,12 @@ skip link, visible focus styles and text alternatives on meaningful images.
 Decorative 3D fallbacks are marked `aria-hidden`. Prefer reduced motion is
 honoured as described above.
 
+## Display mode
+
+A **3D / Flat** control sits at the bottom-right of every page. Flat turns the WebGL canvas off and leaves the static artwork for each section (the same result as `?gl=off`). The choice is saved in `localStorage`. `?gl=force` and `?gl=off` still override it for a single visit.
+
+The visual language uses an ink/paper palette (`#000000` / `#E9E7E2`), monospace labels, and the house ease `cubic-bezier(.77, 0, .18, 1)`.
+
 ## Deploy notes
 
 The intended host is Vercel. Do not deploy until the site has been reviewed

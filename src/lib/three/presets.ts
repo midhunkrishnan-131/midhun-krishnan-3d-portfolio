@@ -1,10 +1,10 @@
 /** Shared colour + light presets for every scene (mirrors the CSS tokens). */
 export const palette = {
-  ink: "#0a0a0b",
-  ink800: "#1a1a1d",
-  ink700: "#26262a",
-  paper: "#ede8df",
-  paperDim: "#b4aea4",
+  ink: "#000000",
+  ink800: "#161616",
+  ink700: "#242424",
+  paper: "#e9e7e2",
+  paperDim: "#b3b0a8",
   ember: "#ff7a45",
   emberSoft: "#ffb08a",
 } as const;
