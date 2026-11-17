@@ -138,7 +138,8 @@ export default function BeginningScene({
       MathUtils.smoothstep(smooth.current, 0.15, 0.55) * (totalChars + 1);
     const t = state.clock.elapsedTime;
 
-    // Mouse: glyph cubes near the cursor scatter outward and tumble, then re-form behind it.
+    // The Decision's mouse idea lives on the notebook (an ink stroke). Glyphs stay almost still
+    // so the line can be read; a breath of clearance only, not a scatter.
     readScenePointer(track.current, sp);
     let near = false;
     if (sp.inside && animate) {
@@ -169,13 +170,13 @@ export default function BeginningScene({
         const dx = x - hit.x;
         const dy = y - hit.y;
         const d = Math.hypot(dx, dy) + 1e-4;
-        f = h * e * Math.max(0, 1 - d / 0.55) ** 2;
-        x += (dx / d) * f * 0.35;
-        y += (dy / d) * f * 0.35;
-        z += f * 0.5;
+        f = h * e * Math.max(0, 1 - d / 0.4) ** 2;
+        x += (dx / d) * f * 0.06;
+        y += (dy / d) * f * 0.06;
+        z += f * 0.08;
       }
       dummy.position.set(x, y, z);
-      dummy.rotation.set((1 - e) * 3 + f * 2.4, (1 - e) * 2 + f * 1.6, 0);
+      dummy.rotation.set((1 - e) * 3 + f * 0.4, (1 - e) * 2 + f * 0.3, 0);
       dummy.scale.setScalar(0.25 + e * 0.75);
       dummy.updateMatrix();
       mesh.setMatrixAt(i, dummy.matrix);

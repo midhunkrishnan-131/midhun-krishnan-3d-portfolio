@@ -108,7 +108,7 @@ export default function StruggleScene({
         : MathUtils.lerp(smooth.current, target, damp(4, delta));
     const resolve = MathUtils.smoothstep(smooth.current, 0.3, 0.78);
 
-    // Mouse: threads near the cursor are shoved apart and partly knot up again.
+    // Mouse: fragments loosen around the pointer, gather toward it, then re-form.
     readScenePointer(track.current, sp);
     let near = false;
     if (sp.inside && animate) {
@@ -128,15 +128,17 @@ export default function StruggleScene({
     meshes.current.forEach((mesh, i) => {
       if (!mesh?.morphTargetInfluences) return;
       const rest = (i - (THREADS - 1) / 2) * 0.22;
-      const f = h * Math.exp(-(((hit.y - rest) / 0.32) ** 2));
+      const f = h * Math.exp(-(((hit.y - rest) / 0.38) ** 2));
       const stagger = MathUtils.clamp(resolve * 1.4 - i * 0.06, 0, 1);
-      mesh.morphTargetInfluences[0] = stagger * (1 - f * 0.55);
+      // Loosen (drop morph) near the probe, then ease the thread toward it to reassemble.
+      mesh.morphTargetInfluences[0] = stagger * (1 - f * 0.72);
+      mesh.position.x = MathUtils.lerp(mesh.position.x, hit.x * f * 0.22, kk);
       mesh.position.y = MathUtils.lerp(
         mesh.position.y,
-        Math.sign(rest - hit.y || 1) * f * 0.28,
+        (hit.y - rest) * f * 0.4,
         kk,
       );
-      mesh.position.z = MathUtils.lerp(mesh.position.z, f * 0.35, kk);
+      mesh.position.z = MathUtils.lerp(mesh.position.z, f * 0.22, kk);
     });
     const t = animate ? state.clock.elapsedTime : 0;
     const k = animate ? damp(3, delta) : 1;

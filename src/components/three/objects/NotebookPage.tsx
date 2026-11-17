@@ -3,15 +3,33 @@
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import {
+  BufferGeometry,
   CanvasTexture,
+  Float32BufferAttribute,
   Group,
   LinearFilter,
   MathUtils,
+  Line,
   Mesh,
   SRGBColorSpace,
+  Vector3,
 } from "three";
+import { useDisposable } from "@/components/three/core/useDisposable";
+import { materials } from "@/components/three/materials/presets";
+import {
+  createScenePointer,
+  pointerOnPlane,
+  readScenePointer,
+} from "@/lib/three/pointer";
+import { palette } from "@/lib/three/presets";
 import { damp } from "@/lib/three/progress";
 import type { SceneProps } from "@/types/three";
+
+const TRAIL = 22;
+const PAGE_HALF = { x: 1.05, y: 1.32 };
+const PLANE_POINT = new Vector3();
+const PLANE_NORMAL = new Vector3();
+const INK_HIT = new Vector3();
 
 /**
  * A ruled notebook leaf with Midhun's first Python programme painted on a
@@ -126,18 +144,41 @@ function drawHighlighted(
   }
 }
 
-export function NotebookPage({
-  progress,
-  active,
-  animate,
-}: SceneProps) {
+export function NotebookPage({ track, progress, active, animate }: SceneProps) {
   const group = useRef<Group>(null);
   const mesh = useRef<Mesh>(null);
   const texture = useMemo(() => paintNotebook(), []);
   useEffect(() => () => texture.dispose(), [texture]);
   const turn = useRef(0);
+  const sp = useMemo(() => createScenePointer(), []);
+  const points = useMemo(
+    () => Array.from({ length: TRAIL }, () => new Vector3()),
+    [],
+  );
+  const aim = useRef(new Vector3());
+  const strength = useRef(0);
+  const positions = useRef(new Float32Array(TRAIL * 3));
+  const lineRef = useRef<Line | null>(null);
+  const trail = useDisposable(() => {
+    const geo = new BufferGeometry();
+    geo.setAttribute(
+      "position",
+      new Float32BufferAttribute(positions.current, 3),
+    );
+    const mat = materials.line(palette.ember, 0);
+    const line = new Line(geo, mat);
+    line.frustumCulled = false;
+    lineRef.current = line;
+    return {
+      line,
+      dispose() {
+        geo.dispose();
+        mat.dispose();
+      },
+    };
+  }, 0);
 
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
     if (!group.current || !active.current) return;
     const target = animate
       ? MathUtils.smoothstep(progress.current, 0.08, 0.7)
@@ -150,6 +191,50 @@ export function NotebookPage({
     group.current.position.set(-0.15, 0.05, -0.35);
     if (mesh.current) {
       mesh.current.rotation.z = Math.sin(open * Math.PI) * 0.04;
+    }
+
+    // The Decision: a single ink stroke follows the pointer across the open leaf.
+    readScenePointer(track.current, sp);
+    let onPage = false;
+    if (animate && sp.inside && open > 0.35 && mesh.current) {
+      mesh.current.updateWorldMatrix(true, false);
+      mesh.current.getWorldPosition(PLANE_POINT);
+      mesh.current.getWorldDirection(PLANE_NORMAL);
+      if (
+        pointerOnPlane(sp, state.camera, PLANE_POINT, INK_HIT, PLANE_NORMAL)
+      ) {
+        mesh.current.worldToLocal(INK_HIT);
+        if (
+          Math.abs(INK_HIT.x) <= PAGE_HALF.x &&
+          Math.abs(INK_HIT.y) <= PAGE_HALF.y
+        ) {
+          onPage = true;
+          INK_HIT.z = 0.012;
+        }
+      }
+    }
+    strength.current = MathUtils.lerp(
+      strength.current,
+      onPage ? 1 : 0,
+      damp(6, delta),
+    );
+    if (onPage) aim.current.copy(INK_HIT);
+    points[0].lerp(aim.current, damp(14, delta));
+    for (let i = 1; i < TRAIL; i++) {
+      points[i].lerp(points[i - 1], damp(12, delta));
+    }
+    const arr = positions.current;
+    for (let i = 0; i < TRAIL; i++) {
+      const pt = points[i];
+      arr[i * 3] = pt.x;
+      arr[i * 3 + 1] = pt.y;
+      arr[i * 3 + 2] = pt.z;
+    }
+    const line = lineRef.current;
+    if (line) {
+      line.geometry.attributes.position.needsUpdate = true;
+      const mat = line.material;
+      if (!Array.isArray(mat)) mat.opacity = strength.current * 0.9;
     }
   });
 
@@ -164,6 +249,7 @@ export function NotebookPage({
           color="#ffffff"
         />
       </mesh>
+      <primitive object={trail.line} />
     </group>
   );
 }
