@@ -20,6 +20,7 @@ interface RenderState {
   setCaps: (caps: RenderCapabilities) => void;
   setReducedMotion: (value: boolean) => void;
   setFailed: () => void;
+  clearFailed: () => void;
   setDpr: (dpr: number) => void;
   adjustMounted: (delta: 1 | -1) => void;
   adjustVisible: (delta: 1 | -1) => void;
@@ -44,6 +45,7 @@ export const useRenderStore = create<RenderState>()((set, get) => ({
     }),
   setReducedMotion: (reducedMotion) => set({ reducedMotion }),
   setFailed: () => set({ failed: true }),
+  clearFailed: () => set({ failed: false }),
   setDpr: (dpr) => {
     const caps = get().caps;
     if (!caps) return;

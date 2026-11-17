@@ -21,6 +21,31 @@ function FrameClear() {
  * Last-resort guard: if the first rendered frames are far over budget (e.g. an undetected
  * software renderer), give up on 3D and let every slot show its static fallback.
  */
+/**
+ * A canvas unmount (3D → Flat) fires webglcontextlost. That is intentional, not a
+ * device failure — ignoring it is what lets the user switch back to 3D.
+ */
+function ContextGuard() {
+  const gl = useThree((s) => s.gl);
+  const setFailed = useRenderStore((s) => s.setFailed);
+  useEffect(() => {
+    const el = gl.domElement;
+    let unmounted = false;
+    const onLost = (event: Event) => {
+      event.preventDefault();
+      if (unmounted) return;
+      if (useRenderStore.getState().displayMode !== "3d") return;
+      setFailed();
+    };
+    el.addEventListener("webglcontextlost", onLost);
+    return () => {
+      unmounted = true;
+      el.removeEventListener("webglcontextlost", onLost);
+    };
+  }, [gl, setFailed]);
+  return null;
+}
+
 function FrameBudgetGuard() {
   const setFailed = useRenderStore((s) => s.setFailed);
   const samples = useRef<number[]>([]);
@@ -98,14 +123,6 @@ export default function SceneCanvas() {
       }}
       onCreated={({ gl }) => {
         gl.setClearColor(0x000000, 0);
-        gl.domElement.addEventListener(
-          "webglcontextlost",
-          (event) => {
-            event.preventDefault();
-            setFailed();
-          },
-          { once: true },
-        );
       }}
     >
       <WebGLErrorBoundary onError={setFailed}>
@@ -117,6 +134,7 @@ export default function SceneCanvas() {
             if (!isGlForced()) setFailed();
           }}
         />
+        <ContextGuard />
         <FrameBudgetGuard />
         <FrameClear />
         <TickerDriver />

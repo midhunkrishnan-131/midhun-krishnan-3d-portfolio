@@ -1,4 +1,5 @@
 import type { SceneKey } from "@/types/three";
+import { StruggleFallbackArt } from "@/components/sections/StruggleFallbackArt";
 
 /**
  * Static, server-rendered stand-ins for each section scene: shown before the 3D view is ready,
@@ -178,6 +179,7 @@ const art: Record<Exclude<SceneKey, "hero">, React.ReactNode> = {
 };
 
 export function SceneFallback({ scene }: { scene: Exclude<SceneKey, "hero"> }) {
+  if (scene === "struggle") return <StruggleFallbackArt />;
   return (
     <svg
       viewBox="0 0 400 400"

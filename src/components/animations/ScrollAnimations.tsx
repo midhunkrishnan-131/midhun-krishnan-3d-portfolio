@@ -137,6 +137,9 @@ function setupHero(splits: SplitText[]) {
 export function ScrollAnimations() {
   const pathname = usePathname();
 
+  // Mounted from app/template.tsx (the route segment) so this effect cannot
+  // run before the page hydrates. A copy in the root layout did, and SplitText
+  // plus gsap.from() then rewrote server HTML that React had not yet claimed.
   useEffect(() => {
     const mm = gsap.matchMedia();
     const splits: SplitText[] = [];

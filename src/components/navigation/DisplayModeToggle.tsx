@@ -1,6 +1,8 @@
 "use client";
 
 import { persistDisplayMode, type DisplayMode } from "@/lib/three/displayMode";
+import { ScrollTrigger } from "@/lib/animations/gsap";
+import { getLenis } from "@/lib/animations/lenis";
 import { useRenderStore } from "@/stores/renderStore";
 import { cn } from "@/lib/utils/cn";
 
@@ -14,18 +16,51 @@ export function DisplayModeToggle() {
   const caps = useRenderStore((s) => s.caps);
   const failed = useRenderStore((s) => s.failed);
   const capsKnown = caps !== null;
-  const canUse3d = !failed && (!capsKnown || caps.webgl);
+  const canUse3d = !capsKnown || caps.webgl;
+  const canRetry = canUse3d; // context-loss sets failed; the user can still ask for 3D again
 
   const setMode = (next: DisplayMode) => {
-    if (next === "3d" && capsKnown && !canUse3d) return;
+    if (next === "3d" && capsKnown && !canRetry) return;
+    if (next === "3d" && failed) useRenderStore.getState().clearFailed();
+    // Anchor to the section in view. Raw scrollY is wrong once the hero pin
+    // height changes with data-gl, and window.scrollTo is overwritten by Lenis.
     const y = window.scrollY;
+    const section = document
+      .elementFromPoint(window.innerWidth / 2, window.innerHeight * 0.42)
+      ?.closest("section");
+    const sectionId = section?.id ?? null;
+    const sectionTop = section
+      ? section.getBoundingClientRect().top + y
+      : 0;
+    const offsetInSection = section ? y - sectionTop : y;
+
+    const restore = () => {
+      let target = y;
+      if (sectionId) {
+        const el = document.getElementById(sectionId);
+        if (el) {
+          target = el.getBoundingClientRect().top + window.scrollY + offsetInSection;
+        }
+      }
+      const lenis = getLenis();
+      if (lenis) lenis.scrollTo(target, { immediate: true, force: true });
+      else window.scrollTo(0, target);
+    };
+
+    const settle = () => {
+      restore();
+      ScrollTrigger.refresh();
+      requestAnimationFrame(() => {
+        restore();
+        ScrollTrigger.refresh();
+      });
+    };
+
     useRenderStore.getState().setDisplayMode(next);
     persistDisplayMode(next);
-    // Hero height changes with data-gl; keep the reader at the same place.
-    requestAnimationFrame(() => {
-      window.scrollTo(0, y);
-      requestAnimationFrame(() => window.scrollTo(0, y));
-    });
+
+    window.addEventListener("gl-layout-change", settle, { once: true });
+    window.setTimeout(settle, 80);
   };
 
   return (
@@ -37,10 +72,10 @@ export function DisplayModeToggle() {
       <button
         type="button"
         aria-pressed={mode === "3d"}
-        aria-disabled={capsKnown && !canUse3d}
-        disabled={capsKnown && !canUse3d}
+        aria-disabled={capsKnown && !canRetry}
+        disabled={capsKnown && !canRetry}
         title={
-          capsKnown && !canUse3d
+          capsKnown && !canRetry
             ? "3D is unavailable on this device, so the static artwork stays on"
             : "Show the 3D scenes"
         }

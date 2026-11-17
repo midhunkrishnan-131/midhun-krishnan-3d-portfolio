@@ -88,10 +88,13 @@ export default function StruggleScene({
     () => Array.from({ length: THREADS }, (_, i) => buildThread(i, segments)),
     segments,
   );
-  const [ink, ember] = useDisposable(
-    () => [materials.ink(tier), materials.ember(1.4)],
-    tier,
-  );
+  const [ink, ember] = useDisposable(() => {
+    const base = materials.ink(tier);
+    // Dark lacquer disappears on the black stage; lift the value so the knot reads.
+    base.color.set("#6a6760");
+    const accent = materials.ember(1.4);
+    return [base, accent];
+  }, tier);
   const smooth = useRef(-1);
   const sp = useMemo(() => createScenePointer(), []);
   const hit = useMemo(() => new Vector3(), []);
@@ -160,10 +163,10 @@ export default function StruggleScene({
             key={i}
             ref={(m) => {
               meshes.current[i] = m;
+              if (m && !m.morphTargetInfluences) m.morphTargetInfluences = [0];
             }}
             geometry={geo}
             material={i === 3 ? ember : ink}
-            morphTargetInfluences={[0]}
           />
         ))}
       </group>

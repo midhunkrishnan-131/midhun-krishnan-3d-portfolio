@@ -62,6 +62,13 @@ export function SceneSlot({
   const displayMode = useRenderStore((s) => s.displayMode);
   const enabled = webgl && !failed && !engineFailed && displayMode === "3d";
 
+  // Reset during render (React's prescribed pattern) so a return to 3D does
+  // not reuse a stale "view is ready" flag and hide the fallback too early.
+  if (!enabled && (ready || near)) {
+    setReady(false);
+    setNear(false);
+  }
+
   useEffect(() => {
     const el = ref.current;
     if (!enabled || !el) return;
