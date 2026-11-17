@@ -5,6 +5,7 @@ import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Heading } from "@/components/ui/Heading";
 import { Tag } from "@/components/ui/Tag";
 import { SceneSlot } from "@/components/three/core/SceneSlot";
+import { CardArranger } from "@/components/interaction/CardArranger";
 import { FocusTarget } from "@/components/sections/FocusTarget";
 import { SceneFallback } from "@/components/sections/SceneFallback";
 
@@ -41,38 +42,49 @@ export function SkillsSection() {
                 yet confirmed.
               </p>
             </header>
-            <ul className="flex flex-col border-t border-line">
-              {skillGroups.map((group) => (
-                <li
-                  key={group.id}
-                  data-reveal="card"
-                  className="border-b border-line"
-                >
-                  <FocusTarget kind="skillGroup" id={group.id} className="py-6">
-                    <h3 className="mb-4 text-lead font-medium text-paper transition-colors group-hover/focus:text-ember-soft">
-                      {group.title}
-                    </h3>
-                    <ul
-                      className="flex flex-wrap gap-2"
-                      aria-label={group.title}
+            <CardArranger
+              id="skills-arrange"
+              order={skillGroups.map((group) => group.id)}
+            >
+              <ul className="flex flex-col border-t border-line">
+                {skillGroups.map((group) => (
+                  <li key={group.id}>
+                    <div
+                      data-arrange-item
+                      data-arrange-id={group.id}
+                      className="border-b border-line"
                     >
-                      {group.items.map((item) => (
-                        <li key={item.name}>
-                          <Tag tone={item.confirmed ? "neutral" : "muted"}>
-                            {item.name}
-                            {item.confirmed ? null : (
-                              <span className="ml-1 normal-case">
-                                (to confirm)
-                              </span>
-                            )}
-                          </Tag>
-                        </li>
-                      ))}
-                    </ul>
-                  </FocusTarget>
-                </li>
-              ))}
-            </ul>
+                      <FocusTarget
+                        kind="skillGroup"
+                        id={group.id}
+                        className="py-6"
+                      >
+                        <h3 className="mb-4 text-lead font-medium text-paper transition-colors group-hover/focus:text-ember-soft">
+                          {group.title}
+                        </h3>
+                        <ul
+                          className="flex flex-wrap gap-2"
+                          aria-label={group.title}
+                        >
+                          {group.items.map((item) => (
+                            <li key={item.name}>
+                              <Tag tone={item.confirmed ? "neutral" : "muted"}>
+                                {item.name}
+                                {item.confirmed ? null : (
+                                  <span className="ml-1 normal-case">
+                                    (to confirm)
+                                  </span>
+                                )}
+                              </Tag>
+                            </li>
+                          ))}
+                        </ul>
+                      </FocusTarget>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </CardArranger>
           </div>
         </div>
       </Container>

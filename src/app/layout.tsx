@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { RenderEngine } from "@/components/three/core/RenderEngine";
 import { SmoothScroll } from "@/components/animations/SmoothScroll";
+import { CustomCursor } from "@/components/interaction/CustomCursor";
 import { ScrollAnimations } from "@/components/animations/ScrollAnimations";
 import { MotionProvider } from "@/components/animations/MotionProvider";
 import "@/styles/globals.css";
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </MotionProvider>
         <RenderEngine />
         <SmoothScroll />
+        <CustomCursor />
         <ScrollAnimations />
       </body>
     </html>

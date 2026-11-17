@@ -7,6 +7,7 @@ import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Heading } from "@/components/ui/Heading";
 import { Tag } from "@/components/ui/Tag";
 import { SceneSlot } from "@/components/three/core/SceneSlot";
+import { CardArranger } from "@/components/interaction/CardArranger";
 import { FocusTarget } from "@/components/sections/FocusTarget";
 import { SceneFallback } from "@/components/sections/SceneFallback";
 import { StatusBadge } from "@/components/sections/StatusBadge";
@@ -20,83 +21,93 @@ function ProjectCard({
 }) {
   const headingId = `project-${project.slug}`;
   return (
-    <FocusTarget kind="project" id={project.slug}>
-      <article
-        data-reveal="card"
-        aria-labelledby={headingId}
-        className={cn(
-          "relative flex flex-col gap-5 rounded-lg border border-line bg-ink-950/70 p-6 backdrop-blur-sm transition-colors duration-(--duration-base) group-hover/focus:border-line-strong sm:p-8",
-          featured && "border-ember/40 group-hover/focus:border-ember/70",
-        )}
-      >
-        <div className="flex flex-wrap items-center gap-3">
-          <StatusBadge status={project.status} />
-          {featured ? <Tag tone="neutral">Flagship</Tag> : null}
-        </div>
-        <Heading
-          level={3}
-          variant={featured ? "title" : "subtitle"}
-          id={headingId}
+    <div
+      data-arrange-item
+      data-arrange-id={project.slug}
+      className="min-w-0 rounded-lg"
+    >
+      <FocusTarget kind="project" id={project.slug}>
+        <article
+          data-cursor="View"
+          aria-labelledby={headingId}
+          className={cn(
+            "relative flex flex-col gap-5 rounded-lg border border-line bg-ink-950/70 p-6 backdrop-blur-sm transition-colors duration-(--duration-base) group-hover/focus:border-line-strong sm:p-8",
+            featured && "border-ember/40 group-hover/focus:border-ember/70",
+          )}
         >
-          {project.title}
-        </Heading>
-        <p className={cn("text-paper-dim", featured && "text-lead text-paper")}>
-          {featured ? project.summary : project.tagline}
-        </p>
-        {featured && project.architecture.length ? (
-          <ul className="flex flex-col gap-2 border-l border-line pl-5 text-paper-dim">
-            {project.architecture.map((line) => (
-              <li key={line}>{line}</li>
-            ))}
-          </ul>
-        ) : null}
-        {project.technologies.length ? (
-          <ul
-            className="flex flex-wrap gap-2"
-            aria-label={`${project.title} technologies`}
+          <div className="flex flex-wrap items-center gap-3">
+            <StatusBadge status={project.status} />
+            {featured ? <Tag tone="neutral">Flagship</Tag> : null}
+          </div>
+          <Heading
+            level={3}
+            variant={featured ? "title" : "subtitle"}
+            id={headingId}
           >
-            {project.technologies.map((tech) => (
-              <li key={tech}>
-                <Tag tone="muted">{tech}</Tag>
-              </li>
-            ))}
-          </ul>
-        ) : null}
-        {project.technologiesToConfirm.length ? (
-          <p className="text-sm text-paper-faint">
-            Technologies to confirm: {project.technologiesToConfirm.join(", ")}
+            {project.title}
+          </Heading>
+          <p
+            className={cn("text-paper-dim", featured && "text-lead text-paper")}
+          >
+            {featured ? project.summary : project.tagline}
           </p>
-        ) : null}
-        <p className="text-sm text-paper-faint">{project.statusNote}</p>
-        <div className="flex flex-wrap gap-5 pt-1 text-sm">
-          {project.githubUrl ? (
-            <a
-              href={project.githubUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-paper underline decoration-ember underline-offset-4 hover:text-ember-soft"
+          {featured && project.architecture.length ? (
+            <ul className="flex flex-col gap-2 border-l border-line pl-5 text-paper-dim">
+              {project.architecture.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+          ) : null}
+          {project.technologies.length ? (
+            <ul
+              className="flex flex-wrap gap-2"
+              aria-label={`${project.title} technologies`}
             >
-              View on GitHub
-              <span className="sr-only"> (opens in a new tab)</span>
-            </a>
-          ) : (
-            <span className="text-paper-faint">GitHub link to be added</span>
-          )}
-          {project.demoUrl ? (
-            <a
-              href={project.demoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-paper underline decoration-ember underline-offset-4 hover:text-ember-soft"
-            >
-              Live demo<span className="sr-only"> (opens in a new tab)</span>
-            </a>
-          ) : (
-            <span className="text-paper-faint">Demo to be added</span>
-          )}
-        </div>
-      </article>
-    </FocusTarget>
+              {project.technologies.map((tech) => (
+                <li key={tech}>
+                  <Tag tone="muted">{tech}</Tag>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {project.technologiesToConfirm.length ? (
+            <p className="text-sm text-paper-faint">
+              Technologies to confirm:{" "}
+              {project.technologiesToConfirm.join(", ")}
+            </p>
+          ) : null}
+          <p className="text-sm text-paper-faint">{project.statusNote}</p>
+          <div className="flex flex-wrap gap-5 pt-1 text-sm">
+            {project.githubUrl ? (
+              <a
+                href={project.githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-cursor="Open"
+                className="text-paper underline decoration-ember underline-offset-4 hover:text-ember-soft"
+              >
+                View on GitHub
+                <span className="sr-only"> (opens in a new tab)</span>
+              </a>
+            ) : (
+              <span className="text-paper-faint">GitHub link to be added</span>
+            )}
+            {project.demoUrl ? (
+              <a
+                href={project.demoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-paper underline decoration-ember underline-offset-4 hover:text-ember-soft"
+              >
+                Live demo<span className="sr-only"> (opens in a new tab)</span>
+              </a>
+            ) : (
+              <span className="text-paper-faint">Demo to be added</span>
+            )}
+          </div>
+        </article>
+      </FocusTarget>
+    </div>
   );
 }
 
@@ -106,6 +117,11 @@ export function ProjectsSection() {
   const headingId = `${section.id}-heading`;
   const featured = projects.filter((p) => p.featured);
   const rest = projects.filter((p) => !p.featured);
+  // Animation order: other cards first, MYX AI last so it lands in its slot last.
+  const arrangeOrder = [
+    ...rest.map((project) => project.slug),
+    ...featured.map((project) => project.slug),
+  ];
   return (
     <section
       id={section.id}
@@ -133,7 +149,11 @@ export function ProjectsSection() {
               className="aspect-square w-full lg:sticky lg:top-[calc(var(--header-height)+2rem)] lg:aspect-auto lg:h-[calc(100svh-var(--header-height)-4rem)]"
             />
           </div>
-          <div className="flex flex-col gap-6 lg:col-span-7">
+          <CardArranger
+            id="projects-arrange"
+            order={arrangeOrder}
+            className="flex flex-col gap-6 lg:col-span-7"
+          >
             {featured.map((p) => (
               <ProjectCard key={p.slug} project={p} featured />
             ))}
@@ -142,7 +162,7 @@ export function ProjectsSection() {
                 <ProjectCard key={p.slug} project={p} />
               ))}
             </div>
-          </div>
+          </CardArranger>
         </div>
       </Container>
     </section>

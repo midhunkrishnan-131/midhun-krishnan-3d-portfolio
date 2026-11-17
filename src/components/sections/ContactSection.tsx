@@ -85,6 +85,7 @@ export function ContactSection() {
                   href={github}
                   target="_blank"
                   rel="noopener noreferrer"
+                  data-cursor="Open"
                   className="text-paper underline decoration-ember underline-offset-4 hover:text-ember-soft"
                 >
                   github.com/midhunkrishnan-131

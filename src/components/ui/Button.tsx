@@ -2,6 +2,20 @@ import Link from "next/link";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
 
+const LINK_ONLY_PROPS = [
+  "as",
+  "replace",
+  "scroll",
+  "shallow",
+  "passHref",
+  "prefetch",
+  "locale",
+  "legacyBehavior",
+  "onNavigate",
+  "transitionTypes",
+  "unstable_dynamicOnHover",
+] as const;
+
 type Variant = "primary" | "ghost" | "text";
 
 const base =
@@ -26,7 +40,19 @@ type ButtonLinkProps = {
   children: ReactNode;
   /** Mark links that leave the site; adds rel and a visually-hidden hint. */
   external?: boolean;
+  "data-cursor"?: string;
 } & Omit<ComponentPropsWithoutRef<typeof Link>, "href" | "children">;
+
+function externalAnchorProps(
+  props: Omit<
+    ButtonLinkProps,
+    "href" | "variant" | "external" | "className" | "children"
+  >,
+): ComponentPropsWithoutRef<"a"> {
+  const next: Record<string, unknown> = { ...props };
+  for (const key of LINK_ONLY_PROPS) delete next[key];
+  return next as ComponentPropsWithoutRef<"a">;
+}
 
 export function ButtonLink({
   href,
@@ -37,12 +63,19 @@ export function ButtonLink({
   ...props
 }: ButtonLinkProps) {
   if (external) {
+    const cursor =
+      typeof props["data-cursor"] === "string" &&
+      props["data-cursor"].length > 0
+        ? props["data-cursor"]
+        : "Open";
     return (
       <a
         href={href}
         target="_blank"
         rel="noopener noreferrer"
         className={buttonClasses(variant, className)}
+        {...externalAnchorProps(props)}
+        data-cursor={cursor}
       >
         {children}
         <span className="sr-only"> (opens in a new tab)</span>

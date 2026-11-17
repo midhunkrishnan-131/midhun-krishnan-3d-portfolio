@@ -158,3 +158,164 @@ html[data-gl="on"] .hero-pin {
     }
   }
 }
+
+/*
+ * Custom cursor. The dot and ring are positioned with transform only (GSAP x/y).
+ * Visual size, fill, label, press and grab states live on ::before / ::after so they
+ * never overwrite that transform. The ghost cursor in CardArranger reuses these classes.
+ * z-index sits above the header (z-55) and the index toggle (z-60).
+ */
+.cursor-dot,
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  will-change: transform;
+  user-select: none;
+}
+
+.cursor-dot {
+  width: 6px;
+  height: 6px;
+}
+
+.cursor-dot::after {
+  content: "";
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-ember);
+  transform-origin: center;
+  transition: transform 0.35s
+    var(--ease-out-expo, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.cursor-dot.is-shrink::after {
+  transform: scale(0.45);
+}
+
+.cursor-ring {
+  width: 34px;
+  height: 34px;
+}
+
+.cursor-ring::before {
+  content: "";
+  grid-area: 1 / 1;
+  box-sizing: border-box;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--color-paper);
+  border-radius: 999px;
+  background-color: transparent;
+  transform-origin: center;
+  transition:
+    transform 0.4s var(--ease-out-expo, cubic-bezier(0.16, 1, 0.3, 1)),
+    background-color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+.cursor-ring.is-press::before {
+  transform: scale(0.85);
+}
+
+.cursor-ring.is-link::before {
+  transform: scale(calc(52 / 34));
+}
+
+.cursor-ring.is-link.is-press::before {
+  transform: scale(calc(52 / 34 * 0.85));
+}
+
+.cursor-ring.is-label::before {
+  transform: scale(calc(84 / 34));
+  background-color: rgb(237 232 223 / 0.14);
+}
+
+.cursor-ring.is-label.is-press::before {
+  transform: scale(calc(84 / 34 * 0.85));
+  background-color: rgb(237 232 223 / 0.14);
+}
+
+.cursor-ring.is-grab::before {
+  transform: scale(0.62);
+  border-color: var(--color-ember);
+  background-color: var(--color-ember);
+}
+
+.cursor-ring.is-grab.is-press::before {
+  transform: scale(calc(0.62 * 0.85));
+  border-color: var(--color-ember);
+  background-color: var(--color-ember);
+}
+
+.cursor-label {
+  grid-area: 1 / 1;
+  z-index: 1;
+  font-family:
+    ui-monospace, "SFMono-Regular", "Cascadia Code", Menlo, monospace;
+  font-size: var(--text-micro, 0.6875rem);
+  line-height: 1;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-paper);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s var(--ease-out-expo, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.cursor-ring.is-label .cursor-label {
+  opacity: 1;
+}
+
+/* Ghost cursor: same look, but it lives in the arranging section and is moved as one unit. */
+.arrange-ghost {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 20;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  will-change: transform;
+}
+
+.arrange-ghost-fade {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.arrange-ghost .cursor-dot,
+.arrange-ghost .cursor-ring {
+  position: absolute;
+  z-index: 1;
+  transform: translate(-50%, -50%);
+}
+
+.arrange-ghost .cursor-ring::before,
+.arrange-ghost .cursor-dot::after,
+.arrange-ghost .cursor-label {
+  transition: none;
+}
+
+@media (pointer: fine) {
+  html.has-custom-cursor,
+  html.has-custom-cursor * {
+    cursor: none;
+  }
+
+  html.has-custom-cursor :is(input, textarea, select, [contenteditable]) {
+    cursor: text;
+  }
+}
