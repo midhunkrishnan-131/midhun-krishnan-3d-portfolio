@@ -100,19 +100,40 @@ const art: Record<Exclude<SceneKey, "hero">, React.ReactNode> = {
     </g>
   ),
   experience: (
-    <g fill="none" stroke="currentColor" opacity="0.65">
-      <rect x="70" y="230" width="260" height="16" />
-      <rect x="145" y="90" width="110" height="80" rx="4" />
+    <g>
+      <rect x="48" y="248" width="304" height="18" rx="2" fill="#1a1a1a" />
+      <rect x="70" y="266" width="10" height="70" fill="#161616" />
+      <rect x="320" y="266" width="10" height="70" fill="#161616" />
+      <rect x="148" y="96" width="120" height="86" rx="6" fill="#0c0c0c" />
       <rect
-        x="155"
-        y="100"
-        width="90"
-        height="60"
+        x="156"
+        y="104"
+        width="104"
+        height="70"
+        rx="2"
+        fill="#1a120e"
         stroke="var(--color-ember)"
+        strokeWidth="2"
       />
-      <circle cx="200" cy="270" r="22" />
-      <path d="M178 290 L178 340 L222 340 L222 290" />
-      <path d="M178 310 L150 330 M222 310 L250 330" />
+      {[0, 1, 2, 3].map((i) => (
+        <rect
+          key={i}
+          x="166"
+          y={112 + i * 15}
+          width={i === 1 ? 72 : 84}
+          height="8"
+          rx="1"
+          fill="var(--color-ember)"
+          opacity={0.45 + i * 0.12}
+        />
+      ))}
+      <rect x="168" y="244" width="80" height="10" rx="2" fill="#2a2a2a" />
+      <rect x="258" y="248" width="16" height="8" rx="2" fill="#2a2a2a" />
+      <rect x="150" y="268" width="88" height="14" rx="3" fill="#1a1a1a" />
+      <rect x="164" y="210" width="60" height="70" rx="8" fill="#242424" />
+      <circle cx="194" cy="196" r="16" fill="#3a3a3a" />
+      <rect x="150" y="230" width="18" height="40" rx="4" fill="#242424" />
+      <rect x="220" y="230" width="18" height="40" rx="4" fill="#242424" />
     </g>
   ),
   myx: (

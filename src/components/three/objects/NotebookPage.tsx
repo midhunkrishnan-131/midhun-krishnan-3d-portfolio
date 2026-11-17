@@ -74,10 +74,10 @@ function paintNotebook(): CanvasTexture {
   }
 
   ctx.fillStyle = "#1a1a1a";
-  ctx.font = "italic 48px 'Instrument Serif', Georgia, serif";
+  ctx.font = "italic 64px 'Instrument Serif', Georgia, serif";
   ctx.fillText("My Programming Journey", 160, 110);
 
-  ctx.font = "italic 22px Georgia, serif";
+  ctx.font = "italic 28px Georgia, serif";
   ctx.fillStyle = "rgba(40,40,40,0.55)";
   ctx.fillText("— the first page I was proud to write", 160, 148);
 
@@ -94,11 +94,11 @@ function paintNotebook(): CanvasTexture {
     "introduce()",
   ];
 
-  ctx.font = "26px ui-monospace, SFMono-Regular, Menlo, monospace";
-  let y = 220;
+  ctx.font = "40px ui-monospace, SFMono-Regular, Menlo, monospace";
+  let y = 230;
   for (const line of lines) {
-    drawHighlighted(ctx, line, 160, y);
-    y += 36;
+    drawHighlighted(ctx, line, 150, y);
+    y += 52;
   }
 
   ctx.font = "italic 20px Georgia, serif";

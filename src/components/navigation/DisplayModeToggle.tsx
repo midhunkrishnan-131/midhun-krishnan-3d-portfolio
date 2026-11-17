@@ -18,8 +18,14 @@ export function DisplayModeToggle() {
 
   const setMode = (next: DisplayMode) => {
     if (next === "3d" && capsKnown && !canUse3d) return;
+    const y = window.scrollY;
     useRenderStore.getState().setDisplayMode(next);
     persistDisplayMode(next);
+    // Hero height changes with data-gl; keep the reader at the same place.
+    requestAnimationFrame(() => {
+      window.scrollTo(0, y);
+      requestAnimationFrame(() => window.scrollTo(0, y));
+    });
   };
 
   return (

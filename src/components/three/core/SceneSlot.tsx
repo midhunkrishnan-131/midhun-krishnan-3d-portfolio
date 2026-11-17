@@ -111,6 +111,14 @@ export function SceneSlot({
   const onError = useCallback(() => setFailed(true), []);
   const show = enabled && near;
 
+  // If onReady is late, hide the fallback anyway once the view has had time to paint
+  // so static artwork cannot show through the transparent canvas.
+  useEffect(() => {
+    if (!show) return;
+    const id = window.setTimeout(() => setReady(true), 700);
+    return () => window.clearTimeout(id);
+  }, [show]);
+
   return (
     <div
       ref={ref}
@@ -121,7 +129,7 @@ export function SceneSlot({
       <div
         className={cn(
           "absolute inset-0 transition-opacity duration-(--duration-cinematic) ease-in-out-soft",
-          show && ready ? "opacity-0" : "opacity-100",
+          show && ready ? "invisible opacity-0" : "opacity-100",
         )}
       >
         {fallback}

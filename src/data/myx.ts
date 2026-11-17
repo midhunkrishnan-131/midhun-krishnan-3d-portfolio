@@ -66,20 +66,39 @@ export const myxCapabilities: readonly MyxCapability[] = [
 
 export const myxArchitecture: readonly { layer: string; detail: string }[] = [
   {
-    layer: "Windows agent",
-    detail: "Local collection and defensive tooling on the machine.",
+    layer: "Frontend",
+    detail: "React and TypeScript interface in the repository (Vite).",
   },
   {
     layer: "FastAPI backend",
-    detail: "Analysis, session storage and reporting services.",
+    detail: "Analysis, session storage and reporting services. Implemented.",
   },
   {
-    layer: "Retrieval and models",
-    detail: "Hybrid RAG, with Gemini or Groq when a key is present.",
+    layer: "AI processing layer",
+    detail: "Model calls (Gemini or Groq) when an API key is present.",
   },
   {
-    layer: "Threat intel connectors",
-    detail: "External services such as VirusTotal, when configured.",
+    layer: "RAG pipeline",
+    detail:
+      "Hybrid RAG (BM25, embeddings, RRF) is implemented in the repository.",
+  },
+  {
+    layer: "Threat intelligence integration",
+    detail:
+      "VirusTotal, Safe Browsing and URLhaus surfaces exist; they need keys.",
+  },
+  {
+    layer: "Deterministic verification engine",
+    detail: "Present as part of the analysis path in the repository.",
+  },
+  {
+    layer: "Reporting system",
+    detail: "PDF reporting with ReportLab is implemented in the repository.",
+  },
+  {
+    layer: "Multi-provider AI architecture",
+    detail:
+      "Gemini and Groq are wired in configuration; a live run needs keys.",
   },
 ];
 

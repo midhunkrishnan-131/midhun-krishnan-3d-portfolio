@@ -9,6 +9,7 @@ import { Heading } from "@/components/ui/Heading";
 import { Tag } from "@/components/ui/Tag";
 import { SceneSlot } from "@/components/three/core/SceneSlot";
 import { CardArranger } from "@/components/interaction/CardArranger";
+import { ProjectScroll } from "@/components/sections/ProjectScroll";
 import { FocusTarget } from "@/components/sections/FocusTarget";
 import { SceneFallback } from "@/components/sections/SceneFallback";
 import { StatusBadge } from "@/components/sections/StatusBadge";
@@ -29,6 +30,7 @@ function ProjectCard({
     >
       <FocusTarget kind="project" id={project.slug}>
         <article
+          data-project-inner
           data-cursor="View"
           aria-labelledby={headingId}
           className={cn(
@@ -174,20 +176,22 @@ export function ProjectsSection() {
               className="aspect-square w-full lg:sticky lg:top-[calc(var(--header-height)+2rem)] lg:aspect-auto lg:h-[calc(100svh-var(--header-height)-4rem)]"
             />
           </div>
-          <CardArranger
-            id="projects-arrange"
-            order={arrangeOrder}
-            className="flex flex-col gap-6 lg:col-span-7"
-          >
-            {featured.map((p) => (
-              <ProjectCard key={p.slug} project={p} featured />
-            ))}
-            <div className="grid gap-6 sm:grid-cols-2">
-              {rest.map((p) => (
-                <ProjectCard key={p.slug} project={p} />
+          <ProjectScroll className="lg:col-span-7">
+            <CardArranger
+              id="projects-arrange"
+              order={arrangeOrder}
+              className="flex flex-col gap-6"
+            >
+              {featured.map((p) => (
+                <ProjectCard key={p.slug} project={p} featured />
               ))}
-            </div>
-          </CardArranger>
+              <div className="grid gap-6 sm:grid-cols-2">
+                {rest.map((p) => (
+                  <ProjectCard key={p.slug} project={p} />
+                ))}
+              </div>
+            </CardArranger>
+          </ProjectScroll>
         </div>
       </Container>
     </section>

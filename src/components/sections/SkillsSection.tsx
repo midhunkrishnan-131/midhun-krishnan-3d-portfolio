@@ -3,7 +3,7 @@ import { getSection } from "@/data/navigation";
 import { Container } from "@/components/layout/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Heading } from "@/components/ui/Heading";
-import { Tag } from "@/components/ui/Tag";
+import { SkillPillList } from "@/components/sections/SkillPillList";
 import { SceneSlot } from "@/components/three/core/SceneSlot";
 import { CardArranger } from "@/components/interaction/CardArranger";
 import { FocusTarget } from "@/components/sections/FocusTarget";
@@ -62,23 +62,10 @@ export function SkillsSection() {
                         <h3 className="mb-4 text-lead font-medium text-paper transition-colors group-hover/focus:text-ember-soft">
                           {group.title}
                         </h3>
-                        <ul
-                          className="flex flex-wrap gap-2"
-                          aria-label={group.title}
-                        >
-                          {group.items.map((item) => (
-                            <li key={item.name}>
-                              <Tag tone={item.confirmed ? "neutral" : "muted"}>
-                                {item.name}
-                                {item.confirmed ? null : (
-                                  <span className="ml-1 normal-case">
-                                    (to confirm)
-                                  </span>
-                                )}
-                              </Tag>
-                            </li>
-                          ))}
-                        </ul>
+                        <SkillPillList
+                          title={group.title}
+                          items={group.items}
+                        />
                       </FocusTarget>
                     </div>
                   </li>

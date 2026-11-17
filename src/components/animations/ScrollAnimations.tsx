@@ -82,24 +82,56 @@ function setupHero(splits: SplitText[]) {
   if (roles) intro.from(roles, { y: 24, autoAlpha: 0 }, 0.4);
   if (actions) intro.from(actions, { y: 20, autoAlpha: 0 }, 0.52);
 
-  const exit = gsap.timeline({
-    defaults: { ease: "none" },
-    scrollTrigger: {
-      trigger: section,
-      start: "top top",
-      end: "bottom bottom",
-      scrub: SCRUB,
-      onToggle: (self) => willMotion(root, self.isActive),
-    },
+  intro.eventCallback("onComplete", () => {
+    // If a later layout jump (data-gl pin) kills SplitText mid-play, the heading
+    // must still be readable — never left at yPercent 110.
+    if (title) gsap.set(title, { clearProps: "transform,opacity,visibility" });
+    introTargets.forEach((el) =>
+      gsap.set(el, { clearProps: "transform,opacity,visibility" }),
+    );
   });
-  if (actions) exit.to(actions, { yPercent: -30, autoAlpha: 0 }, 0.12);
-  if (roles) exit.to(roles, { yPercent: -28, autoAlpha: 0 }, 0.22);
-  if (kicker) exit.to(kicker, { yPercent: -22, autoAlpha: 0 }, 0.32);
-  if (title) exit.to(title, { yPercent: -16, autoAlpha: 0 }, 0.42);
-  if (eyebrow) exit.to(eyebrow, { yPercent: -12, autoAlpha: 0 }, 0.52);
-  if (!introTargets.length && !title) {
-    exit.to(root, { yPercent: -18, autoAlpha: 0 }, 0);
-  }
+
+  // The exit fade is only meaningful once the hero is pinned tall (data-gl=on).
+  // On a one-viewport hero, start and end collapse and the heading vanishes.
+  const attachExit = () => {
+    const extra = section.offsetHeight - window.innerHeight;
+    if (extra < window.innerHeight * 0.35) return null;
+    const exit = gsap.timeline({
+      defaults: { ease: "none" },
+      scrollTrigger: {
+        trigger: section,
+        start: "top top",
+        end: "bottom bottom",
+        scrub: SCRUB,
+        onToggle: (self) => willMotion(root, self.isActive),
+      },
+    });
+    if (actions) exit.to(actions, { yPercent: -30, autoAlpha: 0 }, 0.12);
+    if (roles) exit.to(roles, { yPercent: -28, autoAlpha: 0 }, 0.22);
+    if (kicker) exit.to(kicker, { yPercent: -22, autoAlpha: 0 }, 0.32);
+    if (title) exit.to(title, { yPercent: -16, autoAlpha: 0 }, 0.42);
+    if (eyebrow) exit.to(eyebrow, { yPercent: -12, autoAlpha: 0 }, 0.52);
+    if (!introTargets.length && !title) {
+      exit.to(root, { yPercent: -18, autoAlpha: 0 }, 0);
+    }
+    return exit;
+  };
+
+  let exit = attachExit();
+  const onGl = () => {
+    exit?.scrollTrigger?.kill();
+    exit?.kill();
+    exit = attachExit();
+    ScrollTrigger.refresh();
+  };
+  window.addEventListener("gl-layout-change", onGl);
+  // setupHero has no direct cleanup hook; ScrollAnimations reverts via matchMedia
+  // and this listener is removed when the owner effect re-runs (pathname change).
+  // Attach an abort on the root so the parent cleanup can remove it.
+  root.dataset.heroExit = "1";
+  const prev = (root as HTMLElement & { __onGl?: () => void }).__onGl;
+  if (prev) window.removeEventListener("gl-layout-change", prev);
+  (root as HTMLElement & { __onGl?: () => void }).__onGl = onGl;
 }
 
 export function ScrollAnimations() {
@@ -330,6 +362,10 @@ export function ScrollAnimations() {
     return () => {
       cancelAnimationFrame(id);
       splits.forEach((s) => s.revert());
+      const hero = document.querySelector<HTMLElement>("[data-hero-content]");
+      const onGl =
+        hero && (hero as HTMLElement & { __onGl?: () => void }).__onGl;
+      if (onGl) window.removeEventListener("gl-layout-change", onGl);
       mm.revert();
     };
   }, [pathname]);
