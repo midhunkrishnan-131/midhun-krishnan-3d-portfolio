@@ -5,9 +5,10 @@ import { gsap } from "@/lib/animations/gsap";
 import { site } from "@/data/site";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { cn } from "@/lib/utils/cn";
+import { withBasePath } from "@/lib/env";
 
-const PROFILE = "/images/profile.jpg";
-const AVATAR = "/images/avatar.png";
+const PROFILE = withBasePath("/images/profile.jpg");
+const AVATAR = withBasePath("/images/avatar.png");
 async function resolvePortraitSrc(): Promise<string | null> {
   try {
     const profile = await fetch(PROFILE, { method: "HEAD" });

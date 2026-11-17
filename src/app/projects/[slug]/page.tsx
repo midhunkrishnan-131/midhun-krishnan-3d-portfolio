@@ -26,6 +26,8 @@ export function generateStaticParams() {
   return projects.map((project) => ({ slug: project.slug }));
 }
 
+export const dynamicParams = false;
+
 export async function generateMetadata({
   params,
 }: ProjectPageProps): Promise<Metadata> {

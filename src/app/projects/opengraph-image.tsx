@@ -5,6 +5,7 @@ import { createOgImage } from "@/lib/seo/og";
 export const alt = `Projects — ${site.name}`;
 export const size = ogSize;
 export const contentType = ogContentType;
+export const dynamic = "force-static";
 
 export default function Image() {
   return createOgImage({

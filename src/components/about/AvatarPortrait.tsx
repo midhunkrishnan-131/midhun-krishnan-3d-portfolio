@@ -5,6 +5,7 @@ import { gsap, STORY_EASE } from "@/lib/animations/gsap";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { useRenderStore } from "@/stores/renderStore";
 import { cn } from "@/lib/utils/cn";
+import { withBasePath } from "@/lib/env";
 
 const SIZE = 200;
 const FRAME = 360;
@@ -326,7 +327,7 @@ export function AvatarPortrait({ className }: { className?: string }) {
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/images/avatar.png"
+            src={withBasePath("/images/avatar.png")}
             alt="Illustrated portrait of Midhun Krishnan"
             width={200}
             height={200}

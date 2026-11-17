@@ -2,6 +2,8 @@ import type { MetadataRoute } from "next";
 import { projects } from "@/data/projects";
 import { canonicalUrl, projectPath } from "@/lib/seo/constants";
 
+export const dynamic = "force-static";
+
 /**
  * Home, `/projects` and every `/projects/[slug]` from src/data/projects.ts.
  */

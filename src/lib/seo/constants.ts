@@ -1,6 +1,6 @@
 import { projects } from "@/data/projects";
 import { site } from "@/data/site";
-import { SITE_URL } from "@/lib/env";
+import { SITE_URL, USE_TRAILING_SLASH } from "@/lib/env";
 
 /** Document title when a route does not set its own. */
 export const DEFAULT_TITLE = `${site.name} — ${site.title}`;
@@ -34,9 +34,17 @@ export const PROFILE_PAGE_ID = `${SITE_URL}/#profile`;
 
 /** Absolute canonical URL. `path` is a pathname (`/` or `/projects/...`). */
 export function canonicalUrl(path: string): string {
-  if (path === "/" || path === "") return SITE_URL;
-  const pathname = path.startsWith("/") ? path : `/${path}`;
-  return `${SITE_URL}${pathname.replace(/\/+$/, "")}`;
+  if (path === "/" || path === "") {
+    return USE_TRAILING_SLASH ? `${SITE_URL}/` : SITE_URL;
+  }
+  const pathname = (path.startsWith("/") ? path : `/${path}`).replace(
+    /\/+$/,
+    "",
+  );
+  if (USE_TRAILING_SLASH && !/\.[a-z0-9]+$/i.test(pathname)) {
+    return `${SITE_URL}${pathname}/`;
+  }
+  return `${SITE_URL}${pathname}`;
 }
 
 export function projectPath(slug: string): string {
