@@ -51,26 +51,44 @@ function unit(seed: string): number {
   return (hash >>> 0) / 4294967296;
 }
 
+/**
+ * Layout offset of `element` relative to `root`, ignoring CSS transforms.
+ * Walking only `element.offsetParent` until it equals `root` fails when a
+ * transformed ancestor (a parallax column, a pin spacer) becomes the
+ * offsetParent and skips `root` — every card then shares a bogus slot and
+ * they pile into one corner. Both nodes are summed to the document origin
+ * via their offsetParent chains, then subtracted.
+ */
 function offsetWithin(
   element: HTMLElement,
   root: HTMLElement,
 ): { left: number; top: number } {
-  let left = 0;
-  let top = 0;
-  let node: HTMLElement | null = element;
-  let guard = 0;
-  while (node && node !== root && guard < 24) {
-    left += node.offsetLeft;
-    top += node.offsetTop;
-    const parent: Element | null = node.offsetParent;
-    if (!(parent instanceof HTMLElement) || parent === node) break;
-    node = parent;
-    guard += 1;
-  }
-  return { left, top };
+  const origin = (node: HTMLElement): Point => {
+    let left = 0;
+    let top = 0;
+    let current: HTMLElement | null = node;
+    let guard = 0;
+    while (current && guard < 32) {
+      left += current.offsetLeft;
+      top += current.offsetTop;
+      const parent: Element | null = current.offsetParent;
+      if (!(parent instanceof HTMLElement) || parent === current) break;
+      current = parent;
+      guard += 1;
+    }
+    return { x: left, y: top };
+  };
+  const from = origin(element);
+  const base = origin(root);
+  return { left: from.x - base.x, top: from.y - base.y };
 }
 
-/** Deterministic scatter that stays inside the arranging root. Rotation is always ±8–14°. */
+/**
+ * Deterministic scatter that stays inside the arranging root.
+ * Full-width stacked rows (skills) get a tighter motion so a short group
+ * cannot rotate up on top of its neighbour. Grid cards (projects) keep the
+ * original ±8–14° loose scatter, clamped so siblings do not cover each other.
+ */
 function scatterFor(item: HTMLElement, root: HTMLElement): Scatter {
   const id = item.dataset.arrangeId ?? "card";
   const place = offsetWithin(item, root);
@@ -85,24 +103,65 @@ function scatterFor(item: HTMLElement, root: HTMLElement): Scatter {
     root.clientHeight - place.top - item.offsetHeight,
   );
 
+  const siblings = gsap.utils.toArray<HTMLElement>(
+    "[data-arrange-item]",
+    root,
+  );
+  const index = siblings.indexOf(item);
+  const prev = index > 0 ? siblings[index - 1] : null;
+  const next =
+    index >= 0 && index < siblings.length - 1 ? siblings[index + 1] : null;
+  const prevBottom = prev
+    ? offsetWithin(prev, root).top + prev.offsetHeight
+    : 0;
+  const nextTop = next
+    ? offsetWithin(next, root).top
+    : root.clientHeight;
+  // Allowed travel into the gap (and a little into the neighbour) without
+  // covering the next heading. Tight stacks have almost no formal gap.
+  const gapUp = Math.max(0, place.top - prevBottom);
+  const gapDown = Math.max(0, nextTop - (place.top + item.offsetHeight));
+  const siblingYUp = gapUp + 22;
+  const siblingYDown = gapDown + 22;
+
+  const stacked =
+    roomLeft < 16 &&
+    roomRight < 16 &&
+    item.offsetWidth >= root.clientWidth * 0.88;
+
   let xSign = unit(`${id}:x`) >= 0.5 ? 1 : -1;
-  if ((xSign > 0 ? roomRight : roomLeft) < 24) {
+  if (!stacked && (xSign > 0 ? roomRight : roomLeft) < 24) {
     xSign = roomRight >= roomLeft ? 1 : -1;
   }
   let ySign = unit(`${id}:y`) >= 0.5 ? 1 : -1;
   if ((ySign > 0 ? roomBottom : roomTop) < 24) {
     ySign = roomBottom >= roomTop ? 1 : -1;
   }
+  if ((ySign < 0 ? siblingYUp : siblingYDown) < 8) {
+    ySign = siblingYDown >= siblingYUp ? 1 : -1;
+  }
 
-  const xAvailable = xSign > 0 ? roomRight : roomLeft;
-  const yAvailable = ySign > 0 ? roomBottom : roomTop;
-  const xCap = Math.min(xAvailable * 0.72, root.clientWidth * 0.2);
-  const yCap = Math.min(yAvailable * 0.42, 150);
+  const xAvailable = stacked
+    ? Math.min(root.clientWidth * 0.1, 56)
+    : xSign > 0
+      ? roomRight
+      : roomLeft;
+  const yAvailable = Math.min(
+    ySign > 0 ? roomBottom : roomTop,
+    ySign > 0 ? siblingYDown : siblingYUp,
+  );
+  const xCap = stacked
+    ? xAvailable
+    : Math.min(xAvailable * 0.72, root.clientWidth * 0.2);
+  const yCap = stacked
+    ? Math.min(yAvailable, 28)
+    : Math.min(yAvailable * 0.42, 150, yAvailable);
   const x =
     xSign * Math.min(xAvailable, xCap * (0.55 + unit(`${id}:xj`) * 0.45));
   const y = ySign * Math.min(yAvailable, yCap * (0.5 + unit(`${id}:yj`) * 0.5));
-  const rotation =
-    (unit(`${id}:sign`) >= 0.5 ? 1 : -1) * (8 + unit(`${id}:rot`) * 6);
+  const rotation = stacked
+    ? (unit(`${id}:sign`) >= 0.5 ? 1 : -1) * (3 + unit(`${id}:rot`) * 4)
+    : (unit(`${id}:sign`) >= 0.5 ? 1 : -1) * (8 + unit(`${id}:rot`) * 6);
   return { x, y, rotation };
 }
 
@@ -504,13 +563,27 @@ export function CardArranger({
 
         build();
 
+        let lastWidth = root.clientWidth;
+        let lastHeight = root.clientHeight;
+
         const requestRebuild = () => {
           window.clearTimeout(rebuildTimer);
           rebuildTimer = window.setTimeout(() => {
             if (disposed || !root.isConnected) return;
             const items = orderedItems(root, order);
             const next = items.length > 0 && gridFits(root);
-            if (next !== pinned) build();
+            const width = root.clientWidth;
+            const height = root.clientHeight;
+            const resized =
+              Math.abs(width - lastWidth) > 2 ||
+              Math.abs(height - lastHeight) > 2;
+            if (next !== pinned || resized) {
+              lastWidth = width;
+              lastHeight = height;
+              build();
+              return;
+            }
+            ScrollTrigger.refresh();
           }, 160);
         };
 

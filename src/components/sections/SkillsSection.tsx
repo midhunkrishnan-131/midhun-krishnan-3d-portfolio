@@ -21,38 +21,35 @@ export function SkillsSection() {
       className="relative border-t border-line py-(--section-space)"
     >
       <Container size="wide">
-        <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-8">
+        <div className="grid items-start gap-12 lg:grid-cols-12 lg:gap-8">
           <SceneSlot
             scene="skills"
             fallback={<SceneFallback scene="skills" />}
-            className="aspect-[5/4] w-full max-h-[min(62svh,26rem)] lg:order-2 lg:col-span-6 lg:col-start-7 lg:aspect-auto lg:h-[min(70svh,42rem)] lg:max-h-none"
+            className="aspect-[5/4] w-full max-h-[min(62svh,26rem)] lg:sticky lg:top-[calc(var(--header-height)+2rem)] lg:order-2 lg:col-span-6 lg:col-start-7 lg:aspect-auto lg:h-[min(70svh,42rem)] lg:max-h-none"
           />
-          <div
-            data-parallax="copy"
-            className="flex flex-col gap-10 lg:order-1 lg:col-span-6"
-          >
-            <header className="flex flex-col gap-6">
-              <Eyebrow number={section.number}>Toolkit</Eyebrow>
-              <Heading level={2} id={headingId}>
-                {section.title}
-              </Heading>
-              <p data-reveal="fade" className="text-paper-dim">
-                Grouped by what my work and studies actually involve. Items
-                marked “to confirm” are mentioned in my project notes but not
-                yet confirmed.
-              </p>
-            </header>
+          <div className="flex flex-col lg:order-1 lg:col-span-6">
             <CardArranger
               id="skills-arrange"
               order={skillGroups.map((group) => group.id)}
             >
+              <header className="sticky top-[var(--header-height)] z-10 flex flex-col gap-6 bg-ink-950 pb-8 pt-1">
+                <Eyebrow number={section.number}>Toolkit</Eyebrow>
+                <Heading level={2} id={headingId}>
+                  {section.title}
+                </Heading>
+                <p data-reveal="fade" className="text-paper-dim">
+                  Grouped by what my work and studies actually involve. Items
+                  marked “to confirm” are mentioned in my project notes but not
+                  yet confirmed.
+                </p>
+              </header>
               <ul className="flex flex-col border-t border-line">
                 {skillGroups.map((group) => (
                   <li key={group.id}>
                     <div
                       data-arrange-item
                       data-arrange-id={group.id}
-                      className="border-b border-line"
+                      className="relative border-b border-line bg-ink-950"
                     >
                       <FocusTarget
                         kind="skillGroup"

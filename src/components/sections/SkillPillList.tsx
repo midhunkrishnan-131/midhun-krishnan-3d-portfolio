@@ -32,18 +32,20 @@ export function SkillPillList({
         gsap.set(pills, { clearProps: "all" });
       });
       mm.add("(prefers-reduced-motion: no-preference)", () => {
+        // No rotate: transforms do not affect flex-wrap layout, so a
+        // mid-scrub rotation made neighbouring pills overlap. The parent
+        // CardArranger already supplies the category's lift and turn.
         gsap.from(pills, {
-          y: 16,
+          y: 10,
           autoAlpha: 0,
-          rotate: -4,
-          duration: 0.5,
+          duration: 0.45,
           ease: "none",
-          stagger: 0.05,
+          stagger: 0.04,
           scrollTrigger: {
             trigger: el,
-            start: "top 88%",
-            end: "top 62%",
-            scrub: 0.55,
+            start: "top 90%",
+            end: "top 68%",
+            scrub: 0.5,
             invalidateOnRefresh: true,
           },
         });

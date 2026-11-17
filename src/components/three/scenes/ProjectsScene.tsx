@@ -8,6 +8,8 @@ import {
   ExtrudeGeometry,
   Float32BufferAttribute,
   Group,
+  type LineBasicMaterial,
+  LineSegments,
   MathUtils,
   type MeshStandardMaterial,
   Vector3,
@@ -22,6 +24,7 @@ import {
 import { projects } from "@/data/projects";
 import {
   createScenePointer,
+  pointerOnPlane,
   readScenePointer,
   screenDistance,
 } from "@/lib/three/pointer";
@@ -33,6 +36,7 @@ import type { SceneProps } from "@/types/three";
 const featured = projects.find((p) => p.featured) ?? projects[0];
 const orbiting = projects.filter((p) => p.slug !== featured.slug);
 const ORBIT = 2.15;
+const LINKS = 3;
 
 function orbitRing(radius: number, segments = 128): BufferGeometry {
   const pts: number[] = [];
@@ -48,6 +52,7 @@ function orbitRing(radius: number, segments = 128): BufferGeometry {
 /**
  * Project universe: MYX AI as the dominant central object, the other projects orbiting it.
  * Hovering or focusing a project card (see focusStore) pulls its object forward and lights it.
+ * The pointer also links to the nearest glyphs, matching the Skills constellation mouse.
  */
 export default function ProjectsScene({
   track,
@@ -83,6 +88,15 @@ export default function ProjectsScene({
       ember: materials.ember(0.6),
       line: materials.line(palette.paperDim, 0.22),
       orbitMats: orbiting.map(() => materials.ink(tier)),
+      linkGeo: (() => {
+        const geometry = new BufferGeometry();
+        geometry.setAttribute(
+          "position",
+          new Float32BufferAttribute(new Float32Array(LINKS * 6), 3),
+        );
+        return geometry;
+      })(),
+      linkMat: materials.line(palette.ember, 0),
       dispose() {
         this.featured.dispose();
         this.orbiting.forEach((g) => g.dispose());
@@ -91,6 +105,8 @@ export default function ProjectsScene({
         this.ember.dispose();
         this.line.dispose();
         this.orbitMats.forEach((m) => m.dispose());
+        this.linkGeo.dispose();
+        this.linkMat.dispose();
       },
     };
   }, tier);
@@ -98,6 +114,8 @@ export default function ProjectsScene({
   const sp = useMemo(() => createScenePointer(), []);
   const world = useMemo(() => new Vector3(), []);
   const hover = useRef(0);
+  const hit = useMemo(() => new Vector3(), []);
+  const linksRef = useRef<LineSegments>(null);
 
   useFrame((state, delta) => {
     const group = groupRef.current;
@@ -183,6 +201,55 @@ export default function ProjectsScene({
       k,
     );
     group.rotation.y = MathUtils.lerp(group.rotation.y, sp.x * h * 0.25, k);
+
+    // Same mouse language as Skills: the cursor becomes a temporary node
+    // and draws ember lines to the nearest project glyphs.
+    const links = linksRef.current;
+    if (links) {
+      const attr = links.geometry.getAttribute(
+        "position",
+      ) as Float32BufferAttribute;
+      let near = false;
+      if (h > 0.45 && animate) {
+        group.updateMatrixWorld();
+        near =
+          pointerOnPlane(
+            sp,
+            state.camera,
+            group.getWorldPosition(world),
+            hit,
+          ) !== null;
+      }
+      const targets: { d: number; x: number; y: number; z: number }[] = [];
+      if (near) {
+        group.worldToLocal(hit);
+        const consider = (item: Group | null) => {
+          if (!item) return;
+          item.getWorldPosition(world);
+          group.worldToLocal(world);
+          const d = world.distanceTo(hit);
+          if (d > 3.2) return;
+          targets.push({ d, x: world.x, y: world.y, z: world.z });
+        };
+        consider(hero.current);
+        items.current.forEach(consider);
+        targets.sort((a, b) => a.d - b.d);
+      }
+      for (let j = 0; j < LINKS; j++) {
+        const target = targets[j];
+        if (!target) {
+          attr.setXYZ(j * 2, 0, 0, 0);
+          attr.setXYZ(j * 2 + 1, 0, 0, 0);
+          continue;
+        }
+        attr.setXYZ(j * 2, hit.x, hit.y, hit.z);
+        attr.setXYZ(j * 2 + 1, target.x, target.y, target.z);
+      }
+      attr.needsUpdate = true;
+      (links.material as LineBasicMaterial).setValues({
+        opacity: near ? h * 0.75 : 0,
+      });
+    }
   });
 
   return (
@@ -199,6 +266,12 @@ export default function ProjectsScene({
           />
         </group>
         <lineSegments geometry={resources.ring} material={resources.line} />
+        <lineSegments
+          ref={linksRef}
+          geometry={resources.linkGeo}
+          material={resources.linkMat}
+          frustumCulled={false}
+        />
         {orbiting.map((p, i) => (
           <group
             key={p.slug}

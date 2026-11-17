@@ -5,9 +5,9 @@ import { SiteMenu } from "@/components/navigation/SiteMenu";
 
 export function SiteHeader() {
   return (
-    <header className="fixed inset-x-0 top-0 z-[55] h-(--header-height)">
+    <header className="fixed inset-x-0 top-0 z-[55] h-(--header-height) bg-ink-950">
       <div
-        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink-950/90 to-transparent"
+        className="pointer-events-none absolute inset-0 bg-ink-950"
         aria-hidden="true"
       />
       <div className="relative mx-auto flex h-full max-w-[96rem] items-center justify-between gap-6 px-(--gutter)">
