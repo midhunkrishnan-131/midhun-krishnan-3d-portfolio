@@ -3,8 +3,6 @@ import { site } from "@/data/site";
 import { DEFAULT_TITLE, homeDescription, palette } from "@/lib/seo/constants";
 import { withBasePath } from "@/lib/env";
 
-export const dynamic = "force-static";
-
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: DEFAULT_TITLE,
