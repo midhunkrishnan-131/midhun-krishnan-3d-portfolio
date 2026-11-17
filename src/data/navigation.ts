@@ -63,12 +63,9 @@ export const sections = [
 
 export const sectionHref = (id: SectionNavItem["id"]): string => `/#${id}`;
 
-/**
- * Header quick links. "Projects" points at the project universe section until the
- * /projects index ships in Phase 7.
- */
+/** Header quick links. "Projects" opens the project catalogue. */
 export const primaryLinks: readonly NavLink[] = [
-  { href: sectionHref("projects"), label: "Projects" },
+  { href: "/projects", label: "Projects" },
   { href: sectionHref("contact"), label: "Contact" },
 ];
 

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { projects } from "@/data/projects";
 import { getSection } from "@/data/navigation";
 import type { Project } from "@/types/project";
@@ -44,7 +45,13 @@ function ProjectCard({
             variant={featured ? "title" : "subtitle"}
             id={headingId}
           >
-            {project.title}
+            <Link
+              href={`/projects/${project.slug}`}
+              data-cursor="View"
+              className="transition-colors duration-(--duration-fast) hover:text-ember-soft"
+            >
+              {project.title}
+            </Link>
           </Heading>
           <p
             className={cn("text-paper-dim", featured && "text-lead text-paper")}
@@ -97,6 +104,7 @@ function ProjectCard({
                 href={project.demoUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                data-cursor="Open"
                 className="text-paper underline decoration-ember underline-offset-4 hover:text-ember-soft"
               >
                 Live demo<span className="sr-only"> (opens in a new tab)</span>
@@ -104,6 +112,13 @@ function ProjectCard({
             ) : (
               <span className="text-paper-faint">Demo to be added</span>
             )}
+            <Link
+              href={`/projects/${project.slug}`}
+              data-cursor="View"
+              className="text-paper underline decoration-ember underline-offset-4 hover:text-ember-soft"
+            >
+              Project details
+            </Link>
           </div>
         </article>
       </FocusTarget>
@@ -139,6 +154,15 @@ export function ProjectsSection() {
             {projects.length} projects across AI, Python and frontend
             development, each marked honestly as in progress, a prototype or
             planned.
+          </p>
+          <p data-reveal="fade">
+            <Link
+              href="/projects"
+              data-cursor="View"
+              className="text-sm text-paper underline decoration-ember underline-offset-4 hover:text-ember-soft"
+            >
+              Open the project catalogue
+            </Link>
           </p>
         </header>
         <div className="mt-16 grid gap-10 lg:grid-cols-12 lg:gap-8">
