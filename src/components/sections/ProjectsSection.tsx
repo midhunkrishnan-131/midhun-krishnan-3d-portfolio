@@ -173,7 +173,7 @@ export function ProjectsSection() {
             <SceneSlot
               scene="projects"
               fallback={<SceneFallback scene="projects" />}
-              className="aspect-[5/4] w-full max-h-[min(62svh,26rem)] lg:sticky lg:top-[calc(var(--header-height)+2rem)] lg:aspect-auto lg:h-[min(calc(100svh-var(--header-height)-4rem),44rem)] lg:max-h-none"
+              className="aspect-[5/4] max-h-[min(62svh,26rem)] w-full lg:sticky lg:top-[calc(var(--header-height)+2rem)] lg:aspect-auto lg:h-[min(calc(100svh-var(--header-height)-4rem),44rem)] lg:max-h-none"
             />
           </div>
           <ProjectScroll className="lg:col-span-7">

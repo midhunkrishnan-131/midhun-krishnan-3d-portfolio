@@ -92,20 +92,22 @@ export default function PerceptionScene({
   useFrame((state, delta) => {
     const group = groupRef.current;
     const mesh = nodesRef.current;
-    if (!group || !mesh || !active.current) return;
+    if (!group || !mesh) return;
     const target = animate ? progress.current : 0.7;
     smooth.current =
       smooth.current < 0 || !animate
         ? target
-        : MathUtils.lerp(smooth.current, target, damp(4, delta));
+        : MathUtils.lerp(smooth.current, target, damp(5, delta));
     const crawl =
       MathUtils.smoothstep(smooth.current, 0.2, 0.75) * (nodes.length - 1);
     const t = animate ? state.clock.elapsedTime : 0;
     const camera = state.camera;
-    readScenePointer(track.current, sp);
+    if (active.current) {
+      readScenePointer(track.current, sp);
+    }
     hover.current = MathUtils.lerp(
       hover.current,
-      sp.inside && animate ? 1 : 0,
+      sp.inside && animate && active.current ? 1 : 0,
       damp(5, delta),
     );
     const h = hover.current;

@@ -75,17 +75,19 @@ export default function BcaScene({
 
   useFrame((state, delta) => {
     const group = groupRef.current;
-    if (!group || !active.current) return;
+    if (!group) return;
     const target = animate ? progress.current : 0.6;
     smooth.current =
       smooth.current < 0 || !animate
         ? target
-        : MathUtils.lerp(smooth.current, target, damp(4, delta));
+        : MathUtils.lerp(smooth.current, target, damp(5, delta));
     const t = animate ? state.clock.elapsedTime : 0;
-    readScenePointer(track.current, sp);
+    if (active.current) {
+      readScenePointer(track.current, sp);
+    }
     hover.current = MathUtils.lerp(
       hover.current,
-      sp.inside && animate ? 1 : 0,
+      sp.inside && animate && active.current ? 1 : 0,
       damp(5, delta),
     );
     slabs.current.forEach((slab, i) => {

@@ -45,6 +45,7 @@ export default function MyxScene({
   const probeMesh = useRef<Mesh>(null);
   const nodes = useRef<(Mesh | null)[]>([]);
   const lines = useRef<(Mesh | null)[]>([]);
+  const smooth = useRef(-1);
   const sp = useMemo(() => createScenePointer(), []);
   const aim = useRef({ x: 0, y: 0 });
   const resources = useDisposable(() => {
@@ -105,15 +106,23 @@ export default function MyxScene({
   }, []);
 
   useFrame((state, delta) => {
-    if (!group.current || !active.current) return;
-    const p = animate ? progress.current : 0.55;
+    if (!group.current) return;
+    const target = animate ? progress.current : 0.55;
+    smooth.current =
+      smooth.current < 0 || !animate
+        ? target
+        : MathUtils.lerp(smooth.current, target, damp(5, delta));
+    const p = smooth.current;
     const open = MathUtils.smoothstep(p, 0.05, 0.55);
     group.current.scale.setScalar(MathUtils.lerp(0.72, 1, open));
     group.current.rotation.z = MathUtils.lerp(0.12, 0, open);
 
-    readScenePointer(track.current, sp);
+    if (active.current) {
+      readScenePointer(track.current, sp);
+    }
     const hit =
       animate &&
+      active.current &&
       sp.inside &&
       pointerOnPlane(sp, state.camera, PLANE, probe) !== null;
     const tx = hit ? MathUtils.clamp(probe.x, -2.2, 2.2) : 0;

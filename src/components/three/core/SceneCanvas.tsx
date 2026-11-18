@@ -2,8 +2,7 @@
 
 import { PerformanceMonitor, View } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useEffect, useRef } from "react";
-import { isGlForced } from "@/lib/three/capabilities";
+import { useEffect } from "react";
 import { gsap } from "@/lib/animations/gsap";
 import { useRenderStore } from "@/stores/renderStore";
 import { WebGLErrorBoundary } from "@/components/three/core/WebGLErrorBoundary";
@@ -46,21 +45,6 @@ function ContextGuard() {
   return null;
 }
 
-function FrameBudgetGuard() {
-  const setFailed = useRenderStore((s) => s.setFailed);
-  const samples = useRef<number[]>([]);
-  useFrame(() => {
-    const list = samples.current;
-    if (list.length > 40 || isGlForced()) return;
-    list.push(performance.now());
-    if (list.length === 40) {
-      const avg = (list[39] - list[10]) / 29;
-      if (avg > 120) setFailed();
-    }
-  });
-  return null;
-}
-
 /**
  * Single RAF: the canvas runs with frameloop="never" and is advanced from gsap.ticker — the
  * same clock that drives Lenis and ScrollTrigger. It only renders while a scene is on screen
@@ -70,35 +54,14 @@ function FrameBudgetGuard() {
 function TickerDriver() {
   const advance = useThree((s) => s.advance);
   useEffect(() => {
-    let dirty = true;
-    const mark = () => {
-      dirty = true;
-    };
-    const unsubscribe = useRenderStore.subscribe((s, prev) => {
-      if (
-        s.visible !== prev.visible ||
-        s.mounted !== prev.mounted ||
-        s.displayMode !== prev.displayMode
-      )
-        dirty = true;
-    });
-    window.addEventListener("scroll", mark, { passive: true });
-    window.addEventListener("resize", mark);
     const tick = (time: number) => {
-      const { visible, mounted, displayMode } = useRenderStore.getState();
-      // Tick whenever a 3D view is mounted, even if IntersectionObserver is
-      // late or prefers-reduced-motion is on — otherwise idle cycles freeze.
-      const continuous = displayMode === "3d" && (visible > 0 || mounted > 0);
-      if (!continuous && !dirty) return;
-      dirty = false;
+      const { displayMode } = useRenderStore.getState();
+      if (displayMode !== "3d") return;
       advance(time);
     };
     gsap.ticker.add(tick);
     return () => {
       gsap.ticker.remove(tick);
-      unsubscribe();
-      window.removeEventListener("scroll", mark);
-      window.removeEventListener("resize", mark);
     };
   }, [advance]);
   return null;
@@ -136,12 +99,8 @@ export default function SceneCanvas() {
           onDecline={() => setDpr(useRenderStore.getState().dpr - 0.25)}
           onIncline={() => setDpr(useRenderStore.getState().dpr + 0.25)}
           flipflops={3}
-          onFallback={() => {
-            if (!isGlForced()) setFailed();
-          }}
         />
         <ContextGuard />
-        <FrameBudgetGuard />
         <FrameClear />
         <TickerDriver />
         <View.Port />

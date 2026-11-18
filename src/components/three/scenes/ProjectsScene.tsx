@@ -119,20 +119,22 @@ export default function ProjectsScene({
 
   useFrame((state, delta) => {
     const group = groupRef.current;
-    if (!group || !active.current) return;
+    if (!group) return;
     const target = animate ? progress.current : 0.5;
     smooth.current =
       smooth.current < 0 || !animate
         ? target
-        : MathUtils.lerp(smooth.current, target, damp(4, delta));
+        : MathUtils.lerp(smooth.current, target, damp(5, delta));
     const t = animate ? state.clock.elapsedTime : 0;
     const focus = useFocusStore.getState().project;
     const k = animate ? damp(5, delta) : 1;
     // Mouse: the whole orbit parallaxes with the cursor; the glyph under it is pulled forward.
-    readScenePointer(track.current, sp);
+    if (active.current) {
+      readScenePointer(track.current, sp);
+    }
     hover.current = MathUtils.lerp(
       hover.current,
-      sp.inside && animate ? 1 : 0,
+      sp.inside && animate && active.current ? 1 : 0,
       damp(4, delta),
     );
     const h = hover.current;

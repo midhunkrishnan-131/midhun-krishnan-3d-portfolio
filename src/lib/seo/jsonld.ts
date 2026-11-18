@@ -21,6 +21,7 @@ import {
   breadcrumbId,
   canonicalUrl,
   homeDescription,
+  indexPageDescription,
   personDescription,
   projectPath,
   projectUrl,
@@ -210,6 +211,36 @@ export function buildProjectsIndexGraph(): Graph {
         { name: "Projects", path },
       ]),
       ...projects.map((project) => buildProjectWork(project)),
+    ],
+  };
+}
+
+/** Complete archive index: collection page with breadcrumb linking all chapters and sections. */
+export function buildIndexPageGraph(): Graph {
+  const path = "/index";
+  const url = canonicalUrl(path);
+  const collection: CollectionPage = {
+    "@type": "CollectionPage",
+    "@id": `${url}#page`,
+    url,
+    name: `Index — ${site.name}`,
+    description: indexPageDescription(),
+    inLanguage: "en",
+    isPartOf: websiteRef,
+    author: personRef,
+    breadcrumb: { "@id": breadcrumbId(path) },
+  };
+
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      buildPerson(),
+      buildWebsite(),
+      collection,
+      buildBreadcrumb([
+        { name: "Home", path: "/" },
+        { name: "Index", path },
+      ]),
     ],
   };
 }

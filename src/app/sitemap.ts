@@ -17,6 +17,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.8,
     },
+    {
+      url: canonicalUrl("/index"),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
     ...projects.map((project) => ({
       url: canonicalUrl(projectPath(project.slug)),
       changeFrequency: "monthly" as const,

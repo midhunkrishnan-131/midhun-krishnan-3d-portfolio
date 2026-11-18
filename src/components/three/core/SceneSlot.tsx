@@ -45,7 +45,7 @@ export function SceneSlot({
   scene,
   fallback,
   className,
-  preload = "60% 0px",
+  preload = "200% 0px",
   scrollTargetId,
   progressMode = "pass",
   reveal = false,
@@ -85,6 +85,7 @@ export function SceneSlot({
         progress.current = self.progress;
       },
     });
+    progress.current = trigger.progress;
     const { adjustMounted, adjustVisible } = useRenderStore.getState();
     let isNear = false;
     const nearObserver = new IntersectionObserver(
@@ -122,12 +123,11 @@ export function SceneSlot({
     if (show) active.current = true;
   }, [show]);
 
-  // If onReady is late, hide the fallback anyway once the view has had time to paint
-  // so static artwork cannot show through the transparent canvas.
+  // Hide the fallback immediately once show is true so 3D renders without delay
   useEffect(() => {
     if (!show) return;
-    const id = window.setTimeout(() => setReady(true), 700);
-    return () => window.clearTimeout(id);
+    const id = requestAnimationFrame(() => setReady(true));
+    return () => cancelAnimationFrame(id);
   }, [show]);
 
   return (
@@ -139,7 +139,7 @@ export function SceneSlot({
     >
       <div
         className={cn(
-          "absolute inset-0 transition-opacity duration-(--duration-cinematic) ease-in-out-soft",
+          "absolute inset-0 transition-opacity duration-(--duration-base) ease-in-out-soft",
           show && ready ? "invisible opacity-0" : "opacity-100",
         )}
       >

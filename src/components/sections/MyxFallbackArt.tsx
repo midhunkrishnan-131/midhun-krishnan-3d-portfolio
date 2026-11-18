@@ -17,8 +17,20 @@ export function MyxFallbackArt() {
         opacity="0.55"
       >
         <ellipse cx="200" cy="200" rx="150" ry="62" />
-        <ellipse cx="200" cy="200" rx="150" ry="62" transform="rotate(60 200 200)" />
-        <ellipse cx="200" cy="200" rx="150" ry="62" transform="rotate(-60 200 200)" />
+        <ellipse
+          cx="200"
+          cy="200"
+          rx="150"
+          ry="62"
+          transform="rotate(60 200 200)"
+        />
+        <ellipse
+          cx="200"
+          cy="200"
+          rx="150"
+          ry="62"
+          transform="rotate(-60 200 200)"
+        />
       </g>
       <path
         className="myx-flat__shield"

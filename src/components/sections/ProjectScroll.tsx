@@ -37,7 +37,7 @@ export function ProjectScroll({
           inners.forEach((card, i) => {
             gsap.fromTo(
               card,
-              { x: i === 0 ? 48 : 28, z: -40, rotateY: -4, autoAlpha: 0.55 },
+              { x: i === 0 ? 40 : 24, z: -30, rotateY: -3, autoAlpha: 0.8 },
               {
                 x: 0,
                 z: 0,
@@ -46,10 +46,12 @@ export function ProjectScroll({
                 ease: "none",
                 scrollTrigger: {
                   trigger: card,
-                  start: "top 88%",
-                  end: "top 58%",
-                  scrub: 0.6,
+                  start: "top 90%",
+                  end: "top 62%",
+                  scrub: 0.5,
                   invalidateOnRefresh: true,
+                  onLeave: () =>
+                    gsap.set(card, { clearProps: "opacity,visibility" }),
                 },
               },
             );
@@ -59,19 +61,25 @@ export function ProjectScroll({
       mm.add(
         "(prefers-reduced-motion: no-preference) and (max-width: 63.999rem)",
         () => {
-          gsap.from(inners, {
-            y: 32,
-            autoAlpha: 0.5,
-            ease: "none",
-            stagger: 0.08,
-            scrollTrigger: {
-              trigger: el,
-              start: "top 90%",
-              end: "top 60%",
-              scrub: 0.55,
-              invalidateOnRefresh: true,
+          gsap.fromTo(
+            inners,
+            { y: 28, autoAlpha: 0.8 },
+            {
+              y: 0,
+              autoAlpha: 1,
+              ease: "none",
+              stagger: 0.08,
+              scrollTrigger: {
+                trigger: el,
+                start: "top 92%",
+                end: "top 65%",
+                scrub: 0.5,
+                invalidateOnRefresh: true,
+                onLeave: () =>
+                  gsap.set(inners, { clearProps: "opacity,visibility" }),
+              },
             },
-          });
+          );
         },
       );
     },

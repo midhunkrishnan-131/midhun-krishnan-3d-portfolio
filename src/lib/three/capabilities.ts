@@ -59,7 +59,7 @@ export const isGlForced = (): boolean => glOverride() === "force";
 
 export function detectCapabilities(): RenderCapabilities {
   const override = glOverride();
-  const webgl = override === "off" ? false : hasWebGL(override !== "force");
+  const webgl = override === "off" ? false : hasWebGL(false);
   const nav = navigator as Navigator & NavigatorHints;
   const cores = nav.hardwareConcurrency ?? 4;
   const memory = nav.deviceMemory ?? 8;

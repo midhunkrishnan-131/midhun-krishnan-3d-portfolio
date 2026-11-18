@@ -61,8 +61,20 @@ export function SmoothScroll() {
 
   // Route change: jump to top (or the hash target) and re-measure triggers.
   useEffect(() => {
-    if (!window.location.hash)
+    if (window.location.hash) {
+      const el = document.querySelector(window.location.hash);
+      if (el) {
+        requestAnimationFrame(() => {
+          getLenis()?.scrollTo(el as HTMLElement, {
+            offset: -72,
+            immediate: true,
+          });
+          ScrollTrigger.refresh();
+        });
+      }
+    } else {
       getLenis()?.scrollTo(0, { immediate: true, force: true });
+    }
     const id = requestAnimationFrame(() => ScrollTrigger.refresh());
     return () => cancelAnimationFrame(id);
   }, [pathname]);

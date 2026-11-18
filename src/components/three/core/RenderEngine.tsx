@@ -1,11 +1,16 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { detectCapabilities } from "@/lib/three/capabilities";
 import { readDisplayMode } from "@/lib/three/displayMode";
 import { attachPointer } from "@/lib/three/pointer";
+import { ScrollTrigger } from "@/lib/animations/gsap";
 import { useRenderStore } from "@/stores/renderStore";
+
+const emptySubscribe = () => () => {};
+const getClientSnapshot = () => true;
+const getServerSnapshot = () => false;
 
 const SceneCanvas = dynamic(
   () => import("@/components/three/core/SceneCanvas"),
@@ -15,22 +20,20 @@ const SceneCanvas = dynamic(
   },
 );
 
-type IdleWindow = Window & {
-  requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
-  cancelIdleCallback?: (id: number) => void;
-};
-
 /**
  * Mounted once in the root layout. Detects capabilities into the render store, tracks
- * reduced-motion and the pointer, and — only once a scene slot is near the viewport and the
- * browser is idle — loads the single shared canvas. Renders nothing on the server.
+ * reduced-motion and the pointer, and mounts the single shared WebGL canvas immediately
+ * on the client when 3D is active.
  */
 export function RenderEngine() {
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    getClientSnapshot,
+    getServerSnapshot,
+  );
   const webgl = useRenderStore((s) => s.caps?.webgl === true);
   const failed = useRenderStore((s) => s.failed);
   const displayMode = useRenderStore((s) => s.displayMode);
-  const wanted = useRenderStore((s) => s.mounted > 0);
-  const [idle, setIdle] = useState(false);
 
   useEffect(() => {
     const { setCaps, setReducedMotion, setDisplayMode } =
@@ -48,28 +51,16 @@ export function RenderEngine() {
     };
   }, []);
 
-  useEffect(() => {
-    if (!webgl || displayMode !== "3d" || !wanted || idle) return;
-    const win = window as IdleWindow;
-    if (win.requestIdleCallback) {
-      const id = win.requestIdleCallback(() => setIdle(true), {
-        timeout: 1500,
-      });
-      return () => win.cancelIdleCallback?.(id);
-    }
-    const id = window.setTimeout(() => setIdle(true), 300);
-    return () => window.clearTimeout(id);
-  }, [webgl, displayMode, wanted, idle]);
-
   const live = webgl && !failed && displayMode === "3d";
   useEffect(() => {
     const root = document.documentElement;
     if (live) root.dataset.gl = "on";
     else delete root.dataset.gl;
     window.dispatchEvent(new Event("gl-layout-change"));
+    requestAnimationFrame(() => {
+      ScrollTrigger.refresh();
+    });
   }, [live]);
 
-  return webgl && displayMode === "3d" && idle && !failed ? (
-    <SceneCanvas />
-  ) : null;
+  return mounted && live ? <SceneCanvas /> : null;
 }

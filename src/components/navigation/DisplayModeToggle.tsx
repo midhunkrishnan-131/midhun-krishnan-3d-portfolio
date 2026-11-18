@@ -13,15 +13,15 @@ import { cn } from "@/lib/utils/cn";
  */
 export function DisplayModeToggle() {
   const mode = useRenderStore((s) => s.displayMode);
-  const caps = useRenderStore((s) => s.caps);
-  const failed = useRenderStore((s) => s.failed);
-  const capsKnown = caps !== null;
-  const canUse3d = !capsKnown || caps.webgl;
-  const canRetry = canUse3d; // context-loss sets failed; the user can still ask for 3D again
 
   const setMode = (next: DisplayMode) => {
-    if (next === "3d" && capsKnown && !canRetry) return;
-    if (next === "3d" && failed) useRenderStore.getState().clearFailed();
+    if (next === "3d") {
+      useRenderStore.getState().clearFailed();
+      const currentCaps = useRenderStore.getState().caps;
+      if (currentCaps && !currentCaps.webgl) {
+        useRenderStore.getState().setCaps({ ...currentCaps, webgl: true });
+      }
+    }
     // Anchor to the section in view. Raw scrollY is wrong once the hero pin
     // height changes with data-gl, and window.scrollTo is overwritten by Lenis.
     const y = window.scrollY;
@@ -29,9 +29,7 @@ export function DisplayModeToggle() {
       .elementFromPoint(window.innerWidth / 2, window.innerHeight * 0.42)
       ?.closest("section");
     const sectionId = section?.id ?? null;
-    const sectionTop = section
-      ? section.getBoundingClientRect().top + y
-      : 0;
+    const sectionTop = section ? section.getBoundingClientRect().top + y : 0;
     const offsetInSection = section ? y - sectionTop : y;
 
     const restore = () => {
@@ -39,7 +37,8 @@ export function DisplayModeToggle() {
       if (sectionId) {
         const el = document.getElementById(sectionId);
         if (el) {
-          target = el.getBoundingClientRect().top + window.scrollY + offsetInSection;
+          target =
+            el.getBoundingClientRect().top + window.scrollY + offsetInSection;
         }
       }
       const lenis = getLenis();
@@ -58,6 +57,7 @@ export function DisplayModeToggle() {
 
     useRenderStore.getState().setDisplayMode(next);
     persistDisplayMode(next);
+    settle();
 
     window.addEventListener("gl-layout-change", settle, { once: true });
     window.setTimeout(settle, 80);
@@ -72,17 +72,15 @@ export function DisplayModeToggle() {
       <button
         type="button"
         aria-pressed={mode === "3d"}
-        aria-disabled={capsKnown && !canRetry}
-        disabled={capsKnown && !canRetry}
-        title={
-          capsKnown && !canRetry
-            ? "3D is unavailable on this device, so the static artwork stays on"
-            : "Show the 3D scenes"
-        }
+        title="Show the 3D scenes"
         onClick={() => setMode("3d")}
+        onTouchEnd={(e) => {
+          e.preventDefault();
+          setMode("3d");
+        }}
         className={cn(
-          "transition-colors duration-(--duration-fast) ease-cinematic hover:text-paper",
-          mode === "3d" && "text-paper",
+          "cursor-pointer select-none transition-colors duration-(--duration-fast) ease-cinematic hover:text-paper",
+          mode === "3d" && "text-paper font-semibold underline underline-offset-4",
         )}
       >
         3D
@@ -93,9 +91,13 @@ export function DisplayModeToggle() {
         aria-pressed={mode === "flat"}
         title="Show the static artwork only"
         onClick={() => setMode("flat")}
+        onTouchEnd={(e) => {
+          e.preventDefault();
+          setMode("flat");
+        }}
         className={cn(
-          "transition-colors duration-(--duration-fast) ease-cinematic hover:text-paper",
-          mode === "flat" && "text-paper",
+          "cursor-pointer select-none transition-colors duration-(--duration-fast) ease-cinematic hover:text-paper",
+          mode === "flat" && "text-paper font-semibold underline underline-offset-4",
         )}
       >
         Flat

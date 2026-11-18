@@ -201,19 +201,22 @@ export default function FutureScene({
 
   useFrame((state, delta) => {
     const group = groupRef.current;
-    if (!group || !active.current) return;
+    if (!group) return;
     const target = animate ? progress.current : 0.65;
     smooth.current =
       smooth.current < 0 || !animate
         ? target
-        : MathUtils.lerp(smooth.current, target, damp(4, delta));
+        : MathUtils.lerp(smooth.current, target, damp(5, delta));
     const p = smooth.current;
-    readScenePointer(track.current, sp);
+    if (active.current) {
+      readScenePointer(track.current, sp);
+    }
     const ground = groundRef.current?.material as ShaderMaterial | undefined;
     if (ground) {
       ground.uniforms.uTime.value = animate ? state.clock.elapsedTime : 0;
       ground.uniforms.uDawn.value = MathUtils.smoothstep(p, 0.2, 0.7);
       const onGround =
+        active.current &&
         sp.inside &&
         animate &&
         pointerOnPlane(sp, state.camera, GROUND_POINT, hit, UP) !== null &&

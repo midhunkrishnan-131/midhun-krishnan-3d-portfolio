@@ -385,7 +385,6 @@ html[data-gl="on"] .hero-pin {
   }
 }
 
-
 /* Fluid type: keep headings readable on phones and short laptops, capped on large monitors. */
 @media (max-width: 40rem) {
   :root {

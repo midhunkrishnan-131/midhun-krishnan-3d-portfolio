@@ -22,6 +22,7 @@ const DYNAMIC_PARAMS = "export const dynamicParams = false;\n\n";
 const STATIC_ROUTES = [
   "src/app/apple-icon.tsx",
   "src/app/icon.tsx",
+  "src/app/index/opengraph-image.tsx",
   "src/app/manifest.ts",
   "src/app/opengraph-image.tsx",
   "src/app/projects/opengraph-image.tsx",
@@ -39,7 +40,9 @@ function firstMarker(source, markers) {
     if (at !== -1 && (index === -1 || at < index)) index = at;
   }
   if (index === -1) {
-    throw new Error(`Cannot inject Pages segment config: missing ${markers.join(", ")}`);
+    throw new Error(
+      `Cannot inject Pages segment config: missing ${markers.join(", ")}`,
+    );
   }
   return index;
 }

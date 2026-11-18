@@ -103,10 +103,7 @@ function scatterFor(item: HTMLElement, root: HTMLElement): Scatter {
     root.clientHeight - place.top - item.offsetHeight,
   );
 
-  const siblings = gsap.utils.toArray<HTMLElement>(
-    "[data-arrange-item]",
-    root,
-  );
+  const siblings = gsap.utils.toArray<HTMLElement>("[data-arrange-item]", root);
   const index = siblings.indexOf(item);
   const prev = index > 0 ? siblings[index - 1] : null;
   const next =
@@ -114,9 +111,7 @@ function scatterFor(item: HTMLElement, root: HTMLElement): Scatter {
   const prevBottom = prev
     ? offsetWithin(prev, root).top + prev.offsetHeight
     : 0;
-  const nextTop = next
-    ? offsetWithin(next, root).top
-    : root.clientHeight;
+  const nextTop = next ? offsetWithin(next, root).top : root.clientHeight;
   // Allowed travel into the gap (and a little into the neighbour) without
   // covering the next heading. Tight stacks have almost no formal gap.
   const gapUp = Math.max(0, place.top - prevBottom);
@@ -450,7 +445,7 @@ function createArrangement(
       if (self.direction === 1) self.animation?.progress(1);
     },
     onLeaveBack: (self) => {
-      self.animation?.progress(0);
+      if (self.direction === -1) self.animation?.progress(0);
     },
   });
 }

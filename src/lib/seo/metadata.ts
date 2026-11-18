@@ -7,6 +7,7 @@ import {
   TITLE_TEMPLATE,
   canonicalUrl,
   homeDescription,
+  indexPageDescription,
   palette,
   projectPath,
   projectsIndexDescription,
@@ -103,6 +104,14 @@ export function buildProjectsIndexMetadata(): Metadata {
     title: "Projects",
     description: projectsIndexDescription(),
     path: "/projects",
+  });
+}
+
+export function buildIndexPageMetadata(): Metadata {
+  return buildPageMetadata({
+    title: "Index",
+    description: indexPageDescription(),
+    path: "/index",
   });
 }
 

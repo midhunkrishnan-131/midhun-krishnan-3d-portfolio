@@ -73,7 +73,7 @@ export default function ExperienceScene({
     const open = MathUtils.smoothstep(p, 0.04, 0.48);
     const t = state.clock.elapsedTime;
     const rate = animate ? 1 : 0.45;
-    cycle.current = (t * rate % 6) / 6;
+    cycle.current = ((t * rate) % 6) / 6;
 
     root.current.position.y = MathUtils.lerp(-0.16, 0.02, open);
     root.current.rotation.y = 0.18 + Math.sin(t * 0.08) * 0.02;
@@ -102,7 +102,8 @@ export default function ExperienceScene({
       head.current.rotation.x = -0.08 + trouble * -0.18 + reach * 0.08;
       head.current.rotation.z = -0.04 - trouble * 0.1;
     }
-    if (lArm.current) lArm.current.rotation.x = 1.05 + tapL * 0.45 - trouble * 0.55;
+    if (lArm.current)
+      lArm.current.rotation.x = 1.05 + tapL * 0.45 - trouble * 0.55;
     if (lFore.current) lFore.current.rotation.x = 0.35 + tapL * 0.7;
     if (lHand.current) {
       lHand.current.rotation.x = tapL * 0.7;
@@ -125,7 +126,9 @@ export default function ExperienceScene({
     }
     fill.current = MathUtils.lerp(
       fill.current,
-      trouble > 0.2 ? 0.25 + trouble * 0.75 : 0.18 + (c < 0.28 ? c * 0.4 : 0.12),
+      trouble > 0.2
+        ? 0.25 + trouble * 0.75
+        : 0.18 + (c < 0.28 ? c * 0.4 : 0.12),
       damp(5, delta),
     );
     if (bar.current) bar.current.scale.x = Math.max(0.08, fill.current);
@@ -150,7 +153,8 @@ export default function ExperienceScene({
     pips.current.forEach((mat, i) => {
       if (!mat) return;
       const pulse = Math.sin(t * 2.6 + i * 1.8) * 0.5 + 0.5;
-      mat.emissiveIntensity = 0.35 + pulse * (i === 0 && trouble > 0.4 ? 1.1 : 0.8);
+      mat.emissiveIntensity =
+        0.35 + pulse * (i === 0 && trouble > 0.4 ? 1.1 : 0.8);
     });
   });
 
@@ -292,7 +296,11 @@ export default function ExperienceScene({
         </group>
 
         {/* Keyboard + mouse */}
-        <mesh position={[-0.55, -0.56, 0.38]} rotation={[0.02, 0.15, 0]} castShadow>
+        <mesh
+          position={[-0.55, -0.56, 0.38]}
+          rotation={[0.02, 0.15, 0]}
+          castShadow
+        >
           <boxGeometry args={[0.95, 0.045, 0.34]} />
           <meshStandardMaterial color="#2a2a2a" roughness={0.42} />
         </mesh>
@@ -313,26 +321,53 @@ export default function ExperienceScene({
           </mesh>
           <mesh position={[0, -0.52, 0]} castShadow>
             <cylinderGeometry args={[0.07, 0.09, 0.42, 10]} />
-            <meshStandardMaterial color="#3a3a3a" roughness={0.45} metalness={0.25} />
+            <meshStandardMaterial
+              color="#3a3a3a"
+              roughness={0.45}
+              metalness={0.25}
+            />
           </mesh>
           <mesh position={[0, -0.74, 0]} rotation={[0, 0.2, 0]} castShadow>
             <cylinderGeometry args={[0.34, 0.34, 0.05, 5]} />
-            <meshStandardMaterial color="#2a2a2a" roughness={0.5} metalness={0.2} />
+            <meshStandardMaterial
+              color="#2a2a2a"
+              roughness={0.5}
+              metalness={0.2}
+            />
           </mesh>
         </group>
 
         {/* Technician — seated, 3/4, facing the monitor */}
-        <group position={[-0.95, -0.28, 0.42]} rotation={[0, Math.PI / 2 - 0.32, 0]}>
+        <group
+          position={[-0.95, -0.28, 0.42]}
+          rotation={[0, Math.PI / 2 - 0.32, 0]}
+        >
           {/* Pelvis / thighs */}
-          <mesh position={[0, -0.22, 0.18]} rotation={[Math.PI / 2.15, 0, 0]} castShadow>
+          <mesh
+            position={[0, -0.22, 0.18]}
+            rotation={[Math.PI / 2.15, 0, 0]}
+            castShadow
+          >
             <boxGeometry args={[0.4, 0.18, 0.36]} />
-            <meshStandardMaterial color={PANTS} roughness={0.62} metalness={0.04} />
+            <meshStandardMaterial
+              color={PANTS}
+              roughness={0.62}
+              metalness={0.04}
+            />
           </mesh>
-          <mesh position={[-0.11, -0.46, 0.38]} rotation={[0.2, 0, 0]} castShadow>
+          <mesh
+            position={[-0.11, -0.46, 0.38]}
+            rotation={[0.2, 0, 0]}
+            castShadow
+          >
             <boxGeometry args={[0.15, 0.42, 0.16]} />
             <meshStandardMaterial color={PANTS} roughness={0.62} />
           </mesh>
-          <mesh position={[0.11, -0.46, 0.38]} rotation={[0.2, 0, 0]} castShadow>
+          <mesh
+            position={[0.11, -0.46, 0.38]}
+            rotation={[0.2, 0, 0]}
+            castShadow
+          >
             <boxGeometry args={[0.15, 0.42, 0.16]} />
             <meshStandardMaterial color={PANTS} roughness={0.62} />
           </mesh>
@@ -341,13 +376,25 @@ export default function ExperienceScene({
             {/* Torso + shoulders */}
             <mesh position={[0, 0.3, 0.02]} rotation={[0.08, 0, 0]} castShadow>
               <boxGeometry args={[0.44, 0.58, 0.26]} />
-              <meshStandardMaterial color={SHIRT} roughness={0.55} metalness={0.05} />
+              <meshStandardMaterial
+                color={SHIRT}
+                roughness={0.55}
+                metalness={0.05}
+              />
             </mesh>
-            <mesh position={[-0.28, 0.5, 0.02]} rotation={[0, 0, 0.18]} castShadow>
+            <mesh
+              position={[-0.28, 0.5, 0.02]}
+              rotation={[0, 0, 0.18]}
+              castShadow
+            >
               <boxGeometry args={[0.16, 0.14, 0.2]} />
               <meshStandardMaterial color={SHIRT} roughness={0.55} />
             </mesh>
-            <mesh position={[0.28, 0.5, 0.02]} rotation={[0, 0, -0.18]} castShadow>
+            <mesh
+              position={[0.28, 0.5, 0.02]}
+              rotation={[0, 0, -0.18]}
+              castShadow
+            >
               <boxGeometry args={[0.16, 0.14, 0.2]} />
               <meshStandardMaterial color={SHIRT} roughness={0.55} />
             </mesh>
@@ -356,25 +403,45 @@ export default function ExperienceScene({
             <group ref={head} position={[0, 0.64, 0.04]}>
               <mesh position={[0, 0.07, 0]} castShadow>
                 <cylinderGeometry args={[0.055, 0.065, 0.12, 10]} />
-                <meshStandardMaterial color={SKIN} roughness={0.55} metalness={0.04} />
+                <meshStandardMaterial
+                  color={SKIN}
+                  roughness={0.55}
+                  metalness={0.04}
+                />
               </mesh>
               <mesh position={[0, 0.26, 0.02]} castShadow>
                 <sphereGeometry args={[0.16, 20, 20]} />
-                <meshStandardMaterial color={SKIN} roughness={0.52} metalness={0.04} />
+                <meshStandardMaterial
+                  color={SKIN}
+                  roughness={0.52}
+                  metalness={0.04}
+                />
               </mesh>
-              <mesh position={[0, 0.34, -0.02]} scale={[1, 0.55, 1.05]} castShadow>
+              <mesh
+                position={[0, 0.34, -0.02]}
+                scale={[1, 0.55, 1.05]}
+                castShadow
+              >
                 <sphereGeometry args={[0.155, 18, 18]} />
                 <meshStandardMaterial color={HAIR} roughness={0.72} />
               </mesh>
             </group>
 
             {/* Left arm (far, on the keyboard) */}
-            <group ref={lArm} position={[-0.32, 0.46, 0.04]} rotation={[1.05, 0, 0.28]}>
+            <group
+              ref={lArm}
+              position={[-0.32, 0.46, 0.04]}
+              rotation={[1.05, 0, 0.28]}
+            >
               <mesh position={[0, -0.17, 0]} castShadow>
                 <boxGeometry args={[0.11, 0.34, 0.11]} />
                 <meshStandardMaterial color={SHIRT} roughness={0.55} />
               </mesh>
-              <group ref={lFore} position={[0, -0.36, 0]} rotation={[0.35, 0, 0]}>
+              <group
+                ref={lFore}
+                position={[0, -0.36, 0]}
+                rotation={[0.35, 0, 0]}
+              >
                 <mesh position={[0, -0.15, 0]} castShadow>
                   <boxGeometry args={[0.1, 0.3, 0.1]} />
                   <meshStandardMaterial color={SHIRT} roughness={0.55} />
@@ -395,12 +462,20 @@ export default function ExperienceScene({
             </group>
 
             {/* Right arm (near, types then reaches for the mouse) */}
-            <group ref={rArm} position={[0.32, 0.46, 0.04]} rotation={[1.05, 0, -0.22]}>
+            <group
+              ref={rArm}
+              position={[0.32, 0.46, 0.04]}
+              rotation={[1.05, 0, -0.22]}
+            >
               <mesh position={[0, -0.17, 0]} castShadow>
                 <boxGeometry args={[0.11, 0.34, 0.11]} />
                 <meshStandardMaterial color={SHIRT} roughness={0.55} />
               </mesh>
-              <group ref={rFore} position={[0, -0.36, 0]} rotation={[0.32, 0, 0]}>
+              <group
+                ref={rFore}
+                position={[0, -0.36, 0]}
+                rotation={[0.32, 0, 0]}
+              >
                 <mesh position={[0, -0.15, 0]} castShadow>
                   <boxGeometry args={[0.1, 0.3, 0.1]} />
                   <meshStandardMaterial color={SHIRT} roughness={0.55} />

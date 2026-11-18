@@ -31,7 +31,7 @@ export function HeroSection() {
             scene="hero"
             scrollTargetId={section.id}
             progressMode="pin"
-            preload="30% 0px"
+            preload="200% 0px"
             fallback={<HeroFallbackArt />}
             className="absolute inset-0"
           />

@@ -42,12 +42,12 @@ export function StruggleFallbackArt() {
         },
       });
       tl.to(knot, { strokeDashoffset: 0, ease: "none", duration: 0.45 }, 0);
+      tl.to(knot, { autoAlpha: 0.2, ease: "none", duration: 0.4 }, 0.45);
       tl.to(
-        knot,
-        { autoAlpha: 0.2, ease: "none", duration: 0.4 },
-        0.45,
+        calm,
+        { autoAlpha: 0.85, ease: "none", duration: 0.4, stagger: 0.05 },
+        0.5,
       );
-      tl.to(calm, { autoAlpha: 0.85, ease: "none", duration: 0.4, stagger: 0.05 }, 0.5);
 
       return () => {
         tl.scrollTrigger?.kill();

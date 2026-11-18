@@ -122,27 +122,37 @@ export default function SkillsScene({
   useFrame((state, delta) => {
     const group = groupRef.current;
     const mesh = meshRef.current;
-    if (!group || !mesh || !active.current) return;
+    if (!group || !mesh) return;
     const target = animate ? progress.current : 0.5;
     smooth.current =
       smooth.current < 0 || !animate
         ? target
-        : MathUtils.lerp(smooth.current, target, damp(4, delta));
+        : MathUtils.lerp(smooth.current, target, damp(5, delta));
     const appear = MathUtils.smoothstep(smooth.current, 0.1, 0.45);
     const t = animate ? state.clock.elapsedTime : 0;
     const focusId = useFocusStore.getState().skillGroup;
     const focus = skillGroups.findIndex((g) => g.id === focusId);
 
     // Mouse: the cursor becomes a temporary star, linking itself to the nearest nodes.
-    readScenePointer(track.current, sp);
     let near = false;
-    if (sp.inside && animate && appear > 0.5) {
-      group.updateMatrixWorld();
-      near =
-        pointerOnPlane(sp, state.camera, group.getWorldPosition(world), hit) !==
-        null;
+    if (active.current) {
+      readScenePointer(track.current, sp);
+      if (sp.inside && animate && appear > 0.5) {
+        group.updateMatrixWorld();
+        near =
+          pointerOnPlane(
+            sp,
+            state.camera,
+            group.getWorldPosition(world),
+            hit,
+          ) !== null;
+      }
     }
-    hover.current = MathUtils.lerp(hover.current, near ? 1 : 0, damp(6, delta));
+    hover.current = MathUtils.lerp(
+      hover.current,
+      near && active.current ? 1 : 0,
+      damp(6, delta),
+    );
     const nearest = nearestRef.current;
     const nearestD = nearestDRef.current;
     nearest.fill(-1);

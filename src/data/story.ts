@@ -116,6 +116,7 @@ export const chapters = {
     facts: [
       { label: "Role", value: "Generative AI Developer (training)" },
       { label: "Focus", value: "Python, Gen AI, RAG, FastAPI, APIs" },
+      { label: "GitHub", value: "github.com/midhunkrishnan-131" },
     ],
   },
   bca: {

@@ -157,23 +157,30 @@ export function ScrollAnimations() {
             type: "lines",
             mask: "lines",
             autoSplit: true,
-            onSplit: (self) =>
-              gsap.from(self.lines, {
+            onSplit: (self) => {
+              const tween = gsap.from(self.lines, {
                 yPercent: 110,
-                ease: above ? STORY_EASE : "none",
-                duration: 1.2,
-                stagger: 0.09,
-                delay: above ? 0.12 : 0,
+                ease: STORY_EASE,
+                duration: above ? 0.9 : 1.1,
+                stagger: 0.08,
+                delay: above ? 0.1 : 0,
                 force3D: false,
                 scrollTrigger: above
                   ? undefined
                   : {
                       trigger: el,
                       start: "top 88%",
-                      end: "top 58%",
-                      scrub: SCRUB,
+                      toggleActions: "play none none reverse",
                     },
-              }),
+                onComplete: () => {
+                  gsap.set(self.lines, { clearProps: "transform" });
+                },
+              });
+              cleanups.push(() => {
+                tween.scrollTrigger?.kill();
+                tween.kill();
+              });
+            },
           }),
         );
       });
@@ -185,20 +192,30 @@ export function ScrollAnimations() {
             type: "words",
             aria: "hidden",
             autoSplit: true,
-            onSplit: (self) =>
-              gsap.from(self.words, {
+            onSplit: (self) => {
+              const tween = gsap.from(self.words, {
                 yPercent: 36,
                 autoAlpha: 0,
-                ease: "none",
-                stagger: 0.03,
+                ease: "power2.out",
+                duration: 0.85,
+                stagger: 0.025,
                 force3D: false,
                 scrollTrigger: {
                   trigger: el,
                   start: "top 90%",
-                  end: "top 60%",
-                  scrub: SCRUB,
+                  toggleActions: "play none none reverse",
                 },
-              }),
+                onComplete: () => {
+                  gsap.set(self.words, {
+                    clearProps: "transform,opacity,visibility",
+                  });
+                },
+              });
+              cleanups.push(() => {
+                tween.scrollTrigger?.kill();
+                tween.kill();
+              });
+            },
           }),
         );
       });
@@ -207,46 +224,67 @@ export function ScrollAnimations() {
         .toArray<HTMLElement>("[data-reveal='eyebrow']")
         .forEach((el) => {
           if (isHeroChild(el)) return;
-          gsap.from(el, {
+          const tween = gsap.from(el, {
             y: 16,
             autoAlpha: 0,
-            ease: "none",
+            duration: 0.7,
+            ease: "power2.out",
             scrollTrigger: {
               trigger: el,
               start: "top 92%",
-              end: "top 74%",
-              scrub: SCRUB,
+              toggleActions: "play none none reverse",
             },
+            onComplete: () => {
+              gsap.set(el, { clearProps: "transform,opacity,visibility" });
+            },
+          });
+          cleanups.push(() => {
+            tween.scrollTrigger?.kill();
+            tween.kill();
           });
         });
 
       gsap.utils.toArray<HTMLElement>("[data-reveal='fade']").forEach((el) => {
         if (isHeroChild(el)) return;
-        gsap.from(el, {
-          y: 28,
+        const tween = gsap.from(el, {
+          y: 24,
           autoAlpha: 0,
-          ease: "none",
+          duration: 0.8,
+          ease: "power2.out",
           scrollTrigger: {
             trigger: el,
             start: "top 92%",
-            end: "top 68%",
-            scrub: SCRUB,
+            toggleActions: "play none none reverse",
           },
+          onComplete: () => {
+            gsap.set(el, { clearProps: "transform,opacity,visibility" });
+          },
+        });
+        cleanups.push(() => {
+          tween.scrollTrigger?.kill();
+          tween.kill();
         });
       });
 
       gsap.utils.toArray<HTMLElement>("[data-reveal='card']").forEach((el) => {
-        gsap.from(el, {
-          y: 36,
+        const tween = gsap.from(el, {
+          y: 32,
           autoAlpha: 0,
-          ease: "none",
+          duration: 0.85,
+          ease: "power2.out",
           scrollTrigger: {
             trigger: el,
-            start: "top 94%",
-            end: "top 70%",
-            scrub: SCRUB,
+            start: "top 92%",
+            toggleActions: "play none none reverse",
             onToggle: (self) => willMotion(el, self.isActive),
           },
+          onComplete: () => {
+            gsap.set(el, { clearProps: "transform,opacity,visibility" });
+          },
+        });
+        cleanups.push(() => {
+          tween.scrollTrigger?.kill();
+          tween.kill();
         });
       });
 
@@ -255,17 +293,24 @@ export function ScrollAnimations() {
         .forEach((el) => {
           const items = Array.from(el.children);
           if (!items.length) return;
-          gsap.from(items, {
-            y: 24,
+          const tween = gsap.from(items, {
+            y: 20,
             autoAlpha: 0,
-            ease: "none",
-            stagger: 0.1,
+            duration: 0.7,
+            ease: "power2.out",
+            stagger: 0.08,
             scrollTrigger: {
               trigger: el,
-              start: "top 90%",
-              end: "top 60%",
-              scrub: SCRUB,
+              start: "top 92%",
+              toggleActions: "play none none reverse",
             },
+            onComplete: () => {
+              gsap.set(items, { clearProps: "transform,opacity,visibility" });
+            },
+          });
+          cleanups.push(() => {
+            tween.scrollTrigger?.kill();
+            tween.kill();
           });
         });
 

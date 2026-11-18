@@ -12,6 +12,7 @@ import {
   MathUtils,
   Mesh,
   MeshStandardMaterial,
+  PointLight,
   Points,
   type PointsMaterial,
 } from "three";
@@ -30,16 +31,14 @@ const TOP = 0.5;
 const APEX = 1.15;
 
 /**
- * Folded paper rocket. Every triangle has two positions: where it lies on the flat, unfolded
- * sheet and where it sits on the finished rocket. A single morph target folds one into the
- * other, so scrolling literally folds the sheet. Groups: 0 = paper, 1 = ember-tinted fins.
+ * 3D Origami paper rocket. A faceted geometric rocket that remains 3D at all times
+ * during scroll — it never collapses or flattens into a 2D sheet.
+ * Groups: 0 = paper body & nose cone, 1 = ember-tinted aerodynamic fins.
  */
 function buildRocket(): BufferGeometry {
-  const folded: number[] = [];
-  const flat: number[] = [];
-  const push = (f: V[], u: V[]) => {
-    folded.push(...f.flat());
-    flat.push(...u.flat());
+  const vertices: number[] = [];
+  const push = (triangles: V[]) => {
+    vertices.push(...triangles.flat());
   };
   const corners: [number, number][] = [
     [-W, W],
@@ -47,79 +46,45 @@ function buildRocket(): BufferGeometry {
     [W, -W],
     [-W, -W],
   ];
-  const slant = Math.hypot(APEX - TOP, W);
+
   for (let i = 0; i < 4; i++) {
     const [ax, az] = corners[i];
     const [bx, bz] = corners[(i + 1) % 4];
-    const x0 = (i - 2) * 2 * W;
-    const x1 = x0 + 2 * W;
-    // Body panel (two triangles).
-    push(
-      [
-        [ax, BOTTOM, az],
-        [bx, BOTTOM, bz],
-        [bx, TOP, bz],
-      ],
-      [
-        [x0, BOTTOM, 0],
-        [x1, BOTTOM, 0],
-        [x1, TOP, 0],
-      ],
-    );
-    push(
-      [
-        [ax, BOTTOM, az],
-        [bx, TOP, bz],
-        [ax, TOP, az],
-      ],
-      [
-        [x0, BOTTOM, 0],
-        [x1, TOP, 0],
-        [x0, TOP, 0],
-      ],
-    );
-    // Nose triangle, unfolded above its panel.
-    push(
-      [
-        [ax, TOP, az],
-        [bx, TOP, bz],
-        [0, APEX, 0],
-      ],
-      [
-        [x0, TOP, 0],
-        [x1, TOP, 0],
-        [(x0 + x1) / 2, TOP + slant, 0],
-      ],
-    );
+    // Body panel (two triangles per side).
+    push([
+      [ax, BOTTOM, az],
+      [bx, BOTTOM, bz],
+      [bx, TOP, bz],
+    ]);
+    push([
+      [ax, BOTTOM, az],
+      [bx, TOP, bz],
+      [ax, TOP, az],
+    ]);
+    // Nose cone triangle.
+    push([
+      [ax, TOP, az],
+      [bx, TOP, bz],
+      [0, APEX, 0],
+    ]);
   }
-  const paperCount = folded.length / 3;
-  // Fins: one per corner, unfolded below the strip.
+  const paperCount = vertices.length / 3;
+
+  // Fins: one aerodynamic fin per corner flared outwards.
   for (let i = 0; i < 4; i++) {
     const [cx, cz] = corners[i];
-    const x = (i - 1.5) * 2 * W;
-    push(
-      [
-        [cx, BOTTOM + 0.5, cz],
-        [cx, BOTTOM, cz],
-        [cx * 2.6, BOTTOM - 0.25, cz * 2.6],
-      ],
-      [
-        [x, BOTTOM - 0.05, 0],
-        [x - 0.18, BOTTOM - 0.55, 0],
-        [x + 0.18, BOTTOM - 0.7, 0],
-      ],
-    );
+    push([
+      [cx, BOTTOM + 0.5, cz],
+      [cx, BOTTOM, cz],
+      [cx * 2.6, BOTTOM - 0.25, cz * 2.6],
+    ]);
   }
+
   const g = new BufferGeometry();
-  g.setAttribute("position", new Float32BufferAttribute(flat, 3));
-  const target = new BufferGeometry();
-  target.setAttribute("position", new Float32BufferAttribute(folded, 3));
+  g.setAttribute("position", new Float32BufferAttribute(vertices, 3));
   g.computeVertexNormals();
-  target.computeVertexNormals();
-  g.morphAttributes.position = [target.getAttribute("position")];
-  g.morphAttributes.normal = [target.getAttribute("normal")];
   g.addGroup(0, paperCount, 0);
-  g.addGroup(paperCount, folded.length / 3 - paperCount, 1);
+  g.addGroup(paperCount, vertices.length / 3 - paperCount, 1);
   g.computeBoundingSphere();
   if (g.boundingSphere) g.boundingSphere.radius *= 3;
   return g;
@@ -132,8 +97,11 @@ const seeded = (i: number) => {
 };
 
 /**
- * BlackBox Learning: a flat sheet of paper folds itself into a rocket, ignites and lifts off.
- *   0.22–0.48 fold · 0.46–0.60 ignition · 0.58–0.95 lift-off. Fully scrubbed and reversible.
+ * BlackBox Learning: an origami paper rocket standing proud in 3D.
+ *   - Enters smoothly from below as section approaches.
+ *   - Hovers, breathes and ignites thrusters with ember sparks during chapter reading.
+ *   - Accelerates and launches into the sky as the user scrolls past.
+ *   - Fully reversible when scrolling back upwards, staying completely in 3D without flattening.
  */
 export default function BlackBoxScene({
   track,
@@ -144,8 +112,10 @@ export default function BlackBoxScene({
 }: SceneProps) {
   const rocketRef = useRef<Group>(null);
   const meshRef = useRef<Mesh>(null);
+  const lightRef = useRef<PointLight>(null);
   const sparksRef = useRef<Points>(null);
   const smooth = useRef(-1);
+  const isFirst = useRef(true);
   const sp = useMemo(() => createScenePointer(), []);
   const hover = useRef(0);
   const count = tier === "low" ? 90 : SPARKS;
@@ -197,74 +167,110 @@ export default function BlackBoxScene({
   useFrame((state, delta) => {
     const rocket = rocketRef.current;
     const mesh = meshRef.current;
-    if (!rocket || !mesh || !active.current) return;
-    const target = animate ? progress.current : 0.5;
-    smooth.current =
-      smooth.current < 0 || !animate
-        ? target
-        : MathUtils.lerp(smooth.current, target, damp(5, delta));
-    const p = smooth.current;
-    const fold = MathUtils.smoothstep(p, 0.22, 0.48);
-    const ignite = MathUtils.smoothstep(p, 0.46, 0.6);
-    const lift = MathUtils.smoothstep(p, 0.58, 0.95);
-    const t = animate ? state.clock.elapsedTime : 0;
-    const k = animate ? damp(4, delta) : 1;
+    if (!rocket || !mesh) return;
 
-    // Mouse: the nose tracks the cursor (within the slot) and the exhaust bends away from it.
-    readScenePointer(track.current, sp);
+    const target = animate ? progress.current : 0.5;
+    if (smooth.current < 0 || !animate) {
+      smooth.current = target;
+    } else {
+      smooth.current = MathUtils.lerp(smooth.current, target, damp(6, delta));
+    }
+
+    const p = smooth.current;
+    // 0.08–0.26 lifts rocket smoothly from entrance position into center hover stage.
+    const enter = MathUtils.smoothstep(p, 0.08, 0.26);
+    // 0.24–0.38 ignites thrusters, sparks stream and engine glows.
+    const ignite = MathUtils.smoothstep(p, 0.24, 0.38);
+    // 0.62–0.92 main booster launch: accelerates rocket up into the sky.
+    const lift = MathUtils.smoothstep(p, 0.62, 0.92);
+
+    const t = animate ? state.clock.elapsedTime : 0;
+    const k = animate ? damp(5, delta) : 1;
+
+    // Mouse: nose tilts toward cursor inside slot; exhaust bends away.
+    if (active.current) {
+      readScenePointer(track.current, sp);
+    }
     hover.current = MathUtils.lerp(
       hover.current,
-      sp.inside && animate ? 1 : 0,
+      sp.inside && animate && active.current ? 1 : 0,
       damp(4, delta),
     );
     const px = sp.x * hover.current;
     const py = sp.y * hover.current;
 
-    if (mesh.morphTargetInfluences) mesh.morphTargetInfluences[0] = fold;
+    // Subtle engine vibration and gentle idle hover bob while in viewport.
+    const shake = ignite * Math.max(0, 1 - lift * 0.7) * 0.009;
+    const hoverBob =
+      ignite > 0.01 ? Math.sin(t * 2.2) * 0.035 * (1 - lift * 0.8) : 0;
+    const liftDistance = lift * lift * 3.2;
 
-    // Flat sheet faces the camera; as it folds it stands up and turns, then climbs.
-    const shake = ignite * (1 - lift * 0.6) * 0.012;
-    rocket.position.set(
-      Math.sin(t * 40) * shake,
-      MathUtils.lerp(-0.1, 0, fold) +
-        lift * lift * 2.4 +
-        Math.sin(t * 37) * shake,
-      0,
-    );
-    rocket.rotation.y = MathUtils.lerp(
-      rocket.rotation.y,
-      fold * (0.8 + t * 0.25 * fold),
-      k,
-    );
-    // The nose leans toward the cursor once the rocket exists.
-    rocket.rotation.z = MathUtils.lerp(rocket.rotation.z, -px * 0.45 * fold, k);
-    rocket.rotation.x = MathUtils.lerp(
-      rocket.rotation.x,
-      (1 - fold) * -0.25 + py * 0.3 * fold,
-      k,
-    );
+    const targetPosX = Math.sin(t * 43) * shake;
+    const targetPosY =
+      MathUtils.lerp(-0.7, 0, enter) +
+      hoverBob +
+      liftDistance +
+      Math.sin(t * 37) * shake;
+    const targetPosZ = 0;
 
-    // Sparks stream from the nozzle and bend away from the pointer.
+    // Fixed 3/4 isometric hero orientation with gentle, bounded idle sway.
+    // Deterministic: no unbound t accumulation so reverse scrolling never unwinds or spins wildly.
+    const idleYaw = Math.sin(t * 1.4) * 0.08;
+    const targetRotY = 0.75 + idleYaw;
+    const targetRotZ = -px * 0.42;
+    const targetRotX = py * 0.28 + lift * 0.25;
+
+    if (isFirst.current) {
+      rocket.position.set(targetPosX, targetPosY, targetPosZ);
+      rocket.rotation.set(targetRotX, targetRotY, targetRotZ);
+      isFirst.current = false;
+    } else {
+      rocket.position.set(targetPosX, targetPosY, targetPosZ);
+      rocket.rotation.x = MathUtils.lerp(rocket.rotation.x, targetRotX, k);
+      rocket.rotation.y = MathUtils.lerp(rocket.rotation.y, targetRotY, k);
+      rocket.rotation.z = MathUtils.lerp(rocket.rotation.z, targetRotZ, k);
+    }
+
+    // Dynamic thruster point light attached to rocket base.
+    if (lightRef.current) {
+      const flicker = Math.sin(t * 32) * 0.6;
+      lightRef.current.intensity =
+        ignite * Math.max(0, 4.2 + flicker) * Math.max(0, 1 - lift * 0.7);
+    }
+
+    // Sparks stream from nozzle; fade cleanly on launch so no orphan sparks linger on reverse scroll.
     const pts = sparksRef.current;
     if (pts) {
-      const attr = pts.geometry.getAttribute(
-        "position",
-      ) as Float32BufferAttribute;
-      const nozzleY = rocket.position.y + BOTTOM - 0.05;
-      const push = -px * 0.9;
-      for (let i = 0; i < count; i++) {
-        const [a, b, c] = sparkSeeds[i];
-        const life = (t * (0.9 + a * 0.8) + b) % 1;
-        const fall = life * (0.9 + ignite * 1.6);
-        attr.setXYZ(
-          i,
-          rocket.position.x + (a - 0.5) * 0.3 * life * 3 + push * life * life,
-          nozzleY - fall,
-          (c - 0.5) * 0.3 * life * 3,
-        );
+      const sparkFade = Math.max(0, 1 - lift * 1.3);
+      const sparkAlpha = ignite * sparkFade;
+
+      if (sparkAlpha <= 0.01) {
+        pts.visible = false;
+      } else {
+        pts.visible = true;
+        const attr = pts.geometry.getAttribute(
+          "position",
+        ) as Float32BufferAttribute;
+        const nozzleY = rocket.position.y + BOTTOM - 0.05;
+        const push = -px * 0.85;
+        for (let i = 0; i < count; i++) {
+          const [a, b, c] = sparkSeeds[i];
+          const life = (t * (0.9 + a * 0.8) + b) % 1;
+          const fall = life * (0.9 + ignite * 1.5);
+          attr.setXYZ(
+            i,
+            rocket.position.x +
+              (a - 0.5) * 0.28 * life * 3 +
+              push * life * life,
+            nozzleY - fall,
+            (c - 0.5) * 0.28 * life * 3,
+          );
+        }
+        attr.needsUpdate = true;
+        (pts.material as PointsMaterial).setValues({
+          opacity: sparkAlpha * 0.95,
+        });
       }
-      attr.needsUpdate = true;
-      (pts.material as PointsMaterial).setValues({ opacity: ignite * 0.95 });
     }
   });
 
@@ -272,18 +278,14 @@ export default function BlackBoxScene({
     <>
       <PerspectiveCamera makeDefault position={[0, 0.6, 6.6]} fov={36} />
       <StudioLights rim={1.4} />
-      <pointLight
-        position={[0, -1.6, 0.8]}
-        intensity={4}
-        color={palette.ember}
-        distance={5}
-      />
       <group ref={rocketRef}>
-        <mesh
-          ref={meshRef}
-          geometry={res.geo}
-          material={res.mats}
-          morphTargetInfluences={[0]}
+        <mesh ref={meshRef} geometry={res.geo} material={res.mats} />
+        <pointLight
+          ref={lightRef}
+          position={[0, BOTTOM - 0.1, 0.3]}
+          intensity={0}
+          color={palette.ember}
+          distance={5}
         />
       </group>
       <points

@@ -391,6 +391,7 @@ async function main() {
     const expected = [
       canonicalFor("/"),
       canonicalFor("/projects"),
+      canonicalFor("/index"),
       ...slugs.map((slug) => canonicalFor(`/projects/${slug}`)),
     ];
     for (const url of expected) {
@@ -436,6 +437,7 @@ async function main() {
 
     const ogRoutes = [
       "/opengraph-image",
+      "/index/opengraph-image",
       "/projects/opengraph-image",
       ...slugs.map((slug) => `/projects/${slug}/opengraph-image`),
     ];

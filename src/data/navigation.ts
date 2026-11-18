@@ -30,8 +30,8 @@ export const sections = [
   {
     id: "blackbox-learning",
     number: "06",
-    label: "BlackBox Learning",
-    title: "BlackBox Learning",
+    label: "Midhun's AI Journey",
+    title: "Midhun's AI Journey",
   },
   {
     id: "bca",

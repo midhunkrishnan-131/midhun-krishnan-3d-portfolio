@@ -55,7 +55,13 @@ export function HeroFallbackArt() {
                 strokeWidth="3"
                 strokeLinecap="round"
               />
-              <circle className="hero-flat__ember" cx="190" cy="50" r="4" fill="#ff7a45" />
+              <circle
+                className="hero-flat__ember"
+                cx="190"
+                cy="50"
+                r="4"
+                fill="#ff7a45"
+              />
             </>
           ) : null}
         </g>

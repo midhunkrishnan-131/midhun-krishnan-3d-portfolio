@@ -1,6 +1,6 @@
 export type DisplayMode = "3d" | "flat";
 
-export const DISPLAY_MODE_KEY = "mk-portfolio-display-mode";
+export const DISPLAY_MODE_KEY = "mk-portfolio-display-mode-v2";
 
 /** Query string wins (for tests and shared links); otherwise the saved preference. */
 export function readDisplayMode(): DisplayMode {

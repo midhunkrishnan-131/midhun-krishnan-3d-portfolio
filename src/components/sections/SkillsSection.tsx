@@ -25,14 +25,14 @@ export function SkillsSection() {
           <SceneSlot
             scene="skills"
             fallback={<SceneFallback scene="skills" />}
-            className="aspect-[5/4] w-full max-h-[min(62svh,26rem)] lg:sticky lg:top-[calc(var(--header-height)+2rem)] lg:order-2 lg:col-span-6 lg:col-start-7 lg:aspect-auto lg:h-[min(70svh,42rem)] lg:max-h-none"
+            className="aspect-[5/4] max-h-[min(62svh,26rem)] w-full lg:sticky lg:top-[calc(var(--header-height)+2rem)] lg:order-2 lg:col-span-6 lg:col-start-7 lg:aspect-auto lg:h-[min(70svh,42rem)] lg:max-h-none"
           />
           <div className="flex flex-col lg:order-1 lg:col-span-6">
             <CardArranger
               id="skills-arrange"
               order={skillGroups.map((group) => group.id)}
             >
-              <header className="sticky top-[var(--header-height)] z-10 flex flex-col gap-6 bg-ink-950 pb-8 pt-1">
+              <header className="sticky top-[var(--header-height)] z-10 flex flex-col gap-6 bg-ink-950 pt-1 pb-8">
                 <Eyebrow number={section.number}>Toolkit</Eyebrow>
                 <Heading level={2} id={headingId}>
                   {section.title}

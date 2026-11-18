@@ -63,6 +63,10 @@ export function breadcrumbId(path: string): string {
   return `${canonicalUrl(path)}#breadcrumb`;
 }
 
+export function indexPageDescription(): string {
+  return `Index and archive for ${site.name}'s portfolio: story chapters, software projects, skills, and contact channels.`;
+}
+
 /** Index description lists real project titles and nothing else. */
 export function projectsIndexDescription(): string {
   const titles = projects.map((project) => project.title);
